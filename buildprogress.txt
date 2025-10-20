@@ -1,0 +1,163 @@
+
+Entity Relationships:::::::::::::
+Processor : 
+  - Can create, update, and manage consumers, connections, and billing.
+  - Can view and respond to issue reports.
+  - Has a role (staff, manager).
+
+Consumer : 
+  - Can view their own profile, connections, bills, and issue reports.
+  - Can create new issue reports (e.g., malfunctioning meter, leaking pipe)
+  - Cannot modify billing or connection data.
+  Relationships:
+    - Consumer 1 - n connections
+    - 1 Consumer - n issueReports
+
+Connection:
+  - Represents a water meter connection linked to a consumer
+  - Each connection belongs to one consumer.
+  - Each connection can have multiple billing records (monthly, quarterly, etc.)
+  - Can be linked  to IssureReports if the issue is about a specific connection.
+  Relationship: 
+    - Connection n - 1 Consumer
+    - Connection 1 - n billing
+
+Billing:
+  - Represents a single billing record for a connection (e,g. per month).
+  - Belongs to exactly one connection.
+  - Contains usage, rates total, payment status, etc.
+  Relationships:
+    - Billing n - 1 Connection
+
+IssueReport: 
+  - Create be a consumer.
+  - Can optionally link to a connection (if the issue relates to it)
+  - Managed by processor users who can update the status:
+  - Pending | taking action | resolved
+
+ENTITY RELATIONSHIP DIAGRAM :::::::::::::::::
+Processor (role=staff|manager)
+     │
+     │ manages
+     ▼
+Consumer (1) ────< (n) Connection (1) ────< (n) Billing
+     │
+     │ reports
+     ▼
+IssueReport (status=pending|taking_action|resolved)
+     │
+     └── optional → Connection
+
+
+- processor => manages => Consumer
+- Consumer(1) => (many) connections
+- Connection (1) => (many) Billings
+
+ARCHITECTURE:
+- this is a modern, scalable architecture, just like professional SaaS and municipal systems use today.
+- we'll use MVC + Services + repository pattern, with a clean separation of concerns, modern ES Modules, and async/await across the stack.
+
+water-billing-backend/
+├── src/
+│   ├── app.js
+│   ├── server.js
+│   ├── config/
+│   │   └── db.js
+│   ├── modules/
+│   │   ├── auth/
+│   │   │   ├── auth.controller.js
+│   │   │   ├── auth.routes.js
+│   │   │   ├── auth.service.js
+│   │   │   ├── auth.repository.js
+│   │   │   └── auth.validation.js
+│   │   ├── users/        # Consumers + Processors
+│   │   │   ├── user.model.js
+│   │   │   ├── user.controller.js
+│   │   │   ├── user.routes.js
+│   │   │   ├── user.service.js
+│   │   │   └── user.repository.js
+│   │   ├── connections/
+│   │   │   ├── connection.model.js
+│   │   │   ├── connection.controller.js
+│   │   │   ├── connection.routes.js
+│   │   │   ├── connection.service.js
+│   │   │   └── connection.repository.js
+│   │   ├── billing/
+│   │   │   ├── billing.model.js
+│   │   │   ├── billing.controller.js
+│   │   │   ├── billing.routes.js
+│   │   │   ├── billing.service.js
+│   │   │   └── billing.repository.js
+│   │   └── reports/
+│   │       ├── report.model.js
+│   │       ├── report.controller.js
+│   │       ├── report.routes.js
+│   │       ├── report.service.js
+│   │       └── report.repository.js
+│   ├── middleware/
+│   │   ├── auth.middleware.js
+│   │   ├── role.middleware.js        # restrict access by role
+│   │   ├── error.middleware.js
+│   │   └── validate.middleware.js
+│   ├── utils/
+│   │   ├── ApiResponse.js
+│   │   ├── generateToken.js
+│   │   └── roles.js                  # define USER_ROLES constants
+│   ├── core/
+│   │   ├── logger.js
+│   │   └── AppError.js
+├── .env
+├── package.json
+└── README.md
+
+
+KEY CONCEPTS::::::::::: 
+Controller - Handles HTTP request/responses. Calls Service layer
+Service - Contains business logic (calculations, validation)
+Repository - Handles Database operations using Mongoose
+Model - Define data schema
+middleware - Reusable logic (auth, validation, error handling).
+Utils - Small helpers (JWT, formatters, response.)
+
+example code for Access control logic.
+Use a Role middleware (role.middleware.js) to protect routes:
+
+export const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Access Denied" });
+    }
+    next();
+  };
+};
+
+Example usage:
+// Only processors can create billing
+router.post(
+  "/",
+  authMiddleware,
+  authorizeRoles("processor", "manager"),
+  billingController.createBilling
+);
+
+// Consumers can view their own billing
+router.get(
+  "/my-bills",
+  authMiddleware,
+  authorizeRoles("consumer"),
+  billingController.getMyBills
+);
+
+Recommended Tech stack
+Layer                    Technology
+Runtime                   Node.js
+Framework                 Express.js
+Database                  MongoDB + Mongoose
+Auth                      JWT (Access & Refresh Tokens)
+validation                Zod / express-validator
+Password hashing          bcrypt
+Logging                   Winston or pino 
+Env Mgmt                  dotenv
+Error handling            Centralized custom AppError
+Dev Tools                 Nodemon, ESLint, Prettier
+Testing                   Jest/Supertest
