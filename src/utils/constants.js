@@ -101,15 +101,15 @@ export const processors = [
   {
     processorId: 1,
     name: "John Doe",
-    username: "johndoe@1233",
-    password: "staff123",
+    processorName: "johndoe@1233",
+    processorPassword: "staff123",
     role: "staff",
   },
   {
     processorId: 2,
     name: "Maria Santos",
-    username: "maria.manager",
-    password: "manager123",
+    processorName: "maria.manager",
+    processorPassword: "manager123",
     role: "manager",
   },
 ];
