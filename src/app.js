@@ -3,10 +3,20 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import router from "./routes/index.js";
 import passport from "passport";
+import mongoose from "mongoose";
 import "./strategies/local-strategy.js";
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+mongoose
+  .connect("mongodb://localhost/water_billing_system")
+  .then(() => {
+    console.log("Connected to WBS Database");
+  })
+  .catch((err) => {
+    console.log("failed to connect to database", err);
+  });
 
 app.use(express.json());
 app.use(cookieParser("sfmwbs"));

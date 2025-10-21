@@ -1,119 +1,62 @@
 // ✅ CONSUMERS
 export const consumers = [
   {
-    consumerId: 1,
     name: "Shame Canales",
     email: "shame@gmail.com",
+    birthDate: "1990-05-15",
+    mobileNumber: "09171234567",
     password: "shame123",
-    role: "consumer",
-  },
-  {
-    consumerId: 2,
-    name: "Alice Dela Cruz",
-    email: "alice@gmail.com",
-    password: "alice123",
-    role: "consumer",
-  },
-  {
-    consumerId: 3,
-    name: "Mark Reyes",
-    email: "mark@gmail.com",
-    password: "mark123",
-    role: "consumer",
+    address: "1538 San Rafael St., San Fernando",
+    createdAt: "2023-01-10",
+    status: "active", // suspended or active depending on active connections.
   },
 ];
 
 export const connections = [
   {
-    connectionId: 1,
-    consumerId: 1,
-    address: "Campalingo, San Fernando",
+    id: 1, // automated
+    consumerId: 1, //tied to consumerId
     meterNumber: 201,
-    type: "residential",
-  },
-  {
-    connectionId: 2,
-    consumerId: 1,
-    address: "Barangay Mabini, San Fernando",
-    meterNumber: 202,
-    type: "commercial",
-  },
-  {
-    connectionId: 3,
-    consumerId: 2,
-    address: "Poblacion, San Fernando",
-    meterNumber: 301,
-    type: "residential",
-  },
-  {
-    connectionId: 4,
-    consumerId: 3,
-    address: "San Agustin, San Fernando",
-    meterNumber: 401,
-    type: "residential",
+    address: "Campalingo, San Fernando",
+    connectionDate: "2023-01-15",
+    type: "residential", // residential | commercial
+    status: "active", // active | disconnected
   },
 ];
 
 export const bills = [
   {
     billId: 1,
-    connectionId: 1,
-    amount: 234.5,
-    period: "January",
+    connectionId: 1, // tied to connection
+    dateAdded: "2025-01-10", // date bill was generated
+    monthOf: "January",
     dueDate: "2025-02-10",
+    meterReading: 120.5, //current meter reading
+    chargePerCubicMeter: 15.0, // from settings
+    consumedUnits: 15.63, // meterReading - meterReading of last month
+    amount: 234.5, // consumedUnits * chargePerUnit - do we need to store this?
     status: "paid", // "paid" | "unpaid" | "overdue"
-  },
-  {
-    billId: 2,
-    connectionId: 1,
-    amount: 260.0,
-    period: "February",
-    dueDate: "2025-03-10",
-    status: "unpaid",
-  },
-  {
-    billId: 3,
-    connectionId: 2,
-    amount: 480.75,
-    period: "January",
-    dueDate: "2025-02-15",
-    status: "paid",
-  },
-  {
-    billId: 4,
-    connectionId: 3,
-    amount: 198.25,
-    period: "February",
-    dueDate: "2025-03-10",
-    status: "overdue",
-  },
-  {
-    billId: 5,
-    connectionId: 4,
-    amount: 325.0,
-    period: "March",
-    dueDate: "2025-04-10",
-    status: "unpaid",
   },
 ];
 
 export const processors = [
   {
     processorId: 1,
-    name: "John Doe",
-    processorName: "johndoe@1233",
+    processorName: "John Doe",
+    processorEmail: "johndoe@example.com",
     processorPassword: "staff123",
     role: "staff",
   },
   {
     processorId: 2,
-    name: "Maria Santos",
-    processorName: "maria.manager",
+    processorName: "Maria Santos",
+    processorEmail: "maria.santos@example.com",
     processorPassword: "manager123",
     role: "manager",
   },
 ];
 
+//future
 export const issueReports = [
   {
     reportId: 1,
@@ -123,20 +66,9 @@ export const issueReports = [
     status: "pending", // pending | taking_action | resolved
     createdAt: "2025-03-15",
   },
-  {
-    reportId: 2,
-    consumerId: 2,
-    connectionId: 3,
-    description: "No water supply for 2 days",
-    status: "taking_action",
-    createdAt: "2025-03-20",
-  },
-  {
-    reportId: 3,
-    consumerId: 3,
-    connectionId: 4,
-    description: "Meter malfunction detected",
-    status: "resolved",
-    createdAt: "2025-02-28",
-  },
 ];
+
+export const settings = {
+  chargePerCubicMeter: 15.0,
+  percentageLateFee: 0.02, // 2% late fee
+};

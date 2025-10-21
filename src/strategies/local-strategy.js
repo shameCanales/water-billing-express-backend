@@ -22,16 +22,18 @@ passport.deserializeUser((id, done) => {
   }
 });
 
-//this will run
+//this will run when we call passport.authenticate
 export default passport.use(
   new Strategy(
-    { usernameField: "processorName", passwordField: "processorPassword" },
-    (processorName, processorPassword, done) => {
-      console.log(`Username: ${processorName}, Password: ${processorPassword}`);
+    { usernameField: "processorEmail", passwordField: "processorPassword" },
+    (processorEmail, processorPassword, done) => {
+      console.log(
+        `Username: ${processorEmail}, Password: ${processorPassword}`
+      );
 
       try {
         const findProcessor = processors.find(
-          (proc) => proc.processorName === processorName
+          (proc) => proc.processorEmail === processorEmail
         );
 
         if (!findProcessor) throw new Error("User not found");

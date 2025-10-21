@@ -13,16 +13,16 @@ export const registerProcessorValidationSchema = {
     trim: true,
   },
 
-  username: {
+  email: {
     isString: {
       errorMessage: "Username must be a string.",
     },
     isLength: {
-      options: { min: 3, max: 25 },
-      errorMessage: "Username must be between 3 and 20 characters.",
+      options: { min: 3, max: 30 },
+      errorMessage: "Email must be between 3 and 30 characters.",
     },
     notEmpty: {
-      errorMessage: "Username is required.",
+      errorMessage: "Email is required.",
     },
     trim: true,
   },
