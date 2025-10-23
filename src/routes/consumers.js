@@ -1,1 +1,3 @@
-import { consumers } from "../utils/constants";
+
+
+// name, email, birthDate, mobileNumber, password, address, status

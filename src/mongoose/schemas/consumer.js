@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+// name, email, birthDate, mobileNumber, password, address, status
+
 const consumerSchema = new mongoose.Schema(
   {
     name: {

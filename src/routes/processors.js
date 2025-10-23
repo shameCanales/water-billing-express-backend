@@ -1,13 +1,8 @@
-// import { processors } from "../utils/constants.js";
 import { Router } from "express";
 import { registerProcessorValidationSchema } from "../middlewares/validationSchemas/registerProcessorValidation.js";
 import { checkSchema, validationResult } from "express-validator";
-import {
-  requireAuthAndManager,
-  requireAuth,
-} from "../middlewares/authmiddleware.js";
+import { requireAuthAndManager } from "../middlewares/authmiddleware.js";
 import { Processor } from "../mongoose/schemas/processor.js";
-import { parse } from "cookie";
 
 const router = Router();
 
@@ -130,7 +125,7 @@ router.patch("/api/processors/:id", requireAuthAndManager, async (req, res) => {
     }
 
     res.status(200).json({
-      sucess: true,
+      success: true,
       message: "Processor updated successfully",
       data: updatedProcessor,
     });
@@ -144,5 +139,36 @@ router.patch("/api/processors/:id", requireAuthAndManager, async (req, res) => {
 });
 
 // Delete Processor by ID
+router.delete(
+  "/api/processors/:id",
+  requireAuthAndManager,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const deletedProcessor = await Processor.findByIdAndDelete(id);
+
+      if (!deletedProcessor) {
+        return res.status(404).json({
+          success: false,
+          message: "Processor not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Processor deleted successfully",
+        data: deletedProcessor,
+      });
+    } catch (error) {
+      console.error("Error deleting processor:", error.message);
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete processor",
+        error: error.message,
+      });
+    }
+  }
+);
 
 export default router;
