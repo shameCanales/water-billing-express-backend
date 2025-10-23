@@ -32,7 +32,32 @@ router.get("/api/processors", requireAuthAndManager, async (req, res) => {
 });
 
 // Get Processor by ID
+router.get("/api/processors/:id", requireAuthAndManager, async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const processor = await Processor.findById(id).select("-password");
+
+    if (!processor) {
+      return res.status(404).json({
+        success: false,
+        message: "Processor not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: processor,
+    });
+  } catch (error) {
+    console.error("Error fetching processor:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch processor",
+      error: error.message,
+    });
+  }
+});
 
 // Add a new processor
 /**
@@ -87,6 +112,36 @@ router.post(
 );
 
 // Edit Processor by ID
+router.patch("/api/processors/:id", requireAuthAndManager, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const updatedProcessor = await Processor.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedProcessor) {
+      return res.status(404).json({
+        success: false,
+        message: "Processor not found",
+      });
+    }
+
+    res.status(200).json({
+      sucess: true,
+      message: "Processor updated successfully",
+      data: updatedProcessor,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update processor",
+      error: error.message,
+    });
+  }
+});
 
 // Delete Processor by ID
 
