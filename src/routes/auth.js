@@ -1,4 +1,3 @@
-import { processors } from "../utils/constants.js";
 import { Router } from "express";
 import passport from "passport";
 
@@ -52,6 +51,8 @@ router.post("/api/auth/logout", (req, res, next) => {
   });
 });
 
+export default router;
+
 // Previous implementation with cookies and session without Passport.js
 // router.post("/api/auth/login", (request, response) => {
 //   const {
@@ -98,5 +99,4 @@ router.post("/api/auth/logout", (req, res, next) => {
 //     return response.status(400).send({ message: "No active session" });
 //   }
 // });
-
-export default router;
+// export default router;
