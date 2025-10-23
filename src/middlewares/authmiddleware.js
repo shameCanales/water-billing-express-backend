@@ -5,6 +5,39 @@ export const requireAuth = (req, res, next) => {
   next();
 };
 
+
+export function requireAuthAndStaffOrManager(req, res, next) {
+  try {
+    const user = req.session.user;
+    console.log(user);
+
+    if (!req.session?.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required. Please log in first",
+      });
+    }
+
+    if (user.role !== "manager" || user.role !== "staff") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Staff or Manager privileges required",
+      });
+    }
+
+    req.user = user;
+
+    next();
+  } catch (error) {
+    console.error("Auth and Staff or manager error", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server error during authentication check",
+    });
+  }
+}
+
 export function requireAuthAndManager(req, res, next) {
   try {
     // 1️⃣ Check if user session exists
