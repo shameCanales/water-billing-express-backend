@@ -4,6 +4,7 @@ import { Router } from "express";
 import {
   requireAuthAndStaffOrManager,
   requireAuth,
+  requireAuthAndManager,
 } from "../middlewares/authmiddleware.js";
 
 const router = Router();
@@ -131,10 +132,40 @@ router.patch(
 );
 
 // delete connection by id
+router.delete(
+  "/api/connections/:id",
+  requireAuthAndManager,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
 
-// get connection by id
+      const deletedConnection = await Connection.findByIdAndDelete(id);
+
+      if (!deletedConnection) {
+        return res.status(404).json({
+          success: false,
+          message: "Connection not found",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Connection deleted successfully",
+        data: deletedConnection,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete connection",
+        error: error.message,
+      });
+    }
+  }
+);
 
 // get connections for a specific consumer
+
+// get connection by id
 
 // deactivate connection
 
