@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+// consumer, meterNumber, address, connectionDate, type: residential | , status: active | disconnected
+
 const ConnectionSchema = new mongoose.Schema(
   {
     consumer: {
