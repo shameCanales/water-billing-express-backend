@@ -149,7 +149,34 @@ router.delete(
 );
 
 // Get Consumer by ID
+router.get(
+  "/api/consumers/:id",
+  requireAuthAndStaffOrManager,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
 
+      const consumer = await Consumer.findById(id).select("-password"); // Exclude password from response
 
+      if (!consumer) {
+        return res.status(404).json({
+          success: false,
+          message: "Consumer not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: consumer,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch consumer",
+        error: error.message,
+      });
+    }
+  }
+);
 
 export default router;
