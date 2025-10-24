@@ -81,8 +81,42 @@ router.post(
 );
 
 // Edit Consumer by ID
+router.patch(
+  "/api/consumers/:id",
+  requireAuthAndStaffOrManager,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
 
-// Delete Consumer by ID 
+      const updatedConsumer = await Consumer.findByIdAndUpdate(id, updates, {
+        new: true,
+        runValidators: true,
+      });
+
+      if (!updatedConsumer) {
+        return res.status(404).json({
+          success: false,
+          message: "Consumer not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Consumer updated successfully",
+        data: updatedConsumer,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to update consumer",
+        error: error.message,
+      });
+    }
+  }
+);
+
+// Delete Consumer by ID
 
 // Get Consumer by ID
 
