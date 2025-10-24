@@ -18,7 +18,7 @@ export function requireAuthAndStaffOrManager(req, res, next) {
       });
     }
 
-    if (user.role !== "manager" || user.role !== "staff") {
+    if (user.role !== "manager" && user.role !== "staff") {
       return res.status(403).json({
         success: false,
         message: "Access denied. Staff or Manager privileges required",

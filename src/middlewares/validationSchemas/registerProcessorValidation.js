@@ -15,7 +15,7 @@ export const registerProcessorValidationSchema = {
 
   email: {
     isString: {
-      errorMessage: "Username must be a string.",
+      errorMessage: "email must be a string.",
     },
     isLength: {
       options: { min: 3, max: 30 },
