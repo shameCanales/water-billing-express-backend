@@ -6,6 +6,7 @@ import {
   requireAuth,
   requireAuthAndManager,
 } from "../middlewares/authmiddleware.js";
+import { validateObjectId } from "../middlewares/validateObjectId.js";
 
 const router = Router();
 
@@ -164,6 +165,39 @@ router.delete(
 );
 
 // get connections for a specific consumer
+router.get(
+  "/api/connections/consumer/:consumerid",
+  requireAuth,
+  validateObjectId("consumerid"), // for validating consumerid param
+  async (req, res) => {
+    try {
+      const { consumerid } = req.params;
+
+      const connections = await Connection.find({
+        consumer: consumerid,
+      }).populate("consumer", "name email mobileNumber");
+
+      if (!connections || connections.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No connections found for this consumer",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Connections retrieved successfully",
+        data: connections,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch connections",
+        error: error.message,
+      });
+    }
+  }
+);
 
 // get connection by id
 
