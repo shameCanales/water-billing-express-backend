@@ -39,6 +39,10 @@ const BillSchema = new mongoose.Schema(
       type: String,
       enum: ["paid", "unpaid", "overdue"],
     },
+    paidAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

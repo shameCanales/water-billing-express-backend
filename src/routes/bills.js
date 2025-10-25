@@ -194,6 +194,80 @@ router.get(
 // update bill information
 
 // Update bill status (paid, unpaid, overdue)
+router.patch(
+  "/api/bills/:billId/status",
+  requireAuthAndStaffOrManager,
+  validateObjectIdReusable({ key: "billId" }),
+  async (req, res) => {
+    try {
+      const { billId } = req.params;
+      const { status } = req.body;
+
+      //validate status value
+      const allowedStatuses = ["paid", "unpaid", "overdue"];
+      if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid status. Allowed values: ${allowedStatuses.join(
+            ", "
+          )}`,
+        });
+      }
+
+      const existingBill = await Bill.findById(billId).populate({
+        path: "connection",
+        populate: {
+          path: "consumer",
+          select: "name email mobileNumber address",
+        },
+      });
+
+      if (!existingBill) {
+        return res.status(404).json({
+          success: false,
+          message: "Bill not found",
+        });
+      }
+
+      if (existingBill.status === status) {
+        return res.status(200).json({
+          success: true,
+          message: `Bill is already marked as ${status}`,
+          data: existingBill,
+        });
+      }
+
+      // set paidAt date when marked as paid
+      const updateData = {
+        status,
+        paidAt: status === "paid" ? new Date() : null,
+      };
+
+      const updatedBill = await Bill.findByIdAndUpdate(billId, updateData, {
+        new: true,
+        runValidators: true,
+      }).populate({
+        path: "connection",
+        populate: {
+          path: "consumer",
+          select: "name email mobileNumber address",
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Bill status updated successfully",
+        data: updatedBill,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to update bill status",
+        error: error.message,
+      });
+    }
+  }
+);
 
 // Delete a bill
 
