@@ -270,5 +270,37 @@ router.patch(
 );
 
 // Delete a bill
+router.delete(
+  "/api/bills/:billId",
+  requireAuthAndStaffOrManager,
+  validateObjectIdReusable({ key: "billId" }),
+  async (req, res) => {
+    try {
+      const { billId } = req.params;
+
+      const deletedBill = await Bill.findByIdAndDelete(billId);
+
+      if (!deletedBill) {
+        return res.status(404).json({
+          success: false,
+          message: "Bill not found",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Succesfully deleted bill and I don't know why would you want to delete it",
+        data: deletedBill,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete bill",
+        error: error.message,
+      });
+    }
+  }
+);
 
 export default router;
