@@ -8,10 +8,37 @@ import {
 } from "../middlewares/authmiddleware.js";
 import { BILLING_SETTINGS } from "../config/settings.js";
 import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
+import { populate } from "dotenv";
 
 const router = Router();
 
 // Get all bills
+router.get("/api/bills", requireAuthAndStaffOrManager, async (req, res) => {
+  try {
+    const bills = await Bill.find()
+      .populate({
+        path: "connection",
+        populate: {
+          path: "consumer",
+          select: "name email mobileNumber address",
+        },
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      message: `${bills.length} retrieved succesfully`,
+      data: bills,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch bills",
+      error: error.message,
+    });
+  }
+});
 
 // add bill to a connection
 router.post(
