@@ -7,14 +7,9 @@ const BillSchema = new mongoose.Schema(
       ref: "Connection",
       required: [true, "Connection reference is required"],
     },
-    dateAdded: {
-      type: Date,
-      default: Date.now, // date bill was generated
-    },
     monthOf: {
-      type: String,
+      type: Date,
       required: [true, "Month of billing is required"],
-      trim: true,
     },
     dueDate: {
       type: Date,
@@ -49,5 +44,8 @@ const BillSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// prevent duplicates for the same connection and same month
+BillSchema.index({ connection: 1, monthOf: 1 }, { unique: true }); // means
 
 export const Bill = mongoose.model("Bill", BillSchema);

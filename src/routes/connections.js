@@ -7,6 +7,7 @@ import {
   requireAuthAndManager,
 } from "../middlewares/authmiddleware.js";
 import { validateObjectId } from "../middlewares/validateObjectId.js";
+import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
 
 const router = Router();
 
@@ -168,7 +169,8 @@ router.delete(
 router.get(
   "/api/connections/consumer/:consumerid",
   requireAuth,
-  validateObjectId("consumerid"), // for validating consumerid param
+  // validateObjectId("consumerid"), // for validating consumerid param
+  validateObjectIdReusable({ key: "consumerid" }),
   async (req, res) => {
     try {
       const { consumerid } = req.params;

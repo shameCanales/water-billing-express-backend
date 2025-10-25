@@ -25,3 +25,29 @@ export const validateObjectId = (paramName = "id") => {
     next();
   };
 };
+
+/**
+ * Middleware for validating a MongoDB ObjectId
+ * Can check both params and body depending on where the ID lives.
+ *
+ * @param {object} options
+ * @param {"params"|"body"} [options.source="params"] - Where to read the id from
+ * @param {string} [options.key="id"] - Key name to validate
+ */
+export const validateObjectIdReusable = ({
+  source = "params",
+  key = "id",
+} = {}) => {
+  return (req, res, next) => {
+    const value = source === "body" ? req.body[key] : req.params[key];
+
+    if (!mongoose.Types.ObjectId.isValid(value)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid ${key} format`,
+      });
+    }
+
+    next();
+  };
+};

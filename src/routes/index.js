@@ -4,6 +4,7 @@ import authRouter from "./auth.js";
 import processorsRouter from "./processors.js";
 import consumerRouter from "./consumers.js";
 import ConnectionRouter from "./connections.js";
+import BillRouter from "./bills.js";
 
 const router = Router();
 
@@ -11,5 +12,6 @@ router.use(authRouter);
 router.use(processorsRouter);
 router.use(ConnectionRouter);
 router.use(consumerRouter);
+router.use(BillRouter);
 
 export default router;
