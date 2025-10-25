@@ -1,6 +1,5 @@
 import { Bill } from "../mongoose/schemas/bill.js";
 import { Connection } from "../mongoose/schemas/connection.js";
-import { Consumer } from "../mongoose/schemas/consumer.js";
 import { Router } from "express";
 import {
   requireAuth,
@@ -8,7 +7,6 @@ import {
 } from "../middlewares/authmiddleware.js";
 import { BILLING_SETTINGS } from "../config/settings.js";
 import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
-import { populate } from "dotenv";
 
 const router = Router();
 
@@ -144,6 +142,56 @@ router.post(
 );
 
 // Get bills for a specific connection
+router.get(
+  "/api/connections/:connectionId/bills",
+  requireAuth,
+  validateObjectIdReusable({ key: "connectionId" }),
+  async (req, res) => {
+    try {
+      const { connectionId } = req.params;
+
+      const connectionExists = await Connection.exists({ _id: connectionId });
+      if (!connectionExists) {
+        return res.status(404).json({
+          success: false,
+          message: "Connection not found",
+        });
+      }
+
+      const bills = await Bill.find({ connection: connectionId })
+        .populate({
+          path: "connection",
+          populate: {
+            path: "consumer",
+            select: "name email mobileNumber address",
+          },
+        })
+        .sort({ createdAt: -1 });
+
+      if (!bills.length) {
+        return res.status(404).json({
+          success: false,
+          message: "No bills found for this connection",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        count: bills.length,
+        message: `${bills.length} bills retrieved successfully.`,
+        data: bills,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch bills for this connection",
+        error: error.message,
+      });
+    }
+  }
+);
+
+// update bill information
 
 // Update bill status (paid, unpaid, overdue)
 
