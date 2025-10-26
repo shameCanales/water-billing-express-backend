@@ -25,6 +25,10 @@ export const registerProcessorValidationSchema = {
       errorMessage: "Email is required.",
     },
     trim: true,
+    isEmail: {
+      errorMessage: "Please enter a valid email address",
+    },
+    normalizeEmail: true,
   },
 
   password: {

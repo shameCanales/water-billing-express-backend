@@ -3,13 +3,24 @@ import { registerProcessorValidationSchema } from "../middlewares/validationSche
 import { checkSchema, validationResult } from "express-validator";
 import { requireAuthAndManager } from "../middlewares/authmiddleware.js";
 import { Processor } from "../mongoose/schemas/processor.js";
+import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
 
 const router = Router();
 
 // Get all processors
 router.get("/api/processors", requireAuthAndManager, async (req, res) => {
   try {
-    const processors = await Processor.find().select("-password");
+    const processors = (await Processor.find().select("-password")).toSorted({
+      createdAt: -1,
+    });
+
+    if (processors.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "you don't have any processors.",
+        data: processors,
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -19,7 +30,7 @@ router.get("/api/processors", requireAuthAndManager, async (req, res) => {
     console.error("Error fetching processors: ", error.message);
 
     return res.status(500).json({
-      sucess: false,
+      success: false,
       message: "Failed to fetch processors",
       error: error.message,
     });
@@ -27,32 +38,39 @@ router.get("/api/processors", requireAuthAndManager, async (req, res) => {
 });
 
 // Get Processor by ID
-router.get("/api/processors/:id", requireAuthAndManager, async (req, res) => {
-  try {
-    const { id } = req.params;
+router.get(
+  "/api/processors/:id",
+  requireAuthAndManager,
+  validateObjectIdReusable({ key: "id" }),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    const processor = await Processor.findById(id).select("-password");
+      const processor = await Processor.findById(id).select("-password").lean();
 
-    if (!processor) {
-      return res.status(404).json({
+      if (!processor) {
+        return res.status(404).json({
+          success: false,
+          message: "Processor not found",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Processor fetched successfully",
+        data: processor,
+      });
+    } catch (error) {
+      console.error("Error fetching processor", error.message);
+
+      return res.status(500).json({
         success: false,
-        message: "Processor not found",
+        message: "Failed to fetch processor",
+        error: error.message,
       });
     }
-
-    return res.status(200).json({
-      success: true,
-      data: processor,
-    });
-  } catch (error) {
-    console.error("Error fetching processor:", error.message);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch processor",
-      error: error.message,
-    });
   }
-});
+);
 
 // Add a new processor
 /**
@@ -90,10 +108,12 @@ router.post(
         role,
       });
 
+      const { password: _, ...safeProcessor } = newProcessor.toObject(); // store to _ variable (throwaway variable)
+
       return res.status(201).json({
         success: true,
         message: "Processor registered successfully",
-        data: newProcessor,
+        data: safeProcessor,
       });
     } catch (error) {
       console.error("Error creating processor:", error.message);
@@ -115,7 +135,7 @@ router.patch("/api/processors/:id", requireAuthAndManager, async (req, res) => {
     const updatedProcessor = await Processor.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true,
-    });
+    }).select("-password");
 
     if (!updatedProcessor) {
       return res.status(404).json({
@@ -158,7 +178,7 @@ router.delete(
       res.status(200).json({
         success: true,
         message: "Processor deleted successfully",
-        data: deletedProcessor,
+        // data: deletedProcessor,
       });
     } catch (error) {
       console.error("Error deleting processor:", error.message);

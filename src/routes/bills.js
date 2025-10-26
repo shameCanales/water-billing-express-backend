@@ -24,6 +24,8 @@ router.get("/api/bills", requireAuthAndStaffOrManager, async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
+    
+
     res.status(200).json({
       success: true,
       message: `${bills.length} retrieved succesfully`,
