@@ -6,8 +6,10 @@ import {
   requireAuth,
   requireAuthAndManager,
 } from "../middlewares/authmiddleware.js";
-import { validateObjectId } from "../middlewares/validateObjectId.js";
 import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
+import { addConnectionValidationSchema } from "../middlewares/validationSchemas/addConnectionValidation.js";
+import { editConnectionValidationSchema } from "../middlewares/validationSchemas/editConnectionValidation.js";
+import { check, checkSchema, validationResult } from "express-validator";
 
 const router = Router();
 
@@ -15,13 +17,22 @@ const router = Router();
 router.post(
   "/api/connections",
   requireAuthAndStaffOrManager,
+  checkSchema(addConnectionValidationSchema),
+  validateObjectIdReusable({ key: "consumerId" }),
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
+    }
+
     try {
       const { consumerId, meterNumber, address, connectionDate, type, status } =
         req.body;
 
       const existingConsumer = await Consumer.findById(consumerId);
-
       if (!existingConsumer) {
         return res.status(404).json({
           success: false,
@@ -30,7 +41,6 @@ router.post(
       }
 
       const existingConnection = await Connection.findOne({ meterNumber });
-
       if (existingConnection) {
         return res.status(400).json({
           success: false,
@@ -60,8 +70,8 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Failed to add connection",
-        error: error.message,
+        message: "Internal Server error: Failed to add connection",
+        // error: error.message,
       });
     }
   }
@@ -97,37 +107,47 @@ router.get(
 router.patch(
   "/api/connections/:id",
   requireAuthAndStaffOrManager,
+  validateObjectIdReusable({ key: "id" }),
+  checkSchema(editConnectionValidationSchema),
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
+    }
+
     try {
       const { id } = req.params;
       const updates = req.body;
 
-      const udpatedConnection = await Connection.findByIdAndUpdate(
+      const updatedConnection = await Connection.findByIdAndUpdate(
         id,
         updates,
         {
           new: true,
           runValidators: true,
         }
-      );
+      ).populate("consumer", "name email mobileNumber");
 
-      if (!udpatedConnection) {
+      if (!updatedConnection) {
         return res.status(404).json({
           success: false,
-          message: "Connection no found",
+          message: "Connection not found",
         });
       }
 
       res.status(200).json({
         success: true,
         message: "Connection updated successfully",
-        data: udpatedConnection,
+        data: updatedConnection,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Failed to update connection",
-        error: error.message,
+        message: "Internal Server error: Failed to update connection.",
+        // error: error.message,
       });
     }
   }
@@ -137,6 +157,7 @@ router.patch(
 router.delete(
   "/api/connections/:id",
   requireAuthAndManager,
+  validateObjectIdReusable({ key: "id" }),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -156,6 +177,8 @@ router.delete(
         data: deletedConnection,
       });
     } catch (error) {
+      console.error(error);
+
       res.status(500).json({
         success: false,
         message: "Failed to delete connection",
@@ -169,7 +192,6 @@ router.delete(
 router.get(
   "/api/connections/consumer/:consumerid",
   requireAuth,
-  // validateObjectId("consumerid"), // for validating consumerid param
   validateObjectIdReusable({ key: "consumerid" }),
   async (req, res) => {
     try {
@@ -177,18 +199,19 @@ router.get(
 
       const connections = await Connection.find({
         consumer: consumerid,
-      }).populate("consumer", "name email mobileNumber");
+      })
+        .populate("consumer", "name email mobileNumber")
+        .sort({ createdAt: -1 })
+        .lean();
 
-      if (!connections || connections.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "No connections found for this consumer",
-        });
-      }
+      const message =
+        connections.length > 0
+          ? "Connections retrieved successfuly"
+          : "No connections found for this consumer";
 
       res.status(200).json({
         success: true,
-        message: "Connections retrieved successfully",
+        message,
         data: connections,
       });
     } catch (error) {
