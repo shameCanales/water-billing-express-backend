@@ -7,8 +7,9 @@ import {
 } from "../middlewares/authmiddleware.js";
 import { BILLING_SETTINGS } from "../config/settings.js";
 import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
-import { check, checkSchema, validationResult } from "express-validator";
+import { checkSchema, validationResult } from "express-validator";
 import { addBillValidationSchema } from "../middlewares/validationSchemas/addBillValidation.js";
+import { editBillValidationSchema } from "../middlewares/validationSchemas/editBillValidation.js";
 
 const router = Router();
 
@@ -253,6 +254,59 @@ router.get(
 );
 
 // update bill information
+router.patch(
+  "/api/bills/:billId",
+  requireAuthAndStaffOrManager,
+  validateObjectIdReusable({ key: "billId" }),
+  checkSchema(editBillValidationSchema),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
+    }
+
+    try {
+      const { billId } = req.params;
+      const updates = req.body;
+
+      const bill = await Bill.findById(billId);
+
+      if (!bill) {
+        return res.status(404).json({
+          success: false,
+          message: "bill not found",
+        });
+      }
+
+      const updatedBill = await Bill.findByIdAndUpdate(billId, updates, {
+        new: true,
+        runValidators: true,
+      }).populate({
+        path: "connection",
+        populate: {
+          path: "consumer",
+          select: "name email mobileNumber",
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Bill updated successfully",
+        data: updatedBill,
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        success: false,
+        message: "Internal server error: Failed to update the bill",
+      });
+    }
+  }
+);
 
 // Update bill status (paid, unpaid, overdue)
 router.patch(
