@@ -7,6 +7,8 @@ import {
 } from "../middlewares/authmiddleware.js";
 import { BILLING_SETTINGS } from "../config/settings.js";
 import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
+import { check, checkSchema, validationResult } from "express-validator";
+import { addBillValidationSchema } from "../middlewares/validationSchemas/addBillValidation.js";
 
 const router = Router();
 
@@ -24,18 +26,17 @@ router.get("/api/bills", requireAuthAndStaffOrManager, async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    
-
     res.status(200).json({
       success: true,
-      message: `${bills.length} retrieved succesfully`,
+      message: `bills retrieved successfully`,
+      count: bills.length,
       data: bills,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Failed to fetch bills",
-      error: error.message,
+      // error: error.message,
     });
   }
 });
@@ -45,21 +46,71 @@ router.post(
   "/api/bills",
   requireAuthAndStaffOrManager,
   validateObjectIdReusable({ source: "body", key: "connection" }),
+  checkSchema(addBillValidationSchema),
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
+    }
+
     try {
       const {
         connection,
         monthOf,
         dueDate,
-        meterReading,
-        chargePerCubicMeter = BILLING_SETTINGS.chargePerCubicMeter,
+        meterReading: rawMeterReading,
+        chargePerCubicMeter: rawCharge = BILLING_SETTINGS.chargePerCubicMeter,
       } = req.body;
 
-      const monthDate = new Date(monthOf);
-      monthDate.setDate(1); // sets the day of the date to the 1st date of the month.
-      monthDate.setHours(0, 0, 0, 0); // sets the time to 00:00:00:00 (midnight)
+      const meterReading = Number(rawMeterReading);
+      const chargePerCubicMeter = Number(rawCharge);
 
+      if (!Number.isFinite(meterReading) || meterReading < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "meterReading must be a non-negative number",
+        });
+      }
+
+      if (!Number.isFinite(chargePerCubicMeter) || chargePerCubicMeter < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "chargePerCubicMeter must be a non-negative number",
+        });
+      }
+
+      // normalize monthOf to first day of month at 00:00:00 UTC
+      const parsedMonth = new Date(monthOf);
+      if (isNaN(parsedMonth)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid monthOf date",
+        });
+      }
+
+      const monthDate = new Date(
+        Date.UTC(
+          parsedMonth.getUTCFullYear(),
+          parsedMonth.getUTCMonth(),
+          1,
+          0,
+          0,
+          0,
+          0
+        )
+      );
+
+      // parse dueDate
       const dueDateObj = new Date(dueDate); // duedate = "2025-11-01" || "November 2025". convert to date object
+      if (isNaN(dueDateObj)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid dueDate",
+        });
+      }
 
       // Ensure connection exists
       const findConnection = await Connection.findById(connection).populate(
@@ -77,10 +128,10 @@ router.post(
       const existingBill = await Bill.findOne({
         connection,
         monthOf: monthDate,
-      });
+      }).lean();
 
       if (existingBill) {
-        return res.status(400).json({
+        return res.status(409).json({
           success: false,
           message: `A bill for this period already exists for this connection`,
         });
@@ -88,18 +139,18 @@ router.post(
 
       // find the last bill for this connection
       const lastBill = await Bill.findOne({ connection })
-        .sort({ createdAt: -1 })
+        .sort({ monthOf: -1 })
         .lean();
 
       // compute consumed units
-      let lastReading = lastBill ? lastBill.meterReading : 0;
+      let lastReading = lastBill ? Number(lastBill.meterReading) : 0;
       const consumedUnits = meterReading - lastReading;
 
-      if (consumedUnits <= 0) {
+      if (!Number.isFinite(consumedUnits) || consumedUnits < 0) {
         return res.status(400).json({
           success: false,
           message:
-            "Current meter reading cannot be lower than previous reading",
+            "Current meter reading cannot be lower than previous recorded reading",
         });
       }
 
@@ -134,10 +185,16 @@ router.post(
     } catch (error) {
       console.error("Error creating bill: ", error);
 
+      if (error && error.code === 11000) {
+        return res.status(409).json({
+          success: false,
+          message: "A bill for this connection and month already exists",
+        });
+      }
+
       res.status(500).json({
         success: false,
         message: "Failed to add bill",
-        error: error.message,
       });
     }
   }
@@ -171,9 +228,11 @@ router.get(
         .sort({ createdAt: -1 });
 
       if (!bills.length) {
-        return res.status(404).json({
-          success: false,
+        return res.status(200).json({
+          success: true,
+          count: 0,
           message: "No bills found for this connection",
+          data: [],
         });
       }
 
@@ -216,13 +275,7 @@ router.patch(
         });
       }
 
-      const existingBill = await Bill.findById(billId).populate({
-        path: "connection",
-        populate: {
-          path: "consumer",
-          select: "name email mobileNumber address",
-        },
-      });
+      const existingBill = await Bill.findById(billId).lean();
 
       if (!existingBill) {
         return res.status(404).json({
@@ -279,23 +332,31 @@ router.delete(
   async (req, res) => {
     try {
       const { billId } = req.params;
+      const bill = await Bill.findById(billId);
 
-      const deletedBill = await Bill.findByIdAndDelete(billId);
-
-      if (!deletedBill) {
+      if (!bill) {
         return res.status(404).json({
           success: false,
           message: "Bill not found",
         });
       }
 
+      await bill.deleteOne();
+
       return res.status(200).json({
         success: true,
         message:
-          "Succesfully deleted bill and I don't know why would you want to delete it",
-        data: deletedBill,
+          "Successfully deleted bill and I don't know why would you want to delete it",
+        data: {
+          _id: bill.id,
+          connection: bill.connection,
+          amount: bill.amount,
+          monthOf: bill.monthOf,
+        },
       });
     } catch (error) {
+      console.error("Error deleting bill:", error);
+
       res.status(500).json({
         success: false,
         message: "Failed to delete bill",
