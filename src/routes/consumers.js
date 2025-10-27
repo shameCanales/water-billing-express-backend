@@ -3,13 +3,14 @@ import { Consumer } from "../mongoose/schemas/consumer.js";
 import { Router } from "express";
 import { addConsumerValidationSchema } from "../middlewares/validationSchemas/addConsumerValidation.js";
 import { checkSchema, validationResult } from "express-validator";
+import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
 
 const router = Router();
 
 // get all consumers
 router.get("/api/consumers", requireAuthAndStaffOrManager, async (req, res) => {
   try {
-    const consumers = await Consumer.find();
+    const consumers = await Consumer.find().select("-password");
 
     return res.status(200).json({
       success: true,
@@ -21,7 +22,7 @@ router.get("/api/consumers", requireAuthAndStaffOrManager, async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch consumers",
-      error: error.message,
+      // error: error.message, should not send to client.
     });
   }
 });
@@ -31,8 +32,8 @@ router.get("/api/consumers", requireAuthAndStaffOrManager, async (req, res) => {
 //add consumer
 router.post(
   "/api/consumers",
-  checkSchema(addConsumerValidationSchema),
   requireAuthAndStaffOrManager,
+  checkSchema(addConsumerValidationSchema),
   async (req, res) => {
     const errors = validationResult(req);
 
@@ -63,6 +64,8 @@ router.post(
         status,
       });
 
+      const { password: _, ...consumerData } = newConsumer.toObject();
+
       return res.status(201).json({
         success: true,
         message: "Consumer added successfully",
@@ -73,8 +76,8 @@ router.post(
 
       return res.status(500).json({
         success: false,
-        message: "Error registering consumer",
-        error: error.message,
+        message: "Internal server error",
+        // error: error.message,
       });
     }
   }
@@ -84,6 +87,7 @@ router.post(
 router.patch(
   "/api/consumers/:id",
   requireAuthAndStaffOrManager,
+  validateObjectIdReusable({ key: "id" }),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -120,6 +124,7 @@ router.patch(
 router.delete(
   "/api/consumers/:id",
   requireAuthAndStaffOrManager,
+  validateObjectIdReusable({ key: "id" }),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -152,6 +157,7 @@ router.delete(
 router.get(
   "/api/consumers/:id",
   requireAuthAndStaffOrManager,
+  validateObjectIdReusable({ key: "id" }),
   async (req, res) => {
     try {
       const { id } = req.params;
