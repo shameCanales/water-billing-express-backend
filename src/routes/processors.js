@@ -91,7 +91,7 @@ router.post(
     }
 
     const { name, email, password, role } = matchedData(req);
-    const hashedPassword = hashPassword(password);
+    const hashedPassword = await hashPassword(password);
 
     try {
       const existingProcessor = await Processor.findOne({ email });
@@ -133,6 +133,10 @@ router.patch("/api/processors/:id", requireAuthAndManager, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+
+    if (updates.password) {
+      updates.password = await hashPassword(updates.password);
+    }
 
     const updatedProcessor = await Processor.findByIdAndUpdate(id, updates, {
       new: true,

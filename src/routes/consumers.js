@@ -42,12 +42,10 @@ router.post(
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    console.log(matchedData(req));
-
     const { name, email, birthDate, mobileNumber, password, address, status } =
       matchedData(req);
 
-    const hashedPassword = hashPassword(password);
+    const hashedPassword = await hashPassword(password);
 
     try {
       const existingConsumer = await Consumer.findOne({ email });
@@ -96,7 +94,11 @@ router.patch(
   async (req, res) => {
     try {
       const { id } = req.params;
-      const updates = req.body;
+      const updates = matchedData(req);
+
+      if (updates.password) {
+        updates.password = await hashPassword(updates.password);
+      }
 
       const updatedConsumer = await Consumer.findByIdAndUpdate(id, updates, {
         new: true,

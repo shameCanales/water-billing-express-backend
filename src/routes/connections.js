@@ -9,7 +9,7 @@ import {
 import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
 import { addConnectionValidationSchema } from "../middlewares/validationSchemas/addConnectionValidation.js";
 import { editConnectionValidationSchema } from "../middlewares/validationSchemas/editConnectionValidation.js";
-import { check, checkSchema, validationResult } from "express-validator";
+import { checkSchema, validationResult } from "express-validator";
 
 const router = Router();
 
