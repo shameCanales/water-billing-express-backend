@@ -2,8 +2,9 @@ import { requireAuthAndStaffOrManager } from "../middlewares/authmiddleware.js";
 import { Consumer } from "../mongoose/schemas/consumer.js";
 import { Router } from "express";
 import { addConsumerValidationSchema } from "../middlewares/validationSchemas/addConsumerValidation.js";
-import { checkSchema, validationResult } from "express-validator";
+import { checkSchema, validationResult, matchedData } from "express-validator";
 import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
+import { hashPassword } from "../utils/helpers.js";
 
 const router = Router();
 
@@ -41,8 +42,12 @@ router.post(
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
+    console.log(matchedData(req));
+
     const { name, email, birthDate, mobileNumber, password, address, status } =
-      req.body;
+      matchedData(req);
+
+    const hashedPassword = hashPassword(password);
 
     try {
       const existingConsumer = await Consumer.findOne({ email });
@@ -59,7 +64,7 @@ router.post(
         email,
         birthDate,
         mobileNumber,
-        password,
+        password: hashedPassword,
         address,
         status,
       });
@@ -69,7 +74,7 @@ router.post(
       return res.status(201).json({
         success: true,
         message: "Consumer added successfully",
-        data: newConsumer,
+        data: consumerData,
       });
     } catch (error) {
       console.error("Error creating consumer:", error.message);

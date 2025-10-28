@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy } from "passport-local";
-// import { processors } from "../utils/constants.js";
 import { Processor } from "../mongoose/schemas/processor.js";
+import { comparePassword } from "../utils/helpers.js";
 
 passport.serializeUser((processor, done) => {
   console.log("Serializing processor...");
@@ -38,9 +38,12 @@ export default passport.use(
 
         if (!findProcessor) throw new Error("User not found");
 
-        if (findProcessor.password !== processorPassword) {
-          throw new Error("Invalid credentials");
-        }
+        // if (findProcessor.password !== processorPassword) {
+        const isMatch = comparePassword(
+          processorPassword,
+          findProcessor.password
+        );
+        if (!isMatch) throw new Error("Invalid credentials");
 
         done(null, findProcessor); //successful login
       } catch (error) {

@@ -1,16 +1,17 @@
 import { Router } from "express";
 import { registerProcessorValidationSchema } from "../middlewares/validationSchemas/registerProcessorValidation.js";
-import { checkSchema, validationResult } from "express-validator";
+import { checkSchema, validationResult, matchedData } from "express-validator";
 import { requireAuthAndManager } from "../middlewares/authmiddleware.js";
 import { Processor } from "../mongoose/schemas/processor.js";
 import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
+import { hashPassword } from "../utils/helpers.js";
 
 const router = Router();
 
 // Get all processors
 router.get("/api/processors", requireAuthAndManager, async (req, res) => {
   try {
-    const processors = (await Processor.find().select("-password")).toSorted({
+    const processors = await Processor.find().select("-password").sort({
       createdAt: -1,
     });
 
@@ -89,7 +90,8 @@ router.post(
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role } = matchedData(req);
+    const hashedPassword = hashPassword(password);
 
     try {
       const existingProcessor = await Processor.findOne({ email });
@@ -104,7 +106,7 @@ router.post(
       const newProcessor = await Processor.create({
         name,
         email,
-        password,
+        password: hashedPassword,
         role,
       });
 
