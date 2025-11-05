@@ -153,10 +153,10 @@ Layer                    Technology
 Runtime                   Node.js
 Framework                 Express.js
 Database                  MongoDB + Mongoose
-Auth                      JWT (Access & Refresh Tokens)
-validation                Zod / express-validator
+Auth                      Jsession + cookie =>
+validation                express-validator
 Password hashing          bcrypt
-Logging                   Winston or pino 
+Logging                   x => Winston or pino
 Env Mgmt                  dotenv
 Error handling            Centralized custom AppError
 Dev Tools                 Nodemon, ESLint, Prettier
