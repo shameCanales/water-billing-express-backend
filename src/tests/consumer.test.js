@@ -274,6 +274,10 @@ describe("edit consumer by ID", () => {
   });
 
   it("should return 400 when there is validation error", async () => {
+    jest.spyOn(validator, "validationResult").mockReturnValue({
+      isEmpty: jest.fn(() => false),
+      array: jest.fn(() => [{ msg: "Invalid Field" }]),
+    });
     mockRequest.params.id = 1;
 
     await editConsumerById(mockRequest, mockResponse);
