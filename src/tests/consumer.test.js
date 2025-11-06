@@ -4,6 +4,7 @@ import {
   getAllConsumersHandler,
   createConsumerHandler,
   getConsumerById,
+  editConsumerById,
 } from "../controllers/consumer.controller.js";
 import { Consumer } from "../mongoose/schemas/consumer.js";
 
@@ -262,6 +263,97 @@ describe("get consumer by ID", () => {
     expect(mockResponse.json).toHaveBeenCalledWith({
       success: false,
       message: "Failed to fetch consumer",
+    });
+  });
+});
+
+describe("edit consumer by ID", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return 400 when there is validation error", async () => {
+    mockRequest.params.id = 1;
+
+    await editConsumerById(mockRequest, mockResponse);
+    expect(validator.validationResult).toHaveBeenCalledTimes(1);
+    expect(validator.validationResult).toHaveBeenCalledWith(mockRequest);
+    expect(mockResponse.status).toHaveBeenCalledWith(400);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      errors: [{ msg: "Invalid Field" }],
+    });
+  });
+
+  it("should return 404 when consumer is not found", async () => {
+    jest.spyOn(validator, "validationResult").mockReturnValue({
+      isEmpty: jest.fn(() => true),
+    });
+
+    Consumer.findByIdAndUpdate.mockResolvedValue(null);
+
+    await editConsumerById(mockRequest, mockResponse);
+
+    expect(Consumer.findByIdAndUpdate).toHaveBeenCalledWith(
+      mockRequest.params.id,
+      expect.any(Object),
+      { new: true, runValidators: true }
+    );
+
+    expect(mockResponse.status).toHaveBeenCalledWith(404);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Consumer not found",
+    });
+  });
+
+  it("should return 200 and updated consumer on success", async () => {
+    jest.spyOn(validator, "validationResult").mockReturnValue({
+      isEmpty: jest.fn(() => true),
+    });
+
+    jest.spyOn(validator, "matchedData").mockReturnValue({
+      name: "Updated",
+      password: "newpass123",
+    });
+
+    helpers.hashPassword.mockResolvedValue("hashed_newpass123");
+
+    const updatedConsumer = { _id: "1", name: "Updated" };
+    Consumer.findByIdAndUpdate.mockResolvedValue(updatedConsumer);
+
+    await editConsumerById(mockRequest, mockResponse);
+
+    expect(helpers.hashPassword).toHaveBeenCalledWith("newpass123");
+    expect(Consumer.findByIdAndUpdate).toHaveBeenCalledWith(
+      mockRequest.params.id,
+      { name: "Updated", password: "hashed_newpass123" },
+      { new: true, runValidators: true }
+    );
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: true,
+      message: "Consumer updated successfully",
+      data: updatedConsumer,
+    });
+  });
+
+  it("should return 500 when DB fails to updated consumer", async () => {
+    jest.spyOn(validator, "validationResult").mockReturnValue({
+      isEmpty: jest.fn(() => true),
+    });
+
+    Consumer.findByIdAndUpdate.mockRejectedValue(
+      new Error("Failed to update consumer")
+    );
+
+    await editConsumerById(mockRequest, mockResponse);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(500);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Failed to update consumer",
+      error: "Failed to update consumer"
     });
   });
 });

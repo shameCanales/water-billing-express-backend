@@ -97,3 +97,43 @@ export const getConsumerById = async (req, res) => {
     });
   }
 };
+
+export const editConsumerById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const errors = validationResult(req);
+    const updates = matchedData(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    if (updates.password) {
+      updates.password = await hashPassword(updates.password);
+    }
+
+    const updatedConsumer = await Consumer.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedConsumer) {
+      return res.status(404).json({
+        success: false,
+        message: "Consumer not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Consumer updated successfully",
+      data: updatedConsumer,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update consumer",
+      error: error.message,
+    });
+  }
+};
