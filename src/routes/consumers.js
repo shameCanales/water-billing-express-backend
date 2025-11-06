@@ -8,6 +8,7 @@ import { hashPassword } from "../utils/helpers.js";
 import {
   getAllConsumersHandler,
   createConsumerHandler,
+  getConsumerById,
 } from "../controllers/consumer.controller.js";
 
 const router = Router();
@@ -35,7 +36,12 @@ router.patch(
   async (req, res) => {
     try {
       const { id } = req.params;
+      const errors = validationResult(req);
       const updates = matchedData(req);
+
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ success: false, errors: errors.array() });
+      }
 
       if (updates.password) {
         updates.password = await hashPassword(updates.password);
@@ -53,13 +59,13 @@ router.patch(
         });
       }
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: "Consumer updated successfully",
         data: updatedConsumer,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: "Failed to update consumer",
         error: error.message,
@@ -86,13 +92,13 @@ router.delete(
         });
       }
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: "Consumer deleted successfully",
         data: deletedConsumer,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: "Failed to delete consumer",
         error: error.message,
@@ -106,31 +112,7 @@ router.get(
   "/api/consumers/:id",
   requireAuthAndStaffOrManager,
   validateObjectIdReusable({ key: "id" }),
-  async (req, res) => {
-    try {
-      const { id } = req.params;
-
-      const consumer = await Consumer.findById(id).select("-password"); // Exclude password from response
-
-      if (!consumer) {
-        return res.status(404).json({
-          success: false,
-          message: "Consumer not found",
-        });
-      }
-
-      res.status(200).json({
-        success: true,
-        data: consumer,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch consumer",
-        error: error.message,
-      });
-    }
-  }
+  getConsumerById
 );
 
 export default router;

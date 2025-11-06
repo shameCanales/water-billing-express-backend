@@ -70,3 +70,30 @@ export const createConsumerHandler = async (req, res) => {
     });
   }
 };
+
+export const getConsumerById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const consumer = await Consumer.findById(id).select("-password"); // Exclude password from response
+
+    if (!consumer) {
+      return res.status(404).json({
+        success: false,
+        message: "Consumer not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: consumer,
+    });
+  } catch (error) {
+    console.log(error, error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch consumer",
+      // error: error.message,
+    });
+  }
+};
