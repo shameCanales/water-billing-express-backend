@@ -5,6 +5,7 @@ import {
   createConsumerHandler,
   getConsumerById,
   editConsumerById,
+  deleteConsumerById,
 } from "../controllers/consumer.controller.js";
 import { Consumer } from "../mongoose/schemas/consumer.js";
 
@@ -353,7 +354,67 @@ describe("edit consumer by ID", () => {
     expect(mockResponse.json).toHaveBeenCalledWith({
       success: false,
       message: "Failed to update consumer",
-      error: "Failed to update consumer"
+      error: "Failed to update consumer",
+    });
+  });
+});
+
+describe("delete consumer by id", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return 404 when consumer is not found", async () => {
+    Consumer.findByIdAndDelete.mockResolvedValue(null);
+
+    await deleteConsumerById(mockRequest, mockResponse);
+
+    expect(Consumer.findByIdAndDelete).toHaveBeenCalledTimes(1);
+    expect(Consumer.findByIdAndDelete).toHaveBeenCalledWith(
+      mockRequest.params.id
+    );
+    expect(mockResponse.status).toHaveBeenCalledWith(404);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Consumer not found",
+    });
+  });
+
+  it("should return 200 when deleted successfully", async () => {
+    const fakeDeletedConsumer = { _id: "1", name: "John" };
+    Consumer.findByIdAndDelete.mockResolvedValue(fakeDeletedConsumer);
+
+    await deleteConsumerById(mockRequest, mockResponse);
+
+    expect(Consumer.findByIdAndDelete).toHaveBeenCalledWith(
+      mockRequest.params.id
+    );
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: true,
+      message: "Consumer deleted successfully",
+      data: fakeDeletedConsumer,
+    });
+  });
+
+  it("should return 500 when server or database fails", async () => {
+    // Arrange
+    Consumer.findByIdAndDelete.mockRejectedValue(
+      new Error("Database connection failed")
+    );
+
+    // Act
+    await deleteConsumerById(mockRequest, mockResponse);
+
+    // Assert
+    expect(Consumer.findByIdAndDelete).toHaveBeenCalledWith(
+      mockRequest.params.id
+    );
+    expect(mockResponse.status).toHaveBeenCalledWith(500);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Failed to delete consumer",
+      error: "Database connection failed",
     });
   });
 });

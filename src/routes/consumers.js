@@ -10,6 +10,7 @@ import {
   createConsumerHandler,
   getConsumerById,
   editConsumerById,
+  deleteConsumerById,
 } from "../controllers/consumer.controller.js";
 
 const router = Router();
@@ -42,32 +43,7 @@ router.delete(
   "/api/consumers/:id",
   requireAuthAndStaffOrManager,
   validateObjectIdReusable({ key: "id" }),
-  async (req, res) => {
-    try {
-      const { id } = req.params;
-
-      const deletedConsumer = await Consumer.findByIdAndDelete(id);
-
-      if (!deletedConsumer) {
-        return res.status(404).json({
-          success: false,
-          message: "Consumer not found",
-        });
-      }
-
-      return res.status(200).json({
-        success: true,
-        message: "Consumer deleted successfully",
-        data: deletedConsumer,
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to delete consumer",
-        error: error.message,
-      });
-    }
-  }
+  deleteConsumerById
 );
 
 // Get Consumer by ID
