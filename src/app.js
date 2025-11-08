@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import "./strategies/local-strategy.js";
 import { createApp } from "./createApp.js";
+
 
 mongoose
   .connect("mongodb://localhost/water_billing_system")

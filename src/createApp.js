@@ -5,6 +5,9 @@ import router from "./routes/index.js";
 import passport from "passport";
 import MongoStore from "connect-mongo";
 import mongoose from "mongoose";
+import "./strategies/local-strategy.js"; // important
+import dotenv from "dotenv";
+dotenv.config();
 
 export function createApp() {
   const app = express();
@@ -40,7 +43,9 @@ export function createApp() {
     next();
   });
 
+  console.log("Routers mounted!");
   app.use(router);
+  console.log("processors.js loaded");
 
   app.get("/", (request, response) => {
     console.log(request.session);

@@ -128,6 +128,49 @@ router.post(
   }
 );
 
+router.post("/api/processor/register", async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      errors: errors.array(),
+    });
+  }
+
+  const { name, email, password } = req.body;
+  const hashedPassword = await hashPassword(password);
+
+  try {
+    const existingProcessor = await Processor.findOne({ email });
+
+    if (existingProcessor) {
+      return res.status(409).json({
+        success: false,
+        message: "Processor with this email already exists",
+      });
+    }
+
+    const newManager = await Processor.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "manager",
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Processor registered successfully",
+      data: newManager,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error registering manager",
+    });
+  }
+});
+
 // Edit Processor by ID
 router.patch("/api/processors/:id", requireAuthAndManager, async (req, res) => {
   try {
