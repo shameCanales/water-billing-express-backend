@@ -57,6 +57,7 @@ ARCHITECTURE:
 - this is a modern, scalable architecture, just like professional SaaS and municipal systems use today.
 - we'll use MVC + Services + repository pattern, with a clean separation of concerns, modern ES Modules, and async/await across the stack.
 
+PLANNED ARCHITECTURE:
 water-billing-backend/
 ├── src/
 │   ├── app.js
@@ -110,7 +111,6 @@ water-billing-backend/
 ├── package.json
 └── README.md
 
-
 KEY CONCEPTS::::::::::: 
 Controller - Handles HTTP request/responses. Calls Service layer
 Service - Contains business logic (calculations, validation)
@@ -161,3 +161,79 @@ Env Mgmt                  dotenv
 Error handling            Centralized custom AppError
 Dev Tools                 Nodemon, ESLint, Prettier
 Testing                   Jest/Supertest
+
+
+ARCHITECTURE IMPLEMENTATION:::::::::::::::::::::::::::::::::::
+
+
+Architecture V1: "flat MVC style"
+WATER_BILLING_SYSTEM/
+│
+├── coverage/
+├── node_modules/
+│
+├── src/
+│   ├── config/
+│   │   └── settings.js
+│   │
+│   ├── controllers/
+│   │   └── consumer.controller.js
+│   │
+│   ├── e2e/
+│   │   └── index.test.js
+│   │
+│   ├── middlewares/
+│   │   ├── authentication/
+│   │   │   ├── requireAuth.js
+│   │   │   └── requireAuthAndManager.js
+│   │   │
+│   │   ├── validationSchemas/
+│   │   │   ├── addBillValidation.js
+│   │   │   ├── addConnectionValidation.js
+│   │   │   ├── addConsumerValidation.js
+│   │   │   ├── editBillValidation.js
+│   │   │   ├── editConnectionValidation.js
+│   │   │   └── registerProcessorValidation.js
+│   │   │
+│   │   ├── authmiddleware.js
+│   │   └── validateObjectId.js
+│   │
+│   ├── mongoose/
+│   │   └── schemas/
+│   │       ├── bill.js
+│   │       ├── connection.js
+│   │       ├── consumer.js
+│   │       └── processor.js
+│   │
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── bills.js
+│   │   ├── connections.js
+│   │   ├── consumers.js
+│   │   ├── index.js
+│   │   ├── issueReports.js
+│   │   └── processors.js
+│   │
+│   ├── strategies/
+│   │   └── local-strategy.js
+│   │
+│   ├── tests/
+│   │   └── consumer.test.js
+│   │
+│   ├── utils/
+│   │   ├── constants.js
+│   │   └── helpers.js
+│   │
+│   ├── app.js
+│   └── createApp.js
+│
+├── .babelrc
+├── .env
+├── buildprogress.txt
+├── jest.config.mjs
+├── jsconfig.json
+├── package-lock.json
+├── package.json
+
+
+Architecture V2: Multilayer architecture

@@ -7,7 +7,7 @@ import {
   editConsumerById,
   deleteConsumerById,
 } from "../controllers/consumer.controller.js";
-import { Consumer } from "../mongoose/schemas/consumer.js";
+import { Consumer } from "../models/consumer.model.js";
 
 jest.mock("express-validator", () => ({
   validationResult: jest.fn(() => ({
@@ -29,7 +29,7 @@ jest.mock("../utils/helpers.js", () => ({
   hashPassword: jest.fn((password) => `hashed_${password}`),
 }));
 
-jest.mock("../mongoose/schemas/consumer");
+jest.mock("../models/consumer.model");
 
 const mockRequest = {
   params: {

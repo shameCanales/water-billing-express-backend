@@ -1,4 +1,4 @@
-import { Consumer } from "../mongoose/schemas/consumer.js";
+import { Consumer } from "../models/consumer.model.js";
 import { hashPassword } from "../utils/helpers.js";
 import { matchedData, validationResult } from "express-validator";
 

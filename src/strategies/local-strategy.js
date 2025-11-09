@@ -1,11 +1,11 @@
 import passport from "passport";
 import { Strategy } from "passport-local";
-import { Processor } from "../mongoose/schemas/processor.js";
+import { Processor } from "../models/processor.model.js";
 import { comparePassword } from "../utils/helpers.js";
 
 passport.serializeUser((processor, done) => {
   console.log("Serializing processor...");
-  console.log(processor);
+  // console.log(processor);
   done(null, processor._id); // use _id from MongoDB
 });
 
