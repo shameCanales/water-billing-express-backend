@@ -1,12 +1,9 @@
 # Node dependencies
 node_modules/
-
 # Environment variables
 .env
-
 # Test coverage output
 coverage/
-
 # Cache and temporary files
 .cache/
 build/
