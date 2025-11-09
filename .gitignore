@@ -1,3 +1,21 @@
-# Ignore node modules and MongoDB cache
+# Node dependencies
 node_modules/
+
+# Environment variables
+.env
+
+# Test coverage output
+coverage/
+
+# Cache and temporary files
 .cache/
+build/
+dist/
+buildprogress.txt
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
