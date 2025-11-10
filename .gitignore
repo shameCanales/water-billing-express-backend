@@ -4,6 +4,7 @@ node_modules/
 .env
 # Test coverage output
 coverage/
+lcov-report/
 # Cache and temporary files
 .cache/
 build/
