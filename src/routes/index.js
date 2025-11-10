@@ -1,10 +1,10 @@
 import { Router } from "express";
 // import processorsRouter from "./processors.js";
-import authRouter from "./auth.route.js";
-import processorsRouter from "./processors.route.js";
-import consumerRouter from "./consumers.route.js";
-import ConnectionRouter from "./connections.route.js";
-import BillRouter from "./bills.route.js";
+import authRouter from "./auth.routes.js";
+import processorsRouter from "./processors.routes.js";
+import consumerRouter from "./consumers.routes.js";
+import ConnectionRouter from "./connections.routes.js";
+import BillRouter from "./bills.routes.js";
 
 const router = Router();
 

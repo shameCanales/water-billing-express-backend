@@ -43,9 +43,7 @@ export function createApp() {
     next();
   });
 
-  console.log("Routers mounted!");
   app.use(router);
-  console.log("processors.js loaded");
 
   app.get("/", (request, response) => {
     console.log(request.session);
