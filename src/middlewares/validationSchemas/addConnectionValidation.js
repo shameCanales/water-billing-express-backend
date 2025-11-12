@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export const addConnectionValidationSchema = {
-  consumerId: {
+  consumer: {
     in: ["body"],
     notEmpty: {
       errorMessage: "Consumer ID is required",

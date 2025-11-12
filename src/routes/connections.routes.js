@@ -18,7 +18,7 @@ router.post(
   "/api/connections",
   requireAuthAndStaffOrManager,
   checkSchema(addConnectionValidationSchema),
-  validateObjectIdReusable({ key: "consumerId", source: "body" }),
+  validateObjectIdReusable({ key: "consumer", source: "body" }),
   connectionController.create
 );
 
@@ -50,7 +50,7 @@ router.delete(
 router.get(
   "/api/connections/consumer/:consumerid",
   requireAuth,
-  validateObjectIdReusable({ key: "consumerid" }),
+  validateObjectIdReusable({ key: "consumer" }),
   connectionController.getByConsumerId
 );
 

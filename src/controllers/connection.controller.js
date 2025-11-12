@@ -1,4 +1,4 @@
-import { validationResult } from "express-validator";
+import { validationResult, matchedData } from "express-validator";
 import { ConnectionService } from "../services/connection.service.js";
 
 export const connectionController = {
@@ -97,8 +97,8 @@ export const connectionController = {
 
   async getByConsumerId(req, res) {
     try {
-      const { consumerid } = req.params;
-      const data = await ConnectionService.getByConsumerId(consumerid);
+      const { consumer } = req.params;
+      const data = await ConnectionService.getByConsumerId(consumer);
 
       return res.status(200).json({
         success: true,
@@ -116,62 +116,62 @@ export const connectionController = {
   },
 };
 
-export const addNewConnectionToAConsumerHandler = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-  }
+// export const addNewConnectionToAConsumerHandler = async (req, res) => {
+//   const errors = validationResult(req);
+//   if (!errors.isEmpty()) {
+//     return res.status(400).json({
+//       success: false,
+//       errors: errors.array(),
+//     });
+//   }
 
-  try {
-    const { consumerId, meterNumber, address, connectionDate, type, status } =
-      req.body;
+//   try {
+//     const { consumerId, meterNumber, address, connectionDate, type, status } =
+//       req.body;
 
-    const existingConsumer = await Consumer.findById(consumerId);
-    if (!existingConsumer) {
-      return res.status(404).json({
-        success: false,
-        message: "Consumer not found",
-      });
-    }
+//     const existingConsumer = await Consumer.findById(consumerId);
+//     if (!existingConsumer) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Consumer not found",
+//       });
+//     }
 
-    const existingConnection = await Connection.findOne({ meterNumber });
-    if (existingConnection) {
-      return res.status(400).json({
-        success: false,
-        message: "Connection with this meter number already exists",
-      });
-    }
+//     const existingConnection = await Connection.findOne({ meterNumber });
+//     if (existingConnection) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Connection with this meter number already exists",
+//       });
+//     }
 
-    const newConnection = await Connection.create({
-      consumer: consumerId,
-      meterNumber,
-      address,
-      connectionDate,
-      type,
-      status,
-    });
+//     const newConnection = await Connection.create({
+//       consumer: consumerId,
+//       meterNumber,
+//       address,
+//       connectionDate,
+//       type,
+//       status,
+//     });
 
-    const populatedConnection = await newConnection.populate(
-      "consumer",
-      "name email mobileNumber"
-    );
+//     const populatedConnection = await newConnection.populate(
+//       "consumer",
+//       "name email mobileNumber"
+//     );
 
-    res.status(201).json({
-      success: true,
-      message: "Connection added successfully",
-      data: populatedConnection,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Internal Server error: Failed to add connection",
-      // error: error.message,
-    });
-  }
-};
+//     res.status(201).json({
+//       success: true,
+//       message: "Connection added successfully",
+//       data: populatedConnection,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal Server error: Failed to add connection",
+//       // error: error.message,
+//     });
+//   }
+// };
 
 // export const getAllConnectionsHandler = async (req, res) => {
 //   try {

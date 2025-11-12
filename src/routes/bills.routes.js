@@ -1,27 +1,18 @@
-import { Bill } from "../models/bill.model.js";
-import { Connection } from "../models/connection.model.js";
 import { Router } from "express";
 import {
   requireAuth,
   requireAuthAndStaffOrManager,
 } from "../middlewares/authmiddleware.js";
-import { BILLING_SETTINGS } from "../config/settings.js";
 import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
-import { checkSchema, validationResult } from "express-validator";
+import { checkSchema } from "express-validator";
 import { addBillValidationSchema } from "../middlewares/validationSchemas/addBillValidation.js";
 import { editBillValidationSchema } from "../middlewares/validationSchemas/editBillValidation.js";
-import {
-  addBillToConnectionHandler,
-  getAllBillsHandler,
-  getBillsByConnectionIdHandler,
-  updateBillInformationByIdHandler,
-  updateBillStatusByIdHandler,
-} from "../controllers/bill.controller.js";
+import { BillController } from "../controllers/bill.controller.js";
 
 const router = Router();
 
 // Get all bills
-router.get("/api/bills", requireAuthAndStaffOrManager, getAllBillsHandler);
+router.get("/api/bills", requireAuthAndStaffOrManager, BillController.getAll);
 
 // add bill to a connection
 router.post(
@@ -29,7 +20,7 @@ router.post(
   requireAuthAndStaffOrManager,
   validateObjectIdReusable({ source: "body", key: "connection" }),
   checkSchema(addBillValidationSchema),
-  addBillToConnectionHandler
+  BillController.create
 );
 
 // Get bills for a specific connection
@@ -37,7 +28,7 @@ router.get(
   "/api/connections/:connectionId/bills",
   requireAuth,
   validateObjectIdReusable({ key: "connectionId" }),
-  getBillsByConnectionIdHandler
+  BillController.getByConnection
 );
 
 // update bill information
@@ -46,7 +37,7 @@ router.patch(
   requireAuthAndStaffOrManager,
   validateObjectIdReusable({ key: "billId" }),
   checkSchema(editBillValidationSchema),
-  updateBillInformationByIdHandler
+  BillController.update
 );
 
 // Update bill status (paid, unpaid, overdue)
@@ -54,14 +45,15 @@ router.patch(
   "/api/bills/:billId/status",
   requireAuthAndStaffOrManager,
   validateObjectIdReusable({ key: "billId" }),
-  updateBillStatusByIdHandler
+  BillController.updateStatus
 );
 
 // Delete a bill
 router.delete(
   "/api/bills/:billId",
   requireAuthAndStaffOrManager,
-  validateObjectIdReusable({ key: "billId" })
+  validateObjectIdReusable({ key: "billId" }),
+  BillController.delete
 );
 
 export default router;

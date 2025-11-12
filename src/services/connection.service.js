@@ -3,11 +3,10 @@ import { ConsumerRepository } from "../repositories/consumer.repository.js";
 
 export const ConnectionService = {
   async create(data) {
-    console.log(data);
-    const { consumerId, meterNumber } = data;
+    const { consumer, meterNumber } = data;
 
-    const consumer = await ConsumerRepository.findById(consumerId);
-    if (!consumer) throw new Error("Consumer not found");
+    const foundConsumer = await ConsumerRepository.findById(consumer);
+    if (!foundConsumer) throw new Error("Consumer not found");
 
     const existing = await ConnectionRepository.findByMeterNumber(meterNumber);
     if (existing)
@@ -33,7 +32,7 @@ export const ConnectionService = {
     return deleted;
   },
 
-  async getByConsumerId(consumerId) {
-    return await ConnectionRepository.findByConsumerId(consumerId);
+  async getByConsumerId(consumer) {
+    return await ConnectionRepository.findByConsumerId(consumer);
   },
 };
