@@ -27,4 +27,8 @@ export const ConsumerRepository = {
   async deleteById(id) {
     return Consumer.findByIdAndDelete(id);
   },
+
+  async consumerExists(consumerId) {
+    return Consumer.exists({ _id: consumerId });
+  },
 };

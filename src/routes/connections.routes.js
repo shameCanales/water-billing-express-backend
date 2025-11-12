@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import {
   requireAuthAndStaffOrManager,
@@ -9,13 +8,8 @@ import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
 import { addConnectionValidationSchema } from "../middlewares/validationSchemas/addConnectionValidation.js";
 import { editConnectionValidationSchema } from "../middlewares/validationSchemas/editConnectionValidation.js";
 import { checkSchema } from "express-validator";
-import {
-  addNewConnectionToAConsumerHandler,
-  deleteConnectionByIdHandler,
-  editConnectionByIdHandler,
-  getAllConnectionsHandler,
-  getConnectionsByConsumerIdHandler,
-} from "../controllers/connection.controller.js";
+
+import { connectionController } from "../controllers/connection.controller.js";
 
 const router = Router();
 
@@ -24,15 +18,15 @@ router.post(
   "/api/connections",
   requireAuthAndStaffOrManager,
   checkSchema(addConnectionValidationSchema),
-  validateObjectIdReusable({ key: "consumerId" }),
-  addNewConnectionToAConsumerHandler
+  validateObjectIdReusable({ key: "consumerId", source: "body" }),
+  connectionController.create
 );
 
 // Get all connections
 router.get(
   "/api/connections",
   requireAuthAndStaffOrManager,
-  getAllConnectionsHandler
+  connectionController.getAll
 );
 
 // edit connection by id
@@ -41,7 +35,7 @@ router.patch(
   requireAuthAndStaffOrManager,
   validateObjectIdReusable({ key: "id" }),
   checkSchema(editConnectionValidationSchema),
-  editConnectionByIdHandler
+  connectionController.updateById
 );
 
 // delete connection by id
@@ -49,7 +43,7 @@ router.delete(
   "/api/connections/:id",
   requireAuthAndManager,
   validateObjectIdReusable({ key: "id" }),
-  deleteConnectionByIdHandler
+  connectionController.deleteById
 );
 
 // get connections for a specific consumer
@@ -57,7 +51,7 @@ router.get(
   "/api/connections/consumer/:consumerid",
   requireAuth,
   validateObjectIdReusable({ key: "consumerid" }),
-  getConnectionsByConsumerIdHandler
+  connectionController.getByConsumerId
 );
 
 // get connection by id

@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 const ConnectionSchema = new mongoose.Schema(
   {
-    consumer: {
+    consumerId: {
       type: mongoose.Schema.Types.ObjectId, // reference to Consumer model
       ref: "Consumer", // foreign key
       required: true,
