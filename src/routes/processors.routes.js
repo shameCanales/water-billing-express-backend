@@ -3,27 +3,25 @@ import { registerProcessorValidationSchema } from "../middlewares/validationSche
 import { checkSchema } from "express-validator";
 import { requireAuthAndManager } from "../middlewares/authmiddleware.js";
 import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
-import {
-  addFirstManagerHandler,
-  addNewProcessorHandler,
-  deleteProcessorByIdHandler,
-  editProcessorByIdHandler,
-  getAllProcessorsHandler,
-  getProcessorByIdHandler,
-} from "../controllers/processor.controller.js";
 import { editProcessorValidationSchema } from "../middlewares/validationSchemas/editProcessorValidation.js";
+import { ProcessorController } from "../controllers/processor.controller.js";
+import { registerManagerValidationSchema } from "../middlewares/validationSchemas/registerManagerValidation.js";
 
 const router = Router();
 
 // Get all processors
-router.get("/api/processors", requireAuthAndManager, getAllProcessorsHandler);
+router.get(
+  "/api/processors",
+  requireAuthAndManager,
+  ProcessorController.getAll
+);
 
 // Get Processor by ID
 router.get(
   "/api/processors/:id",
   requireAuthAndManager,
   validateObjectIdReusable({ key: "id" }),
-  getProcessorByIdHandler
+  ProcessorController.getById
 );
 
 // Add a new processor
@@ -36,25 +34,29 @@ router.post(
   "/api/processors",
   requireAuthAndManager, // middleware that checks for authentication and manager role
   checkSchema(registerProcessorValidationSchema), // middleware for validating request body
-  addNewProcessorHandler
+  ProcessorController.create
 );
 
 // Add first manager, not public route. only for adding initial user or manager
-router.post("/api/processor/register", addFirstManagerHandler);
+router.post(
+  "/api/processors/register",
+  checkSchema(registerManagerValidationSchema),
+  ProcessorController.createManager
+);
 
 // Edit Processor by ID
 router.patch(
   "/api/processors/:id",
   requireAuthAndManager,
   checkSchema(editProcessorValidationSchema),
-  editProcessorByIdHandler
+  ProcessorController.update
 );
 
 // Delete Processor by ID
 router.delete(
   "/api/processors/:id",
   requireAuthAndManager,
-  deleteProcessorByIdHandler
+  ProcessorController.delete
 );
 
 export default router;
