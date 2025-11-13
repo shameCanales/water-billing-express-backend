@@ -1,7 +1,7 @@
 import { validationResult, matchedData } from "express-validator";
-import { ConnectionService } from "../services/connection.service.js";
+import { ConnectionService } from "./connection.service.js";
 
-export const connectionController = {
+export const ConnectionController = {
   async create(req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -58,10 +58,10 @@ export const connectionController = {
     }
 
     try {
-      const { id } = req.params;
+      const { connectionId } = req.params;
       const updates = req.body;
 
-      const updated = await ConnectionService.updateById(id, updates);
+      const updated = await ConnectionService.updateById(connectionId, updates);
 
       return res.status(200).json({
         success: true,
@@ -79,8 +79,8 @@ export const connectionController = {
 
   async deleteById(req, res) {
     try {
-      const { id } = req.params;
-      await ConnectionService.deleteById(id);
+      const { connectionId } = req.params;
+      await ConnectionService.deleteById(connectionId);
 
       return res.status(200).json({
         success: true,

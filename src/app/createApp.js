@@ -1,12 +1,19 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import router from "./routes/index.js";
 import passport from "passport";
 import MongoStore from "connect-mongo";
+
 import mongoose from "mongoose";
-import "./strategies/local-strategy.js"; // important
+import "../config/strategies/local-strategy.js"; // important
 import dotenv from "dotenv";
+
+import authRouter from "../modules/auth/auth.routes.js";
+import consumerRouter from "../modules/consumers/consumers.routes.js";
+import connectionRouter from "../modules/connections/connections.routes.js";
+import billRouter from "../modules/bills/bills.routes.js";
+import processorRouter from "../modules/processors/processors.routes.js";
+
 dotenv.config();
 
 export function createApp() {
@@ -43,7 +50,11 @@ export function createApp() {
     next();
   });
 
-  app.use(router);
+  app.use("/api/auth", authRouter);
+  app.use("/api/consumers", consumerRouter);
+  app.use("/api/connections", connectionRouter);
+  app.use("/api/bills", billRouter);
+  app.use("/api/processors", processorRouter);
 
   app.get("/", (request, response) => {
     console.log(request.session);

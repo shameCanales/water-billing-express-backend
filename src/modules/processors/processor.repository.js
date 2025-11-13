@@ -1,4 +1,4 @@
-import { Processor } from "../models/processor.model.js";
+import { Processor } from "./processor.model.js";
 
 export const ProcessorRepository = {
   async findAll() {

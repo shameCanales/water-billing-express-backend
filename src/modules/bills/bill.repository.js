@@ -1,4 +1,4 @@
-import { Bill } from "../models/bill.model.js";
+import { Bill } from "./bill.model.js";
 
 export const BillRepository = {
   async findAll() {

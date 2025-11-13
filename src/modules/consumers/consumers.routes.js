@@ -1,30 +1,38 @@
-import { requireAuthAndStaffOrManager } from "../middlewares/authmiddleware.js";
+import {
+  requireAuthAndStaffOrManager,
+  requireAuth,
+} from "../../core/middlewares/authmiddleware.js";
 import { Router } from "express";
-import { addConsumerValidationSchema } from "../middlewares/validationSchemas/addConsumerValidation.js";
+import { addConsumerValidationSchema } from "../../core/middlewares/validationSchemas/addConsumerValidation.js";
 import { checkSchema } from "express-validator";
-import { validateObjectIdReusable } from "../middlewares/validateObjectId.js";
-import { ConsumerController } from "../controllers/consumer.controller.js";
+import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.js";
+import { ConsumerController } from "./consumer.controller.js";
+import { ConnectionController } from "../connections/connection.controller.js";
 
 const router = Router();
 
 // get all consumers :  [{name, email, birthDate, mobileNumber, password, address, status}, ...]
-router.get(
-  "/api/consumers",
-  requireAuthAndStaffOrManager,
-  ConsumerController.getAll
-);
+router.get("/", requireAuthAndStaffOrManager, ConsumerController.getAll);
 
 // Get Consumer by ID
 router.get(
-  "/api/consumers/:id",
+  "/:consumerId",
   requireAuthAndStaffOrManager,
-  validateObjectIdReusable({ key: "id" }),
+  validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.getById
+);
+
+// get connections for a specific consumer
+router.get(
+  "/:consumerId/connections",
+  requireAuth,
+  validateObjectIdReusable({ key: "consumerId" }),
+  ConnectionController.getByConsumerId
 );
 
 //add consumer
 router.post(
-  "/api/consumers",
+  "/",
   requireAuthAndStaffOrManager,
   checkSchema(addConsumerValidationSchema),
   ConsumerController.create
@@ -32,17 +40,17 @@ router.post(
 
 // Edit Consumer by ID
 router.patch(
-  "/api/consumers/:id",
+  "/:consumerId",
   requireAuthAndStaffOrManager,
-  validateObjectIdReusable({ key: "id" }),
+  validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.editById
 );
 
 // Delete Consumer by ID
 router.delete(
-  "/api/consumers/:id",
+  "/:consumerId",
   requireAuthAndStaffOrManager,
-  validateObjectIdReusable({ key: "id" }),
+  validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.deleteById
 );
 

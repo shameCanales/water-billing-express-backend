@@ -1,5 +1,5 @@
-import { ConnectionRepository } from "../repositories/connection.repository.js";
-import { ConsumerRepository } from "../repositories/consumer.repository.js";
+import { ConnectionRepository } from "./connection.repository.js";
+import { ConsumerRepository } from "../consumers/consumer.repository.js";
 
 export const ConnectionService = {
   async create(data) {

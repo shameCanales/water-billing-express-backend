@@ -1,5 +1,5 @@
 import { matchedData, validationResult } from "express-validator";
-import { BillService } from "../services/bill.service.js";
+import { BillService } from "./bill.service.js";
 
 export const BillController = {
   async getAll(req, res) {

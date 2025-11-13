@@ -1,4 +1,4 @@
-import { Consumer } from "../models/consumer.model.js";
+import { Consumer } from "./consumer.model.js";
 
 export const ConsumerRepository = {
   async findAll() {

@@ -1,5 +1,5 @@
 import { matchedData, validationResult } from "express-validator";
-import { ConsumerService } from "../services/consumer.service.js";
+import { ConsumerService } from "./consumer.service.js";
 
 export const ConsumerController = {
   async getAll(req, res) {
@@ -45,9 +45,9 @@ export const ConsumerController = {
 
   async getById(req, res) {
     try {
-      const { id } = req.params;
+      const { consumerId } = req.params;
 
-      const consumer = await ConsumerService.getConsumerById(id);
+      const consumer = await ConsumerService.getConsumerById(consumerId);
 
       return res.status(200).json({
         success: true,
@@ -73,10 +73,13 @@ export const ConsumerController = {
     }
 
     try {
-      const { id } = req.params;
+      const { consumerId } = req.params;
       const updates = matchedData(req);
 
-      const updatedConsumer = await ConsumerService.updateConsumer(id, updates);
+      const updatedConsumer = await ConsumerService.updateConsumer(
+        consumerId,
+        updates
+      );
 
       return res.status(200).json({
         success: true,
@@ -95,7 +98,7 @@ export const ConsumerController = {
 
   async deleteById(req, res) {
     try {
-      await ConsumerService.deleteConsumer(req.params.id);
+      await ConsumerService.deleteConsumer(req.params.consumerId);
 
       return res.status(200).json({
         success: true,

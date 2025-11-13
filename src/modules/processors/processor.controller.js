@@ -1,7 +1,7 @@
 import { validationResult, matchedData } from "express-validator";
-import { Processor } from "../models/processor.model.js";
-import { hashPassword } from "../utils/helpers.js";
-import { ProcessorService } from "../services/processor.service.js";
+// import { Processor } from "./processor.model.js";
+// import { hashPassword } from "../../core/utils/helpers.js";
+import { ProcessorService } from "./processor.service.js";
 
 export const ProcessorController = {
   async getAll(req, res) {
@@ -23,8 +23,8 @@ export const ProcessorController = {
 
   async getById(req, res) {
     try {
-      const { id } = req.params;
-      const processor = await ProcessorService.getById(id);
+      const { processorId } = req.params;
+      const processor = await ProcessorService.getById(processorId);
 
       return res.status(200).json({
         success: true,
@@ -105,9 +105,9 @@ export const ProcessorController = {
     }
 
     try {
-      const { id } = req.params;
+      const { processorId } = req.params;
       const update = matchedData(req);
-      const updated = await ProcessorService.updateById(id, update);
+      const updated = await ProcessorService.updateById(processorId, update);
 
       res.status(200).json({
         success: true,
@@ -125,9 +125,9 @@ export const ProcessorController = {
 
   async delete(req, res) {
     try {
-      const { id } = req.params;
+      const { processorId } = req.params;
 
-      const deleted = await ProcessorService.deleteById(id);
+      const deleted = await ProcessorService.deleteById(processorId);
 
       return res.status(200).json({
         success: true,

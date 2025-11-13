@@ -1,4 +1,4 @@
-import { Connection } from "../models/connection.model.js";
+import { Connection } from "./connection.model.js";
 
 export const ConnectionRepository = {
   async findAll() {

@@ -1,5 +1,5 @@
-import { ConsumerRepository } from "../repositories/consumer.repository.js";
-import { hashPassword } from "../utils/helpers.js";
+import { ConsumerRepository } from "./consumer.repository.js";
+import { hashPassword } from "../../core/utils/helpers.js";
 
 export const ConsumerService = {
   async getAllConsumers() {

@@ -1,5 +1,5 @@
-import { ProcessorRepository } from "../repositories/processor.repository.js";
-import { hashPassword } from "../utils/helpers.js";
+import { ProcessorRepository } from "./processor.repository.js";
+import { hashPassword } from "../../core/utils/helpers.js";
 
 export const ProcessorService = {
   async getAll() {

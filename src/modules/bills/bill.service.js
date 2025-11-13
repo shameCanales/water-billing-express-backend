@@ -1,6 +1,6 @@
-import { BillRepository } from "../repositories/bill.repository.js";
-import { ConnectionRepository } from "../repositories/connection.repository.js";
-import { BILLING_SETTINGS } from "../config/settings.js"; //{chargePerCubicMeter: 20,}
+import { BillRepository } from "./bill.repository.js";
+import { ConnectionRepository } from "../connections/connection.repository.js";
+import { BILLING_SETTINGS } from "../../config/settings.js"; //{chargePerCubicMeter: 20,}
 
 export const BillService = {
   async getAllBills() {

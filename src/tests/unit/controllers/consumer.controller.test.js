@@ -1,6 +1,6 @@
 import { validationResult, matchedData } from "express-validator";
-import { ConsumerService } from "../../../services/consumer.service.js";
-import { ConsumerController } from "../../../controllers/consumer.controller.js";
+import { ConsumerService } from "../../../modules/consumers/consumer.service.js";
+import { ConsumerController } from "../../../modules/consumers/consumer.controller.js";
 
 jest.mock("express-validator", () => ({
   validationResult: jest.fn(),

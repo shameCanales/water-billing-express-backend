@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import request from "supertest";
-import { createApp } from "../../createApp";
+import { createApp } from "../../app/createApp";
 
 describe("/api/processor", () => {
   let app;

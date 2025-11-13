@@ -6,8 +6,8 @@
   "scripts": {
     "test": "jest",
     "test:e2e": "jest --testPathPatterns src/tests/e2e",
-    "test:watch" : "NODE_ENV=test jest --watch",
-    "start": "nodemon src/app.js"
+    "test:watch": "NODE_ENV=test jest --watch",
+    "start": "nodemon src/app/server.js"
   },
   "keywords": [],
   "author": "",

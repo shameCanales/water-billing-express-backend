@@ -5,7 +5,6 @@ export const requireAuth = (req, res, next) => {
   next();
 };
 
-
 export function requireAuthAndStaffOrManager(req, res, next) {
   try {
     const user = req.session.user;

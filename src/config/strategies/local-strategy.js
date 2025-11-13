@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy } from "passport-local";
-import { Processor } from "../models/processor.model.js";
-import { comparePassword } from "../utils/helpers.js";
+import { Processor } from "../../modules/processors/processor.model.js";
+import { comparePassword } from "../../core/utils/helpers.js";
 
 passport.serializeUser((processor, done) => {
   console.log("Serializing processor...");
