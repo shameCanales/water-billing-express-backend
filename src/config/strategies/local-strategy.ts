@@ -2,7 +2,6 @@ import passport from "passport";
 import { Strategy } from "passport-local";
 import { Processor } from "../../modules/processors/processor.model.js";
 import { comparePassword } from "../../core/utils/helpers.js";
-import type { IProcessorDocument } from "../../modules/processors/processor.model.js";
 import type { Types } from "mongoose";
 
 declare global {
