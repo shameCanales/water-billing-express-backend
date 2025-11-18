@@ -513,3 +513,77 @@ validate.middleware.js → Use express-validator.
   - Add /config/env.js for typed environment configuration.
   - dd /tests/modules/ matching structure for per-module tests.
   - Add /shared/ for common constants/enums used across modules.
+
+
+
+TYPESCRIPT CONVERTION :::::::::::::::::::::::::::::::::::::::::
+standard template for models
+
+// Base
+export interface IModel {
+  field1: type;
+  field2: type;
+}
+
+// Document
+export interface IModelDocument extends IModel, Document {
+  _id: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Lean (no populate)
+export interface IModelLean {
+  _id: mongoose.Types.ObjectId;
+  field1: type;
+  field2: type;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+}
+
+// Lean (with populate)
+export interface IModelPopulated {
+  _id: mongoose.Types.ObjectId;
+  reference: IReferencePopulated;  // ← Populated!
+  field2: type;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+}
+
+:::::::::::::::::::::::::::::::::::
+🚫 Common Mistakes to Avoid
+❌ DON'T use string for _id
+typescript_id: string;  // Wrong!
+✅ DO use mongoose.Types.ObjectId
+typescript_id: mongoose.Types.ObjectId;  // Correct!
+
+❌ DON'T use string for dates
+typescriptcreatedAt: string;  // Wrong!
+✅ DO use Date
+typescriptcreatedAt: Date;  // Correct!
+
+❌ DON'T forget __v
+typescriptexport interface IConsumerLean {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+  // Missing __v!
+}
+✅ DO include __v
+typescriptexport interface IConsumerLean {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+  __v: number;  // Correct!
+}
+
+❌ DON'T extend base interface in Lean
+typescriptexport interface IConnectionLean extends IConnection {
+  // This causes type conflicts!
+}
+✅ DO redefine all fields
+typescriptexport interface IConnectionLean {
+  _id: mongoose.Types.ObjectId;
+  consumer: mongoose.Types.ObjectId;
+  // ... all fields explicitly defined
+}

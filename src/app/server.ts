@@ -1,0 +1,36 @@
+import mongoose from "mongoose";
+import { createApp } from "./createApp.js";
+
+mongoose
+  .connect("mongodb://localhost/water_billing_system")
+  .then(() => {
+    console.log("Connected to WBS Database");
+  })
+  .catch((err) => {
+    console.log("failed to connect to database", err);
+  });
+
+const app = createApp();
+const port = process.env.PORT || 3001;
+
+app.listen(port, () => {
+  console.log(`Express Server Running on ${port}`);
+});
+
+// save Uninitialized:::::::::::::::::::
+// false (recommended):
+// Don’t store empty sessions — only save when something is added (like req.session.user = {...}).
+// true:
+// Save all sessions, even if they’re brand new and unused (empty).
+// Why false is better:
+// Saves database space and avoids creating useless session documents in MongoDB.
+// Better performance and privacy compliance (e.g., GDPR).
+
+// Resave:::::::::::::::::::::
+// false (recommended):
+// Only save the session if something changed in req.session.
+// true:
+// Re-save the session on every request, even if nothing changed.
+// Why false is better:
+// Prevents unnecessary writes to MongoDB on every HTTP request.
+// Reduces I/O and improves performance.
