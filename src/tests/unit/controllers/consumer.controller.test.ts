@@ -1,13 +1,14 @@
 import { validationResult, matchedData } from "express-validator";
-import { ConsumerService } from "../../../modules/consumers/consumer.service.js";
-import { ConsumerController } from "../../../modules/consumers/consumer.controller.js";
+import { ConsumerService } from "../../../modules/consumers/consumer.service";
+import { ConsumerController } from "../../../modules/consumers/consumer.controller";
+import type { Request, Response } from "express";
 
 jest.mock("express-validator", () => ({
   validationResult: jest.fn(),
   matchedData: jest.fn(),
 }));
 
-jest.mock("../../../services/consumer.service.js", () => ({
+jest.mock("../../../modules/consumers/consumer.service", () => ({
   ConsumerService: {
     getAllConsumers: jest.fn(),
     createConsumer: jest.fn(),
@@ -18,7 +19,8 @@ jest.mock("../../../services/consumer.service.js", () => ({
 }));
 
 describe("Consumer Controller", () => {
-  let req, res;
+  let req: Partial<Request>;
+  let res: Partial<Response>;
 
   beforeEach(() => {
     req = { body: {}, params: {} };
@@ -33,13 +35,15 @@ describe("Consumer Controller", () => {
   describe("get all consumer", () => {
     it("should return 200 and the consumers list on success", async () => {
       const consumersArray = [
-        { _id: "1", name: "john" },
-        { _id: "2", name: "jane" },
+        { _id: "1", name: "john", email: "john@test.com", status: "active" },
+        { _id: "2", name: "jane", email: "jane@test.com", status: "active" },
       ];
-      ConsumerService.getAllConsumers.mockResolvedValue(consumersArray);
+      (ConsumerService.getAllConsumers as jest.Mock).mockResolvedValue(
+        consumersArray
+      );
 
       // Act
-      await ConsumerController.getAll(req, res);
+      await ConsumerController.getAll(req as Request, res as Response);
 
       // Assert
       expect(ConsumerService.getAllConsumers).toHaveBeenCalledTimes(1);
@@ -51,11 +55,11 @@ describe("Consumer Controller", () => {
     });
 
     it("should return 500 if service throws an error", async () => {
-      ConsumerService.getAllConsumers.mockRejectedValue(
+      (ConsumerService.getAllConsumers as jest.Mock).mockRejectedValue(
         new Error("DB failure")
       );
 
-      await ConsumerController.getAll(req, res);
+      await ConsumerController.getAll(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -67,12 +71,12 @@ describe("Consumer Controller", () => {
 
   describe("create", () => {
     it("should return 400 if validation fails", async () => {
-      validationResult.mockReturnValue({
+      (validationResult as unknown as jest.Mock).mockReturnValue({
         isEmpty: () => false,
         array: () => [{ msg: "Invalid email" }],
       });
 
-      await ConsumerController.create(req, res);
+      await ConsumerController.create(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -82,13 +86,17 @@ describe("Consumer Controller", () => {
     });
 
     it("should return 201 and created consumer when successful", async () => {
-      validationResult.mockReturnValue({ isEmpty: () => true });
+      (validationResult as unknown as jest.Mock).mockReturnValue({
+        isEmpty: () => true,
+      });
       const newConsumer = { name: "Mark", email: "test@test.com" };
-      matchedData.mockReturnValue(newConsumer);
+      (matchedData as unknown as jest.Mock).mockReturnValue(newConsumer);
 
-      ConsumerService.createConsumer.mockResolvedValue(newConsumer);
+      (ConsumerService.createConsumer as jest.Mock).mockResolvedValue(
+        newConsumer
+      );
 
-      await ConsumerController.create(req, res);
+      await ConsumerController.create(req as Request, res as Response);
 
       expect(ConsumerService.createConsumer).toHaveBeenCalledWith(newConsumer);
       expect(res.status).toHaveBeenCalledWith(201);
@@ -100,14 +108,18 @@ describe("Consumer Controller", () => {
     });
 
     it("should return 409 if consumer already exists", async () => {
-      validationResult.mockReturnValue({ isEmpty: () => true });
-      matchedData.mockReturnValue({ email: "exists@test.com" });
+      (validationResult as unknown as jest.Mock).mockReturnValue({
+        isEmpty: () => true,
+      });
+      (matchedData as unknown as jest.Mock).mockReturnValue({
+        email: "exists@test.com",
+      });
 
-      ConsumerService.createConsumer.mockRejectedValue(
+      (ConsumerService.createConsumer as jest.Mock).mockRejectedValue(
         new Error("Consumer already exists")
       );
 
-      await ConsumerController.create(req, res);
+      await ConsumerController.create(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith({
@@ -119,12 +131,18 @@ describe("Consumer Controller", () => {
 
   describe("getById", () => {
     it("should return 200 and consumer when found", async () => {
-      req.params.id = "123";
-      const mockConsumer = { _id: "123", name: "John" };
-      ConsumerService.getConsumerById.mockResolvedValue(mockConsumer);
+      req.params = { consumerId: "123" };
+      const mockConsumer = { _id: "123", name: "John", email: "john@test.com" };
+      (ConsumerService.getConsumerById as jest.Mock).mockResolvedValue(
+        mockConsumer
+      );
 
-      await ConsumerController.getById(req, res);
+      await ConsumerController.getById(
+        req as Request<{ consumerId: string }>,
+        res as Response
+      );
 
+      expect(ConsumerService.getConsumerById).toHaveBeenCalledWith("123");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -134,13 +152,15 @@ describe("Consumer Controller", () => {
     });
 
     it("should return 404 if consumer not found", async () => {
-      req.params.id = "123";
-      ConsumerService.getConsumerById.mockRejectedValue(
+      req.params = { consumerId: "123" };
+      (ConsumerService.getConsumerById as jest.Mock).mockRejectedValue(
         new Error("Consumer not found")
       );
 
-      await ConsumerController.getById(req, res);
-
+      await ConsumerController.getById(
+        req as Request<{ consumerId: string }>,
+        res as Response
+      );
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
@@ -151,12 +171,15 @@ describe("Consumer Controller", () => {
 
   describe("editById", () => {
     it("should return 400 when validation errors", async () => {
-      validationResult.mockReturnValue({
+      (validationResult as unknown as jest.Mock).mockReturnValue({
         isEmpty: () => false,
         array: () => [{ msg: "Invalid email" }],
       });
 
-      await ConsumerController.editById(req, res);
+      await ConsumerController.editById(
+        req as Request<{ consumerId: string }>,
+        res as Response
+      );
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -166,14 +189,21 @@ describe("Consumer Controller", () => {
     });
 
     it("should return 200 and updated consumer on success", async () => {
-      validationResult.mockReturnValue({ isEmpty: () => true });
-      req.params.id = "123";
-      matchedData.mockReturnValue({ name: "Updated John" });
+      (validationResult as unknown as jest.Mock).mockReturnValue({
+        isEmpty: () => true,
+      });
+      req.params = { consumerId: "123" };
+      (matchedData as jest.Mock).mockReturnValue({ name: "Updated John" });
 
       const mockUpdatedConsumer = { _id: "123", name: "Updated John" };
-      ConsumerService.updateConsumer.mockResolvedValue(mockUpdatedConsumer);
+      (ConsumerService.updateConsumer as jest.Mock).mockResolvedValue(
+        mockUpdatedConsumer
+      );
 
-      await ConsumerController.editById(req, res);
+      await ConsumerController.editById(
+        req as Request<{ consumerId: string }>,
+        res as Response
+      );
 
       expect(ConsumerService.updateConsumer).toHaveBeenCalledWith("123", {
         name: "Updated John",
@@ -185,17 +215,21 @@ describe("Consumer Controller", () => {
         data: mockUpdatedConsumer,
       });
     });
-
     it("should return 404 if consumer not found", async () => {
-      validationResult.mockReturnValue({ isEmpty: () => true });
-      req.params.id = "999";
-      matchedData.mockReturnValue({ name: "Doesn't exist" });
+      (validationResult as unknown as jest.Mock).mockReturnValue({
+        isEmpty: () => true,
+      });
+      req.params = { consumerId: "999" };
+      (matchedData as jest.Mock).mockReturnValue({ name: "Doesn't exist" });
 
-      ConsumerService.updateConsumer.mockRejectedValue(
+      (ConsumerService.updateConsumer as jest.Mock).mockRejectedValue(
         new Error("Consumer not found")
       );
 
-      await ConsumerController.editById(req, res);
+      await ConsumerController.editById(
+        req as Request<{ consumerId: string }>,
+        res as Response
+      );
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -205,15 +239,20 @@ describe("Consumer Controller", () => {
     });
 
     it("should return 500 if other error occurs", async () => {
-      validationResult.mockReturnValue({ isEmpty: () => true });
-      req.params.id = "123";
-      matchedData.mockReturnValue({ name: "Error user" });
+      (validationResult as unknown as jest.Mock).mockReturnValue({
+        isEmpty: () => true,
+      });
+      req.params = { consumerId: "123" };
+      (matchedData as jest.Mock).mockReturnValue({ name: "Error user" });
 
-      ConsumerService.updateConsumer.mockRejectedValue(
+      (ConsumerService.updateConsumer as jest.Mock).mockRejectedValue(
         new Error("Database connection failed")
       );
 
-      await ConsumerController.editById(req, res);
+      await ConsumerController.editById(
+        req as Request<{ consumerId: string }>,
+        res as Response
+      );
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -225,10 +264,15 @@ describe("Consumer Controller", () => {
 
   describe("deleteById", () => {
     it("should return 200 when consumer is deleted successfully", async () => {
-      req.params.id = "123";
-      ConsumerService.deleteConsumer.mockResolvedValue();
+      req.params = { consumerId: "123" };
+      (ConsumerService.deleteConsumer as jest.Mock).mockResolvedValue(
+        undefined
+      );
 
-      await ConsumerController.deleteById(req, res);
+      await ConsumerController.deleteById(
+        req as Request<{ consumerId: string }>,
+        res as Response
+      );
 
       expect(ConsumerService.deleteConsumer).toHaveBeenCalledWith("123");
       expect(res.status).toHaveBeenCalledWith(200);
@@ -239,12 +283,15 @@ describe("Consumer Controller", () => {
     });
 
     it("should return 404 if consumer not found", async () => {
-      req.params.id = "404";
-      ConsumerService.deleteConsumer.mockRejectedValue(
+      req.params = { consumerId: "404" };
+      (ConsumerService.deleteConsumer as jest.Mock).mockRejectedValue(
         new Error("Consumer not found")
       );
 
-      await ConsumerController.deleteById(req, res);
+      await ConsumerController.deleteById(
+        req as Request<{ consumerId: string }>,
+        res as Response
+      );
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -254,12 +301,14 @@ describe("Consumer Controller", () => {
     });
 
     it("should return 500 if an unexpected error occurs", async () => {
-      req.params.id = "123";
-      ConsumerService.deleteConsumer.mockRejectedValue(
+      req.params = { consumerId: "123" };
+      (ConsumerService.deleteConsumer as jest.Mock).mockRejectedValue(
         new Error("Unexpected error")
       );
-
-      await ConsumerController.deleteById(req, res);
+      await ConsumerController.deleteById(
+        req as Request<{ consumerId: string }>,
+        res as Response
+      );
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
