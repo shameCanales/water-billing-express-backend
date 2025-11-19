@@ -27,7 +27,7 @@ export const AuthController = {
             next(loginErr);
             return;
           }
-          req.session.user = user; // optional: custom session reference
+          // req.session.user = user; // optional: custom session reference
           res.status(200).json(user);
         });
       }
