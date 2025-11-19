@@ -113,7 +113,7 @@ const config: Config = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  preset: "ts-jest/presets/default-esm",
+  preset: "ts-jest",
 
   // Run tests from one or more projects
   // projects: undefined,
@@ -189,10 +189,14 @@ const config: Config = {
     //   - \.m?js$  → match files ending in .js or .mjs (the "m" is optional)
     // This is needed if you're using modern JS syntax (like ES modules)
     // that Node or Jest might not understand directly.
-    "^.+\\.m?[tj]sx?$": [
+    "^.+\\.tsx?$": [
       "ts-jest",
       {
         useESM: true,
+        tsconfig: {
+          module: "ESNext",
+          moduleResolution: "node",
+        },
       },
     ],
   },

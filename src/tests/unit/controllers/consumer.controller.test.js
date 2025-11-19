@@ -1,274 +1,274 @@
-// import { validationResult, matchedData } from "express-validator";
-// import { ConsumerService } from "../../../modules/consumers/consumer.service.js";
-// import { ConsumerController } from "../../../modules/consumers/consumer.controller.js";
+import { validationResult, matchedData } from "express-validator";
+import { ConsumerService } from "../../../modules/consumers/consumer.service.js";
+import { ConsumerController } from "../../../modules/consumers/consumer.controller.js";
 
-// jest.mock("express-validator", () => ({
-//   validationResult: jest.fn(),
-//   matchedData: jest.fn(),
-// }));
+jest.mock("express-validator", () => ({
+  validationResult: jest.fn(),
+  matchedData: jest.fn(),
+}));
 
-// jest.mock("../../../services/consumer.service.js", () => ({
-//   ConsumerService: {
-//     getAllConsumers: jest.fn(),
-//     createConsumer: jest.fn(),
-//     getConsumerById: jest.fn(),
-//     updateConsumer: jest.fn(),
-//     deleteConsumer: jest.fn(),
-//   },
-// }));
+jest.mock("../../../services/consumer.service.js", () => ({
+  ConsumerService: {
+    getAllConsumers: jest.fn(),
+    createConsumer: jest.fn(),
+    getConsumerById: jest.fn(),
+    updateConsumer: jest.fn(),
+    deleteConsumer: jest.fn(),
+  },
+}));
 
-// describe("Consumer Controller", () => {
-//   let req, res;
+describe("Consumer Controller", () => {
+  let req, res;
 
-//   beforeEach(() => {
-//     req = { body: {}, params: {} };
-//     res = {
-//       status: jest.fn().mockReturnThis(),
-//       json: jest.fn(),
-//     };
+  beforeEach(() => {
+    req = { body: {}, params: {} };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
 
-//     jest.clearAllMocks();
-//   });
+    jest.clearAllMocks();
+  });
 
-//   describe("get all consumer", () => {
-//     it("should return 200 and the consumers list on success", async () => {
-//       const consumersArray = [
-//         { _id: "1", name: "john" },
-//         { _id: "2", name: "jane" },
-//       ];
-//       ConsumerService.getAllConsumers.mockResolvedValue(consumersArray);
+  describe("get all consumer", () => {
+    it("should return 200 and the consumers list on success", async () => {
+      const consumersArray = [
+        { _id: "1", name: "john" },
+        { _id: "2", name: "jane" },
+      ];
+      ConsumerService.getAllConsumers.mockResolvedValue(consumersArray);
 
-//       // Act
-//       await ConsumerController.getAll(req, res);
+      // Act
+      await ConsumerController.getAll(req, res);
 
-//       // Assert
-//       expect(ConsumerService.getAllConsumers).toHaveBeenCalledTimes(1);
-//       expect(res.status).toHaveBeenCalledWith(200);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: true,
-//         data: consumersArray,
-//       });
-//     });
+      // Assert
+      expect(ConsumerService.getAllConsumers).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: consumersArray,
+      });
+    });
 
-//     it("should return 500 if service throws an error", async () => {
-//       ConsumerService.getAllConsumers.mockRejectedValue(
-//         new Error("DB failure")
-//       );
+    it("should return 500 if service throws an error", async () => {
+      ConsumerService.getAllConsumers.mockRejectedValue(
+        new Error("DB failure")
+      );
 
-//       await ConsumerController.getAll(req, res);
+      await ConsumerController.getAll(req, res);
 
-//       expect(res.status).toHaveBeenCalledWith(500);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: false,
-//         message: "Failed to fetch consumers",
-//       });
-//     });
-//   });
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: "Failed to fetch consumers",
+      });
+    });
+  });
 
-//   describe("create", () => {
-//     it("should return 400 if validation fails", async () => {
-//       validationResult.mockReturnValue({
-//         isEmpty: () => false,
-//         array: () => [{ msg: "Invalid email" }],
-//       });
+  describe("create", () => {
+    it("should return 400 if validation fails", async () => {
+      validationResult.mockReturnValue({
+        isEmpty: () => false,
+        array: () => [{ msg: "Invalid email" }],
+      });
 
-//       await ConsumerController.create(req, res);
+      await ConsumerController.create(req, res);
 
-//       expect(res.status).toHaveBeenCalledWith(400);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: false,
-//         errors: [{ msg: "Invalid email" }],
-//       });
-//     });
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        errors: [{ msg: "Invalid email" }],
+      });
+    });
 
-//     it("should return 201 and created consumer when successful", async () => {
-//       validationResult.mockReturnValue({ isEmpty: () => true });
-//       const newConsumer = { name: "Mark", email: "test@test.com" };
-//       matchedData.mockReturnValue(newConsumer);
+    it("should return 201 and created consumer when successful", async () => {
+      validationResult.mockReturnValue({ isEmpty: () => true });
+      const newConsumer = { name: "Mark", email: "test@test.com" };
+      matchedData.mockReturnValue(newConsumer);
 
-//       ConsumerService.createConsumer.mockResolvedValue(newConsumer);
+      ConsumerService.createConsumer.mockResolvedValue(newConsumer);
 
-//       await ConsumerController.create(req, res);
+      await ConsumerController.create(req, res);
 
-//       expect(ConsumerService.createConsumer).toHaveBeenCalledWith(newConsumer);
-//       expect(res.status).toHaveBeenCalledWith(201);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: true,
-//         message: "Consumer added successfully",
-//         data: newConsumer,
-//       });
-//     });
+      expect(ConsumerService.createConsumer).toHaveBeenCalledWith(newConsumer);
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: "Consumer added successfully",
+        data: newConsumer,
+      });
+    });
 
-//     it("should return 409 if consumer already exists", async () => {
-//       validationResult.mockReturnValue({ isEmpty: () => true });
-//       matchedData.mockReturnValue({ email: "exists@test.com" });
+    it("should return 409 if consumer already exists", async () => {
+      validationResult.mockReturnValue({ isEmpty: () => true });
+      matchedData.mockReturnValue({ email: "exists@test.com" });
 
-//       ConsumerService.createConsumer.mockRejectedValue(
-//         new Error("Consumer already exists")
-//       );
+      ConsumerService.createConsumer.mockRejectedValue(
+        new Error("Consumer already exists")
+      );
 
-//       await ConsumerController.create(req, res);
+      await ConsumerController.create(req, res);
 
-//       expect(res.status).toHaveBeenCalledWith(409);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: false,
-//         message: "Consumer already exists",
-//       });
-//     });
-//   });
+      expect(res.status).toHaveBeenCalledWith(409);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: "Consumer already exists",
+      });
+    });
+  });
 
-//   describe("getById", () => {
-//     it("should return 200 and consumer when found", async () => {
-//       req.params.id = "123";
-//       const mockConsumer = { _id: "123", name: "John" };
-//       ConsumerService.getConsumerById.mockResolvedValue(mockConsumer);
+  describe("getById", () => {
+    it("should return 200 and consumer when found", async () => {
+      req.params.id = "123";
+      const mockConsumer = { _id: "123", name: "John" };
+      ConsumerService.getConsumerById.mockResolvedValue(mockConsumer);
 
-//       await ConsumerController.getById(req, res);
+      await ConsumerController.getById(req, res);
 
-//       expect(res.status).toHaveBeenCalledWith(200);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: true,
-//         message: "successfully fetched consumer by id",
-//         data: mockConsumer,
-//       });
-//     });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: "successfully fetched consumer by id",
+        data: mockConsumer,
+      });
+    });
 
-//     it("should return 404 if consumer not found", async () => {
-//       req.params.id = "123";
-//       ConsumerService.getConsumerById.mockRejectedValue(
-//         new Error("Consumer not found")
-//       );
+    it("should return 404 if consumer not found", async () => {
+      req.params.id = "123";
+      ConsumerService.getConsumerById.mockRejectedValue(
+        new Error("Consumer not found")
+      );
 
-//       await ConsumerController.getById(req, res);
+      await ConsumerController.getById(req, res);
 
-//       expect(res.status).toHaveBeenCalledWith(404);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: false,
-//         message: "Consumer not found",
-//       });
-//     });
-//   });
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: "Consumer not found",
+      });
+    });
+  });
 
-//   describe("editById", () => {
-//     it("should return 400 when validation errors", async () => {
-//       validationResult.mockReturnValue({
-//         isEmpty: () => false,
-//         array: () => [{ msg: "Invalid email" }],
-//       });
+  describe("editById", () => {
+    it("should return 400 when validation errors", async () => {
+      validationResult.mockReturnValue({
+        isEmpty: () => false,
+        array: () => [{ msg: "Invalid email" }],
+      });
 
-//       await ConsumerController.editById(req, res);
+      await ConsumerController.editById(req, res);
 
-//       expect(res.status).toHaveBeenCalledWith(400);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: false,
-//         errors: [{ msg: "Invalid email" }],
-//       });
-//     });
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        errors: [{ msg: "Invalid email" }],
+      });
+    });
 
-//     it("should return 200 and updated consumer on success", async () => {
-//       validationResult.mockReturnValue({ isEmpty: () => true });
-//       req.params.id = "123";
-//       matchedData.mockReturnValue({ name: "Updated John" });
+    it("should return 200 and updated consumer on success", async () => {
+      validationResult.mockReturnValue({ isEmpty: () => true });
+      req.params.id = "123";
+      matchedData.mockReturnValue({ name: "Updated John" });
 
-//       const mockUpdatedConsumer = { _id: "123", name: "Updated John" };
-//       ConsumerService.updateConsumer.mockResolvedValue(mockUpdatedConsumer);
+      const mockUpdatedConsumer = { _id: "123", name: "Updated John" };
+      ConsumerService.updateConsumer.mockResolvedValue(mockUpdatedConsumer);
 
-//       await ConsumerController.editById(req, res);
+      await ConsumerController.editById(req, res);
 
-//       expect(ConsumerService.updateConsumer).toHaveBeenCalledWith("123", {
-//         name: "Updated John",
-//       });
-//       expect(res.status).toHaveBeenCalledWith(200);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: true,
-//         message: "Consumer updated successfully",
-//         data: mockUpdatedConsumer,
-//       });
-//     });
+      expect(ConsumerService.updateConsumer).toHaveBeenCalledWith("123", {
+        name: "Updated John",
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: "Consumer updated successfully",
+        data: mockUpdatedConsumer,
+      });
+    });
 
-//     it("should return 404 if consumer not found", async () => {
-//       validationResult.mockReturnValue({ isEmpty: () => true });
-//       req.params.id = "999";
-//       matchedData.mockReturnValue({ name: "Doesn't exist" });
+    it("should return 404 if consumer not found", async () => {
+      validationResult.mockReturnValue({ isEmpty: () => true });
+      req.params.id = "999";
+      matchedData.mockReturnValue({ name: "Doesn't exist" });
 
-//       ConsumerService.updateConsumer.mockRejectedValue(
-//         new Error("Consumer not found")
-//       );
+      ConsumerService.updateConsumer.mockRejectedValue(
+        new Error("Consumer not found")
+      );
 
-//       await ConsumerController.editById(req, res);
+      await ConsumerController.editById(req, res);
 
-//       expect(res.status).toHaveBeenCalledWith(404);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: false,
-//         message: "Consumer not found",
-//       });
-//     });
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: "Consumer not found",
+      });
+    });
 
-//     it("should return 500 if other error occurs", async () => {
-//       validationResult.mockReturnValue({ isEmpty: () => true });
-//       req.params.id = "123";
-//       matchedData.mockReturnValue({ name: "Error user" });
+    it("should return 500 if other error occurs", async () => {
+      validationResult.mockReturnValue({ isEmpty: () => true });
+      req.params.id = "123";
+      matchedData.mockReturnValue({ name: "Error user" });
 
-//       ConsumerService.updateConsumer.mockRejectedValue(
-//         new Error("Database connection failed")
-//       );
+      ConsumerService.updateConsumer.mockRejectedValue(
+        new Error("Database connection failed")
+      );
 
-//       await ConsumerController.editById(req, res);
+      await ConsumerController.editById(req, res);
 
-//       expect(res.status).toHaveBeenCalledWith(500);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: false,
-//         message: "Database connection failed",
-//       });
-//     });
-//   });
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: "Database connection failed",
+      });
+    });
+  });
 
-//   describe("deleteById", () => {
-//     it("should return 200 when consumer is deleted successfully", async () => {
-//       req.params.id = "123";
-//       ConsumerService.deleteConsumer.mockResolvedValue();
+  describe("deleteById", () => {
+    it("should return 200 when consumer is deleted successfully", async () => {
+      req.params.id = "123";
+      ConsumerService.deleteConsumer.mockResolvedValue();
 
-//       await ConsumerController.deleteById(req, res);
+      await ConsumerController.deleteById(req, res);
 
-//       expect(ConsumerService.deleteConsumer).toHaveBeenCalledWith("123");
-//       expect(res.status).toHaveBeenCalledWith(200);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: true,
-//         message: "Consumer deleted successfully",
-//       });
-//     });
+      expect(ConsumerService.deleteConsumer).toHaveBeenCalledWith("123");
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: "Consumer deleted successfully",
+      });
+    });
 
-//     it("should return 404 if consumer not found", async () => {
-//       req.params.id = "404";
-//       ConsumerService.deleteConsumer.mockRejectedValue(
-//         new Error("Consumer not found")
-//       );
+    it("should return 404 if consumer not found", async () => {
+      req.params.id = "404";
+      ConsumerService.deleteConsumer.mockRejectedValue(
+        new Error("Consumer not found")
+      );
 
-//       await ConsumerController.deleteById(req, res);
+      await ConsumerController.deleteById(req, res);
 
-//       expect(res.status).toHaveBeenCalledWith(404);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: false,
-//         message: "Consumer not found",
-//       });
-//     });
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: "Consumer not found",
+      });
+    });
 
-//     it("should return 500 if an unexpected error occurs", async () => {
-//       req.params.id = "123";
-//       ConsumerService.deleteConsumer.mockRejectedValue(
-//         new Error("Unexpected error")
-//       );
+    it("should return 500 if an unexpected error occurs", async () => {
+      req.params.id = "123";
+      ConsumerService.deleteConsumer.mockRejectedValue(
+        new Error("Unexpected error")
+      );
 
-//       await ConsumerController.deleteById(req, res);
+      await ConsumerController.deleteById(req, res);
 
-//       expect(res.status).toHaveBeenCalledWith(500);
-//       expect(res.json).toHaveBeenCalledWith({
-//         success: false,
-//         message: "Unexpected error",
-//       });
-//     });
-//   });
-// });
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: "Unexpected error",
+      });
+    });
+  });
+});
 
 // // 1. Read the function — identify inputs, outputs, side effects.
 // // 2. List all possible branches (happy path + errors).

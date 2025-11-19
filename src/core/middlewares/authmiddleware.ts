@@ -5,7 +5,7 @@ export const requireAuth = (
   res: Response,
   next: NextFunction
 ): void => {
-  if (!req.session.user) {
+  if (!req.isAuthenticated()) {
     res.status(401).json({ message: "Not authenticated" });
     return;
   }
@@ -18,10 +18,7 @@ export const requireAuthAndStaffOrManager = (
   next: NextFunction
 ): void => {
   try {
-    const user = req.session.user;
-    console.log(user);
-
-    if (!req.session?.user) {
+    if (!req.isAuthenticated() || !req.user) {
       res.status(401).json({
         success: false,
         message: "Authentication required. Please log in first",
@@ -30,16 +27,16 @@ export const requireAuthAndStaffOrManager = (
       return;
     }
 
+    const user = req.user as any;
+    console.log(user);
+
     if (user.role !== "manager" && user.role !== "staff") {
       res.status(403).json({
         success: false,
         message: "Access denied. Staff or Manager privileges required",
       });
-
       return;
     }
-
-    req.user = user;
 
     next();
   } catch (error) {
@@ -59,10 +56,8 @@ export const requireAuthAndManager = (
 ): void => {
   try {
     // 1️⃣ Check if user session exists
-    const user = req.session.user;
-    console.log(user);
 
-    if (!req.session?.user) {
+    if (!req.isAuthenticated() || !req.user) {
       res.status(401).json({
         success: false,
         message: "Authentication required. Please log in first.",
@@ -70,6 +65,10 @@ export const requireAuthAndManager = (
 
       return;
     }
+
+    // 2️⃣ Get user from req.user (where Passport stores it)
+    const user = req.user as any; // Type assertion
+    console.log(user);
 
     // 2️⃣ Validate role
     if (user.role !== "manager") {
