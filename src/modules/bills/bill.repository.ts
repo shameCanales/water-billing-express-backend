@@ -1,10 +1,10 @@
-import { Bill } from "./bill.model.js";
+import { Bill } from "./bill.model.ts";
 import type {
   IBill,
   IBillDocument,
   IBillLean,
   IBillPopulatedLean,
-} from "./bill.model.js";
+} from "./bill.model.ts";
 
 export const BillRepository = {
   async findAll(): Promise<IBillPopulatedLean[]> {

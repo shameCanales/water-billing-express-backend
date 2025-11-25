@@ -1,5 +1,6 @@
+import "../core/emv.ts"; // import first to 
 import mongoose from "mongoose";
-import { createApp } from "./createApp.js";
+import { createApp } from "./createApp.ts";
 
 mongoose
   .connect("mongodb://localhost/water_billing_system")

@@ -1,10 +1,10 @@
-import { ProcessorRepository } from "./processor.repository.js";
-import { hashPassword } from "../../core/utils/helpers.js";
+import { ProcessorRepository } from "./processor.repository.ts";
+import { hashPassword } from "../../core/utils/helpers.ts";
 import type {
   IProcessor,
   IProcessorDocument,
   IProcessorLean,
-} from "./processor.model.js";
+} from "./processor.model.ts";
 import { Types } from "mongoose";
 
 export const ProcessorService = {
@@ -20,6 +20,11 @@ export const ProcessorService = {
     const processor = await ProcessorRepository.findById(id);
     if (!processor) throw new Error("Processor not found");
     return processor;
+  },
+
+  // In modules/processors/processor.service.ts
+  async getByEmail(email: string): Promise<IProcessorDocument | null> {
+    return await ProcessorRepository.findByEmail(email);
   },
 
   async create(

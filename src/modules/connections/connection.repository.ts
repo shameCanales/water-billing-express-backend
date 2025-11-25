@@ -1,9 +1,9 @@
-import { Connection } from "./connection.model.js";
+import { Connection } from "./connection.model.ts";
 import type {
   IConnectionLean,
   IConnectionPopulated,
   IConnection,
-} from "./connection.model.js";
+} from "./connection.model.ts";
 
 import mongoose from "mongoose";
 

@@ -1,7 +1,7 @@
 import { validationResult, matchedData } from "express-validator";
-import { ProcessorService } from "./processor.service.js";
+import { ProcessorService } from "./processor.service.ts";
 import type { Request, Response } from "express";
-import type { IProcessor } from "./processor.model.js";
+import type { IProcessor } from "./processor.model.ts";
 
 export const ProcessorController = {
   async getAll(req: Request, res: Response): Promise<Response> {

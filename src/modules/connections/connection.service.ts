@@ -1,6 +1,6 @@
-import { ConnectionRepository } from "./connection.repository.js";
-import { ConsumerRepository } from "../consumers/consumer.repository.js";
-import type { IConnection, IConnectionPopulated } from "./connection.model.js";
+import { ConnectionRepository } from "./connection.repository.ts";
+import { ConsumerRepository } from "../consumers/consumer.repository.ts";
+import type { IConnection, IConnectionPopulated } from "./connection.model.ts";
 import type mongoose from "mongoose";
 
 export const ConnectionService = {

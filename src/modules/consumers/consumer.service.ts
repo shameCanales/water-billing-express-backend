@@ -1,5 +1,5 @@
-import { ConsumerRepository } from "./consumer.repository.js";
-import { hashPassword } from "../../core/utils/helpers.js";
+import { ConsumerRepository } from "./consumer.repository.ts";
+import { hashPassword } from "../../core/utils/helpers.ts";
 import type { IConsumer, IConsumerDocument } from "./consumer.model.ts";
 import type mongoose from "mongoose";
 

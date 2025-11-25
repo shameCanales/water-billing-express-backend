@@ -3,11 +3,11 @@ import { checkSchema } from "express-validator";
 import {
   requireAuthAndStaffOrManager,
   requireAuth,
-} from "../../core/middlewares/authmiddleware.js";
-import { addConsumerValidationSchema } from "../../core/middlewares/validationSchemas/addConsumerValidation.js";
-import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.js";
-import { ConsumerController } from "./consumer.controller.js";
-import { ConnectionController } from "../connections/connection.controller.js";
+} from "../../core/middlewares/authmiddleware.ts";
+import { addConsumerValidationSchema } from "../../core/middlewares/validationSchemas/addConsumerValidation.ts";
+import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
+import { ConsumerController } from "./consumer.controller.ts";
+import { ConnectionController } from "../connections/connection.controller.ts";
 
 const router = Router();
 

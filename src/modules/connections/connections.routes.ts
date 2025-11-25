@@ -3,13 +3,13 @@ import {
   requireAuthAndStaffOrManager,
   requireAuth,
   requireAuthAndManager,
-} from "../../core/middlewares/authmiddleware.js";
-import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.js";
-import { addConnectionValidationSchema } from "../../core/middlewares/validationSchemas/addConnectionValidation.js";
-import { editConnectionValidationSchema } from "../../core/middlewares/validationSchemas/editConnectionValidation.js";
+} from "../../core/middlewares/authmiddleware.ts";
+import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
+import { addConnectionValidationSchema } from "../../core/middlewares/validationSchemas/addConnectionValidation.ts";
+import { editConnectionValidationSchema } from "../../core/middlewares/validationSchemas/editConnectionValidation.ts";
 import { checkSchema } from "express-validator";
-import { BillController } from "../bills/bill.controller.js";
-import { ConnectionController } from "./connection.controller.js";
+import { BillController } from "../bills/bill.controller.ts";
+import { ConnectionController } from "./connection.controller.ts";
 
 const router = Router();
 

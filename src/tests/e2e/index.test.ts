@@ -30,7 +30,7 @@ describe("/api/processor", () => {
 
     expect(registerManagerResponse.statusCode).toBe(201);
 
-    const loginRes = await authenticatedAgent.post("/api/auth/login").send({
+    const loginRes = await authenticatedAgent.post("/api/auth/admin/login").send({
       processorEmail: "admin@test.com",
       processorPassword: "@Password123",
     });
@@ -38,12 +38,12 @@ describe("/api/processor", () => {
   });
 
   it("should return 401 when not logged in", async () => {
-    const response = await request(app).get("/api/auth/status");
+    const response = await request(app).get("/api/auth/admin/status");
     expect(response.statusCode).toBe(401);
   });
 
   it("should return authenticated manager when logged in", async () => {
-    const response = await authenticatedAgent.get("/api/auth/status");
+    const response = await authenticatedAgent.get("/api/auth/admin/status");
 
     expect(response.statusCode).toBe(200);
     expect(response.body.email).toBe("admin@test.com");

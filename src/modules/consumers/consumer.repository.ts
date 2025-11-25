@@ -1,6 +1,6 @@
 import type mongoose from "mongoose";
-import { Consumer } from "./consumer.model.js";
-import type { IConsumer, IConsumerDocument } from "./consumer.model.js";
+import { Consumer } from "./consumer.model.ts";
+import type { IConsumer, IConsumerDocument } from "./consumer.model.ts";
 
 export const ConsumerRepository = {
   async findAll(): Promise<IConsumerDocument[]> {

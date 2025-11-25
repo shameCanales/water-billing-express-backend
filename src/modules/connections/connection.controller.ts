@@ -1,7 +1,7 @@
 import { validationResult, matchedData } from "express-validator";
-import { ConnectionService } from "./connection.service.js";
+import { ConnectionService } from "./connection.service.ts";
 import type { Request, Response } from "express";
-import type { IConnection } from "./connection.model.js";
+import type { IConnection } from "./connection.model.ts";
 
 export const ConnectionController = {
   async create(req: Request, res: Response): Promise<Response> {

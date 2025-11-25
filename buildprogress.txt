@@ -587,3 +587,10 @@ typescriptexport interface IConnectionLean {
   consumer: mongoose.Types.ObjectId;
   // ... all fields explicitly defined
 }
+
+respond: 
+to answer your questions:
+1. yes actually they have different permisions and features. 
+2. yes they will use different frontend app because i think its not practical to have role based auth in frontend? or is it practical? my main concern here is i don't want the consumers to have a way to login as admin when they have admin credential, like the login as admin button and they try logging in and get in. so i think it's better to have separate frontends for them.
+3. in that case, i don't my app to be as complex as that yet. i just want to implement jwt first. then maybe in the future i will add 2FA.
+4. okay let's have different routes for them.

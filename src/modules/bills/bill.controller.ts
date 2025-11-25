@@ -1,7 +1,7 @@
 import { matchedData, validationResult } from "express-validator";
-import { BillService, type CreateBillData } from "./bill.service.js";
+import { BillService, type CreateBillData } from "./bill.service.ts";
 import type { Request, Response } from "express";
-import type { IBill } from "./bill.model.js";
+import type { IBill } from "./bill.model.ts";
 
 export const BillController = {
   async getAll(req: Request, res: Response): Promise<Response> {

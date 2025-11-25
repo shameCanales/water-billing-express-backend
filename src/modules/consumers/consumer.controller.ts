@@ -1,7 +1,7 @@
 import { matchedData, validationResult } from "express-validator";
-import { ConsumerService } from "./consumer.service.js";
+import { ConsumerService } from "./consumer.service.ts";
 import type { Request, Response } from "express";
-import type { IConsumer } from "./consumer.model.js";
+import type { IConsumer } from "./consumer.model.ts";
 
 export const ConsumerController = {
   async getAll(req: Request, res: Response): Promise<Response> {

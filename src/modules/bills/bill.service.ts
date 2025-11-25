@@ -1,6 +1,6 @@
-import { BillRepository } from "./bill.repository.js";
-import { ConnectionRepository } from "../connections/connection.repository.js";
-import { BILLING_SETTINGS } from "../../config/settings.js"; //{chargePerCubicMeter: 20,}
+import { BillRepository } from "./bill.repository.ts";
+import { ConnectionRepository } from "../connections/connection.repository.ts";
+import { BILLING_SETTINGS } from "../../config/settings.ts"; //{chargePerCubicMeter: 20,}
 import type {
   IBill,
   IBillDocument,

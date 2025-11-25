@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { registerProcessorValidationSchema } from "../../core/middlewares/validationSchemas/registerProcessorValidation.js";
+import { registerProcessorValidationSchema } from "../../core/middlewares/validationSchemas/registerProcessorValidation.ts";
 import { checkSchema } from "express-validator";
-import { requireAuthAndManager } from "../../core/middlewares/authmiddleware.js";
-import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.js";
-import { editProcessorValidationSchema } from "../../core/middlewares/validationSchemas/editProcessorValidation.js";
-import { ProcessorController } from "./processor.controller.js";
-import { registerManagerValidationSchema } from "../../core/middlewares/validationSchemas/registerManagerValidation.js";
+import { requireAuthAndManager } from "../../core/middlewares/authmiddleware.ts";
+import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
+import { editProcessorValidationSchema } from "../../core/middlewares/validationSchemas/editProcessorValidation.ts";
+import { ProcessorController } from "./processor.controller.ts";
+import { registerManagerValidationSchema } from "../../core/middlewares/validationSchemas/registerManagerValidation.ts";
 
 const router = Router();
 

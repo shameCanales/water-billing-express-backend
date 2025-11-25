@@ -1,9 +1,9 @@
-import { Processor } from "./processor.model.js";
+import { Processor } from "./processor.model.ts";
 import type {
   IProcessor,
   IProcessorDocument,
   IProcessorLean,
-} from "./processor.model.js";
+} from "./processor.model.ts";
 import type { Types } from "mongoose";
 
 export const ProcessorRepository = {
@@ -19,7 +19,7 @@ export const ProcessorRepository = {
   },
 
   async findByEmail(email: string): Promise<IProcessorDocument | null> {
-    return await Processor.findOne({ email });
+    return await Processor.findOne({ email }).select("+password");
   },
 
   async create(data: IProcessor): Promise<IProcessorDocument> {
