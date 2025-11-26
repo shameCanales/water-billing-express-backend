@@ -1,13 +1,26 @@
 import { Router } from "express";
 import { AuthAdminController } from "./authAdmin.controller.ts";
-import { requireAdminAuth } from "../../core/middlewares/auth.middleware.ts";
+// import { requireAdminAuth } from "../../core/middlewares/adminAuth.middleware.ts";
+import { AdminAuthMiddleware } from "../../core/middlewares/adminAuth.middleware.ts";
 
 const router = Router();
 
 router.post("/login", AuthAdminController.login);
-router.post("/refresh", requireAdminAuth, AuthAdminController.refresh);
-router.get("/status", requireAdminAuth, AuthAdminController.status);
-router.post("/logout", requireAdminAuth, AuthAdminController.logout);
+router.post(
+  "/refresh",
+  AdminAuthMiddleware.requireAuth,
+  AuthAdminController.refresh
+);
+router.get(
+  "/status",
+  AdminAuthMiddleware.requireAuth,
+  AuthAdminController.status
+);
+router.post(
+  "/logout",
+  AdminAuthMiddleware.requireAuth,
+  AuthAdminController.logout
+);
 
 export default router;
 

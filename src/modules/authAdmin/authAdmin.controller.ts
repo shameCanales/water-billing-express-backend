@@ -139,6 +139,7 @@ export const AuthAdminController = {
       // Optional Implement token blacklist here
       // const token = extractTokenFromHeader(req.headers.authorization);
       // await redisClient.set("blacklist:" + token, true, 'EX', tokenExpiry); // 7 days expiry
+      // handle logout on the frontend by deleting the token
 
       res.status(200).json({
         success: true,
