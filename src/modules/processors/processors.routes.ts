@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { registerProcessorValidationSchema } from "../../core/middlewares/validationSchemas/registerProcessorValidation.ts";
 import { checkSchema } from "express-validator";
-// import { requireAuthAndManager } from "../../core/middlewares/authmiddleware.ts";
 import { AdminAuthMiddleware } from "../../core/middlewares/adminAuth.middleware.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { editProcessorValidationSchema } from "../../core/middlewares/validationSchemas/editProcessorValidation.ts";

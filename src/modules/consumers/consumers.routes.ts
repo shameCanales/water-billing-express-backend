@@ -1,10 +1,5 @@
 import { Router } from "express";
 import { checkSchema } from "express-validator";
-// import {
-//   requireAuthAndStaffOrManager,
-//   requireAuth,
-// } from "../../core/middlewares/authmiddleware.ts";
-
 import { AdminAuthMiddleware, AuthMiddleware } from "../../core/middlewares/adminAuth.middleware.ts";
 import { addConsumerValidationSchema } from "../../core/middlewares/validationSchemas/addConsumerValidation.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";

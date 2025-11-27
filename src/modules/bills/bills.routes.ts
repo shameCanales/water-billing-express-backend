@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { AdminAuthMiddleware } from "../../core/middlewares/adminAuth.middleware.ts";
-// import { requireAuthAndStaffOrManager } from "../../core/middlewares/authmiddleware.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { checkSchema } from "express-validator";
 import { addBillValidationSchema } from "../../core/middlewares/validationSchemas/addBillValidation.ts";
