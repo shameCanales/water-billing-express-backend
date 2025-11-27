@@ -1,9 +1,8 @@
 import { Router } from "express";
 import {
-  requireAuthAndStaffOrManager,
-  requireAuth,
-  requireAuthAndManager,
-} from "../../core/middlewares/authmiddleware.ts";
+  AdminAuthMiddleware,
+  AuthMiddleware,
+} from "../../core/middlewares/adminAuth.middleware.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { addConnectionValidationSchema } from "../../core/middlewares/validationSchemas/addConnectionValidation.ts";
 import { editConnectionValidationSchema } from "../../core/middlewares/validationSchemas/editConnectionValidation.ts";
@@ -16,19 +15,25 @@ const router = Router();
 // Add new connection for a specific consumer
 router.post(
   "/",
-  requireAuthAndStaffOrManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   checkSchema(addConnectionValidationSchema),
   validateObjectIdReusable({ key: "consumer", source: "body" }),
   ConnectionController.create
 );
 
 // Get all connections
-router.get("/", requireAuthAndStaffOrManager, ConnectionController.getAll);
+router.get(
+  "/",
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
+  ConnectionController.getAll
+);
 
 // Get bills for a specific connection
 router.get(
   "/:connectionId/bills",
-  requireAuth,
+  AuthMiddleware.requireConsumerOrAdmin,
   validateObjectIdReusable({ key: "connectionId" }),
   BillController.getByConnection
 );
@@ -36,7 +41,8 @@ router.get(
 // edit connection by id
 router.patch(
   "/:connectionId",
-  requireAuthAndStaffOrManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "connectionId" }),
   checkSchema(editConnectionValidationSchema),
   ConnectionController.updateById
@@ -45,12 +51,11 @@ router.patch(
 // delete connection by id
 router.delete(
   "/:connectionId",
-  requireAuthAndManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "connectionId" }),
   ConnectionController.deleteById
 );
-
-
 
 // get connection by id
 
