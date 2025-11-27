@@ -7,7 +7,7 @@ declare global {
       user?: {
         id: string;
         email: string;
-        role?: "staff" | "manager";
+        role?: "staff" | "manager" | "consumer";
         type: "admin" | "consumer";
       };
     }
@@ -155,30 +155,74 @@ export const ConsumerAuthMiddleware = {
   },
 };
 
-/* ------------------------------------------
-   OPTIONAL AUTH (for both admin + consumer)
-------------------------------------------- */
-export const OptionalAuthMiddleware = {
-  check(req: Request, res: Response, next: NextFunction): void {
+//  CONSUMER OR ADMIN AUTH MIDDLEWARE
+export const AuthMiddleware = {
+  requireConsumerOrAdmin(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void {
     try {
       const token = extractTokenFromHeader(req.headers.authorization);
 
-      if (token) {
-        const payload = verifyToken(token);
+      if (!token) {
+        res.status(401).json({
+          success: false,
+          message: "Authentication required. Please provide a token.",
+        });
+        return;
+      }
 
-        if (payload) {
-          req.user = {
-            id: payload.id,
-            email: payload.email,
-            role: payload.type === "admin" ? payload.role : undefined,
-            type: payload.type,
-          };
+      const payload = verifyToken(token);
+
+      if (
+        !payload ||
+        (payload.type !== "admin" && payload.type !== "consumer")
+      ) {
+        res.status(403).json({
+          success: false,
+          message: "Access denied.",
+        });
+        return;
+      }
+
+      // Type guard: distinguish admin vs consumer
+      if (payload.type === "admin") {
+        // payload.role must exist and be staff or manager
+        if (
+          !payload.role ||
+          (payload.role !== "staff" && payload.role !== "manager")
+        ) {
+          res.status(403).json({
+            success: false,
+            message: "Admin role invalid.",
+          });
+          return;
         }
+
+        req.user = {
+          id: payload.id,
+          email: payload.email,
+          role: payload.role, // staff or manager
+          type: "admin",
+        };
+      } else {
+        // consumer
+        req.user = {
+          id: payload.id,
+          email: payload.email,
+          role: "consumer", // default for consumers
+          type: "consumer",
+        };
       }
 
       next();
-    } catch {
-      next(); // silently ignore, because auth is optional
+    } catch (err) {
+      console.error("Auth error:", err);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error during authentication.",
+      });
     }
   },
 };

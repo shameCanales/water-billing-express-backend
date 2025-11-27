@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { checkSchema } from "express-validator";
-import {
-  requireAuthAndStaffOrManager,
-  requireAuth,
-} from "../../core/middlewares/authmiddleware.ts";
+// import {
+//   requireAuthAndStaffOrManager,
+//   requireAuth,
+// } from "../../core/middlewares/authmiddleware.ts";
+
+import { AdminAuthMiddleware, AuthMiddleware } from "../../core/middlewares/adminAuth.middleware.ts";
 import { addConsumerValidationSchema } from "../../core/middlewares/validationSchemas/addConsumerValidation.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { ConsumerController } from "./consumer.controller.ts";
@@ -12,12 +14,18 @@ import { ConnectionController } from "../connections/connection.controller.ts";
 const router = Router();
 
 // get all consumers :  [{name, email, birthDate, mobileNumber, password, address, status}, ...]
-router.get("/", requireAuthAndStaffOrManager, ConsumerController.getAll);
+router.get(
+  "/",
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
+  ConsumerController.getAll
+);
 
 // Get Consumer by ID
 router.get(
   "/:consumerId",
-  requireAuthAndStaffOrManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.getById
 );
@@ -25,7 +33,7 @@ router.get(
 // get connections for a specific consumer
 router.get(
   "/:consumerId/connections",
-  requireAuth,
+  AuthMiddleware.requireConsumerOrAdmin,
   validateObjectIdReusable({ key: "consumerId" }),
   ConnectionController.getByConsumerId
 );
@@ -33,7 +41,8 @@ router.get(
 //add consumer
 router.post(
   "/",
-  requireAuthAndStaffOrManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   checkSchema(addConsumerValidationSchema),
   ConsumerController.create
 );
@@ -41,7 +50,8 @@ router.post(
 // Edit Consumer by ID
 router.patch(
   "/:consumerId",
-  requireAuthAndStaffOrManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.editById
 );
@@ -49,7 +59,8 @@ router.patch(
 // Delete Consumer by ID
 router.delete(
   "/:consumerId",
-  requireAuthAndStaffOrManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.deleteById
 );

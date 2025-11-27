@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { ConsumerService } from "../../consumers/consumer.service";
-import { verifyPassword } from "../../../core/utils/helpers";
-import { generateToken } from "../../../core/utils/jwt.utils";
+import { verifyPassword } from "../../../core/utils/helpers.ts";
+import { generateToken } from "../../../core/utils/jwt.utils.ts";
+import { ConsumerService } from "../consumers/consumer.service.ts";
 
 export const ConsumerAuthController = {
   /**
