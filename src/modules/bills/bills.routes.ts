@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { requireAuthAndStaffOrManager } from "../../core/middlewares/authmiddleware.ts";
+import { AdminAuthMiddleware } from "../../core/middlewares/adminAuth.middleware.ts";
+// import { requireAuthAndStaffOrManager } from "../../core/middlewares/authmiddleware.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { checkSchema } from "express-validator";
 import { addBillValidationSchema } from "../../core/middlewares/validationSchemas/addBillValidation.ts";
@@ -9,12 +10,18 @@ import { BillController } from "./bill.controller.ts";
 const router = Router();
 
 // Get all bills
-router.get("/", requireAuthAndStaffOrManager, BillController.getAll);
+router.get(
+  "/",
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
+  BillController.getAll
+);
 
 // add bill to a connection
 router.post(
   "/",
-  requireAuthAndStaffOrManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ source: "body", key: "connection" }),
   checkSchema(addBillValidationSchema),
   BillController.create
@@ -23,7 +30,8 @@ router.post(
 // update bill information
 router.patch(
   "/:billId",
-  requireAuthAndStaffOrManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "billId" }),
   checkSchema(editBillValidationSchema),
   BillController.update
@@ -32,7 +40,8 @@ router.patch(
 // Update bill status (paid, unpaid, overdue)
 router.patch(
   "/:billId/status",
-  requireAuthAndStaffOrManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "billId" }),
   BillController.updateStatus
 );
@@ -40,7 +49,8 @@ router.patch(
 // Delete a bill
 router.delete(
   "/:billId",
-  requireAuthAndStaffOrManager,
+  AdminAuthMiddleware.requireAuth,
+  AdminAuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "billId" }),
   BillController.delete
 );

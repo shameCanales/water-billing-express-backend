@@ -84,7 +84,7 @@ export const AdminAuthMiddleware = {
   },
 
   requireStaffOrManager(req: Request, res: Response, next: NextFunction): void {
-    console.log(req.user, "type: ", req.user?.type)
+    // console.log(req.user, "type: ", req.user?.type)
 
     if (!req.user || req.user.type !== "admin") {
       res.status(401).json({
