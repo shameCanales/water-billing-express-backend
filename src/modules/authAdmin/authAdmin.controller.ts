@@ -1,6 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import { ProcessorService } from "../processors/processor.service.ts";
-import { generateToken } from "../../core/utils/jwt.utils.ts";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../../core/utils/jwt.utils.ts";
 import { comparePassword } from "../../core/utils/helpers.ts";
 
 export const AuthAdminController = {
@@ -24,8 +28,7 @@ export const AuthAdminController = {
 
       // Find admin by email (includes password field)
       const admin = await ProcessorService.getByEmail(email);
-
-      if (!admin) {
+      if (!admin || !(await comparePassword(password, admin.password))) {
         res.status(401).json({
           success: false,
           message: "Invalid credentials",
@@ -33,47 +36,91 @@ export const AuthAdminController = {
         return;
       }
 
-      // Verify password
-      const isPasswordValid = await comparePassword(password, admin.password);
-
-      if (!isPasswordValid) {
-        res.status(401).json({
-          success: false,
-          message: "Invalid credentials",
-        });
-        return;
-      }
-
-      if (!admin.role) {
-        res.status(500).json({
-          success: false,
-          message: "User role not found",
-        });
-        return;
-      }
-
-      // Generate JWT token with admin payload
-      const token = generateToken({
+      const payload = {
         id: admin._id.toString(),
         email: admin.email,
-        role: admin.role,
-        type: "admin",
-      });
+        role: admin.role!,
+        type: "admin" as const,
+      };
 
-      // Return token and user data (without password)
-      // const { password: _, ...adminData } = admin.toObject(); // desctructure is not required because getByEmail already excludes password
+      const accessToken = generateAccessToken(payload);
+      const refreshToken = generateRefreshToken(payload);
+
+      res.cookie("jwt", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+        sameSite: "strict", // CSRF protection
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+      });
 
       res.status(200).json({
         success: true,
         message: "Login successful",
-        token,
-        user: admin,
+        accessToken,
+        user: {
+          id: admin._id,
+          email: admin.email,
+          role: admin.role,
+        },
       });
     } catch (err) {
       console.error("Admin login error:", err);
       res.status(500).json({
         success: false,
         message: "Internal server error.",
+      });
+    }
+  },
+
+  /**
+   * Refresh Token (Optional - for extending sessions)
+   * POST /api/auth/admin/refresh
+   * Requires: requireAdminAuth middleware
+   */
+  async refresh(req: Request, res: Response): Promise<void> {
+    try {
+      const cookies = req.cookies;
+      if (!cookies?.jwt) {
+        res.status(401).json({
+          success: false,
+          message: "Refresh token required",
+        });
+        return;
+      }
+
+      const refreshToken = cookies.jwt;
+
+      //verify Refresh token
+      const decoded = verifyRefreshToken(refreshToken);
+      if (!decoded) {
+        res.status(403).json({
+          success: false,
+          message: "Invalid refresh token",
+        });
+        return;
+      }
+
+      // 3. Optional but recommended: Check if user still exists in DB
+      // const foundUser = await UserService.getById(decoded.id);
+      // if (!foundUser) return res.status(401)
+
+      // 4. Generate NEW Access Token
+      const newAccessToken = generateAccessToken({
+        id: decoded.id,
+        email: decoded.email,
+        role: (decoded as any).role,
+        type: decoded.type as any,
+      });
+
+      res.status(200).json({
+        success: true,
+        accessToken: newAccessToken,
+      });
+    } catch (err) {
+      console.error("Refresh Error: ", err);
+      res.status(500).json({
+        success: false,
+        message: "Server error",
       });
     }
   },
@@ -123,70 +170,26 @@ export const AuthAdminController = {
     }
   },
 
-  /**
-   * Admin Logout
-   * POST /api/auth/admin/logout
-   *
-   * Note: With JWT, logout is primarily handled client-side
-   * by removing the token. This endpoint is optional.
-   *
-   * For true logout, implement token blacklist:
-   * - Store token in Redis with expiry
-   * - Check blacklist in auth middleware
-   */
+  // backend should delete the refresh token(the cookie)
+  // frontend should delete the Access Token (The variable in memory)
   async logout(req: Request, res: Response): Promise<void> {
     try {
-      // Optional Implement token blacklist here
-      // const token = extractTokenFromHeader(req.headers.authorization);
-      // await redisClient.set("blacklist:" + token, true, 'EX', tokenExpiry); // 7 days expiry
-      // handle logout on the frontend by deleting the token
+      res.clearCookie("jwt", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
 
       res.status(200).json({
         success: true,
-        message: "Logged out successfully. Please remove token from client",
+        message: "Logged out successfully",
       });
     } catch (err) {
-      console.error("Admin logout error: ", err);
+      console.error("Logout error: ", err);
+
       res.status(500).json({
         success: false,
-        message: "Internal server error",
-      });
-    }
-  },
-
-  /**
-   * Refresh Token (Optional - for extending sessions)
-   * POST /api/auth/admin/refresh
-   * Requires: requireAdminAuth middleware
-   */
-  async refresh(req: Request, res: Response): Promise<void> {
-    try {
-      if (!req.user) {
-        res.status(401).json({
-          success: false,
-          message: "Not authenticated",
-        });
-        return;
-      }
-
-      // Generate new token with same payload
-      const newToken = generateToken({
-        id: req.user.id,
-        email: req.user.email,
-        role: req.user.role!,
-        type: "admin",
-      });
-
-      res.status(200).json({
-        success: true,
-        message: "Token refreshed",
-        token: newToken,
-      });
-    } catch (error) {
-      console.error("Token refresh error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
+        message: "Cannot logout, Internal server error",
       });
     }
   },

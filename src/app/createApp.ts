@@ -1,5 +1,8 @@
 import express from "express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import type { Application, Request, Response, NextFunction } from "express";
+
 import authAdminRouter from "../modules/authAdmin/authAdmin.routes.ts";
 import authConsumerRouter from "../modules/authConsumer/authConsumer.routes.ts";
 import consumerRouter from "../modules/consumers/consumers.routes.ts";
@@ -10,8 +13,16 @@ import processorRouter from "../modules/processors/processors.routes.ts";
 export function createApp(): Application {
   const app: Application = express();
 
+  // 1. CORS MUST come before routes
+  app.use(
+    cors({
+      origin: "http://localhost:3000", // Explicitly allow your Frontend
+      credentials: true, // Allow Cookies to travel between ports
+    })
+  );
+
   app.use(express.json());
-  //  app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser());
 
   const loggingMiddleware = (
     request: Request,

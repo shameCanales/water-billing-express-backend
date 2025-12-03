@@ -1,5 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
-import { verifyToken, extractTokenFromHeader } from "../utils/jwt.utils.ts";
+import {
+  verifyAccessToken,
+  extractTokenFromHeader,
+} from "../utils/jwt.utils.ts";
 
 declare global {
   namespace Express {
@@ -28,7 +31,7 @@ export const AdminAuthMiddleware = {
         return;
       }
 
-      const payload = verifyToken(token);
+      const payload = verifyAccessToken(token);
 
       if (!payload) {
         res.status(401).json({
@@ -122,7 +125,7 @@ export const ConsumerAuthMiddleware = {
         return;
       }
 
-      const payload = verifyToken(token);
+      const payload = verifyAccessToken(token);
 
       if (!payload) {
         res.status(401).json({
@@ -175,7 +178,7 @@ export const AuthMiddleware = {
         return;
       }
 
-      const payload = verifyToken(token);
+      const payload = verifyAccessToken(token);
 
       if (
         !payload ||

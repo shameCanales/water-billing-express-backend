@@ -1,10 +1,13 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET_KEY!;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? "7d";
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;
 
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET is not defined in environment variables");
+const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRES_IN || "15m";
+const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d";
+
+if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
+  throw new Error("jwt secrets are not defined in environment variables");
 }
 
 export interface AdminJWTPayload {
@@ -22,67 +25,42 @@ export interface ConsumerJWTPayload {
 
 export type JWTPayload = AdminJWTPayload | ConsumerJWTPayload;
 
-/**
- * Generate a JWT Token
- * Uses HMAC-SHA256 algorithm
- */
-
-export const generateToken = (payload: JWTPayload): string => {
-  const options: jwt.SignOptions = {
-    expiresIn: JWT_EXPIRES_IN as string | number,
+export const generateAccessToken = (payload: JWTPayload): string => {
+  return jwt.sign(payload, ACCESS_TOKEN_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRY as jwt.SignOptions["expiresIn"],
     algorithm: "HS256",
-  } as jwt.SignOptions;
-
-  return jwt.sign(payload, JWT_SECRET, options);
+  });
 };
 
-/**
- * Verify and decode a JWT token
- * Returns null if token is invalid or expired
- */
+export const generateRefreshToken = (payload: JWTPayload): string => {
+  return jwt.sign(payload, REFRESH_TOKEN_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRY as jwt.SignOptions["expiresIn"],
+    algorithm: "HS256",
+  });
+};
 
-export const verifyToken = (token: string): JWTPayload | null => {
+export const verifyAccessToken = (token: string): JWTPayload | null => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET, {
-      algorithms: ["HS256"],
-    }) as JWTPayload;
-
-    return decoded;
+    return jwt.verify(token, ACCESS_TOKEN_SECRET) as JWTPayload;
   } catch (err) {
-    if (err instanceof jwt.TokenExpiredError) {
-      console.log("Token expired");
-    } else if (err instanceof jwt.JsonWebTokenError) {
-      console.log("Invalid token");
-    }
-
     return null;
   }
 };
 
 /**
- * Extract token from Authorization header
- * Expected format: "Bearer <token>"
+ * Verify Refresh Token
  */
+export const verifyRefreshToken = (token: string): JWTPayload | null => {
+  try {
+    return jwt.verify(token, REFRESH_TOKEN_SECRET) as JWTPayload;
+  } catch (err) {
+    return null;
+  }
+};
+
 export const extractTokenFromHeader = (authHeader?: string): string | null => {
-  if (!authHeader) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return null;
   }
-
-  if (!authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-
-  return authHeader.substring(7); //Remove "Bearer " prefix
-};
-
-/**
- * Decode token without verifying (useful for getting payload without validation)
- * WARNING: Don't use this for authentication! Only for reading non-sensitive data
- */
-export const decodeToken = (token: string): JWTPayload | null => {
-  try {
-    return jwt.decode(token) as JWTPayload;
-  } catch (err) {
-    return null;
-  }
+  return authHeader.substring(7);
 };

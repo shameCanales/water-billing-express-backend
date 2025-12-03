@@ -6,20 +6,15 @@ import { AdminAuthMiddleware } from "../../core/middlewares/adminAuth.middleware
 const router = Router();
 
 router.post("/login", AuthAdminController.login);
-router.post(
-  "/refresh",
-  AdminAuthMiddleware.requireAuth,
-  AuthAdminController.refresh
-);
+
+router.post("/refresh", AuthAdminController.refresh);
+
+router.post("/logout", AuthAdminController.logout);
+
 router.get(
   "/status",
   AdminAuthMiddleware.requireAuth,
   AuthAdminController.status
-);
-router.post(
-  "/logout",
-  AdminAuthMiddleware.requireAuth,
-  AuthAdminController.logout
 );
 
 export default router;
