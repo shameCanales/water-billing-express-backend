@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   AdminAuthMiddleware,
   AuthMiddleware,
-} from "../../core/middlewares/adminAuth.middleware.ts";
+} from "../../core/middlewares/auth/auth.middleware.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { addConnectionValidationSchema } from "../../core/middlewares/validationSchemas/addConnectionValidation.ts";
 import { editConnectionValidationSchema } from "../../core/middlewares/validationSchemas/editConnectionValidation.ts";

@@ -1,9 +1,13 @@
 import type { Request, Response } from "express";
-import { verifyPassword } from "../../../core/utils/helpers.ts";
-import { generateToken } from "../../../core/utils/jwt.utils.ts";
+import { comparePassword } from "../../core/utils/helpers.ts";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../../core/utils/jwt.utils.ts";
 import { ConsumerService } from "../consumers/consumer.service.ts";
 
-export const ConsumerAuthController = {
+export const AuthConsumerController = {
   /**
    * Consumer Login
    * POST /api/auth/consumer/login
@@ -12,7 +16,7 @@ export const ConsumerAuthController = {
     try {
       const { email, password } = req.body;
 
-      // Validation
+
       if (!email || !password) {
         res.status(400).json({
           success: false,
@@ -21,8 +25,7 @@ export const ConsumerAuthController = {
         return;
       }
 
-      // Find consumer by email
-      const consumer = await ConsumerService.findByEmail(email);
+      const consumer = await ConsumerService.getConsumerByEmail(email);
 
       if (!consumer) {
         res.status(401).json({
@@ -32,7 +35,6 @@ export const ConsumerAuthController = {
         return;
       }
 
-      // Check if account is suspended
       if (consumer.status === "suspended") {
         res.status(403).json({
           success: false,
@@ -41,8 +43,7 @@ export const ConsumerAuthController = {
         return;
       }
 
-      // Verify password
-      const isPasswordValid = await verifyPassword(password, consumer.password);
+      const isPasswordValid = await comparePassword(password, consumer.password);
 
       if (!isPasswordValid) {
         res.status(401).json({
@@ -52,12 +53,27 @@ export const ConsumerAuthController = {
         return;
       }
 
-      // Generate JWT token with consumer payload
-      const token = generateToken({
+      // set the payload
+      const payload = {
         id: consumer._id.toString(),
         email: consumer.email,
-        type: "consumer",
+        type: "consumer" as const,
+      };
+
+      // Generate Both Tokens
+      const accessToken = generateAccessToken(payload);
+      const refreshToken = generateRefreshToken(payload);
+
+      // Set HttpOnly Cookie
+      res.cookie("jwt", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
+      // ---------------------------------------------------------
+      // NEW JWT LOGIC END
+      // ---------------------------------------------------------
 
       // Return token and user data (without password)
       const { password: _, ...consumerData } = consumer.toObject();
@@ -65,7 +81,7 @@ export const ConsumerAuthController = {
       res.status(200).json({
         success: true,
         message: "Login successful",
-        token,
+        accessToken, // Frontend stores this in memory
         user: consumerData,
       });
     } catch (error) {
@@ -80,11 +96,10 @@ export const ConsumerAuthController = {
   /**
    * Consumer Registration
    * POST /api/auth/consumer/register
-   * Allows consumers to self-register
+   * (Logic remains mostly the same)
    */
   async register(req: Request, res: Response): Promise<void> {
     try {
-      // Create new consumer
       const newConsumer = await ConsumerService.createConsumer(req.body);
 
       res.status(201).json({
@@ -108,11 +123,10 @@ export const ConsumerAuthController = {
   /**
    * Get Consumer Auth Status
    * GET /api/auth/consumer/status
-   * Requires: requireConsumerAuth middleware
+   * Requires: AuthMiddleware.requireConsumer
    */
   async status(req: Request, res: Response): Promise<void> {
     try {
-      // req.user is set by requireConsumerAuth middleware
       if (!req.user) {
         res.status(401).json({
           success: false,
@@ -121,7 +135,6 @@ export const ConsumerAuthController = {
         return;
       }
 
-      // Optionally fetch fresh data from database
       const consumer = await ConsumerService.getConsumerById(req.user.id);
 
       if (!consumer) {
@@ -132,7 +145,6 @@ export const ConsumerAuthController = {
         return;
       }
 
-      // Check if account was suspended
       if (consumer.status === "suspended") {
         res.status(403).json({
           success: false,
@@ -159,14 +171,25 @@ export const ConsumerAuthController = {
   /**
    * Consumer Logout
    * POST /api/auth/consumer/logout
-   *
-   * Note: With JWT, logout is primarily handled client-side
    */
   async logout(req: Request, res: Response): Promise<void> {
     try {
+      // Clear the cookie logic
+      const cookies = req.cookies;
+      if (!cookies?.jwt) {
+        res.status(200).json({ success: true, message: "Logged out" });
+        return;
+      }
+
+      res.clearCookie("jwt", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
       res.status(200).json({
         success: true,
-        message: "Logged out successfully. Please remove token from client.",
+        message: "Logged out successfully",
       });
     } catch (error) {
       console.error("Consumer logout error:", error);
@@ -178,31 +201,48 @@ export const ConsumerAuthController = {
   },
 
   /**
-   * Refresh Token (Optional)
+   * Refresh Token
    * POST /api/auth/consumer/refresh
-   * Requires: requireConsumerAuth middleware
+   * Note: Does NOT use middleware because access token is expired
    */
   async refresh(req: Request, res: Response): Promise<void> {
     try {
-      if (!req.user) {
+      const cookies = req.cookies;
+
+      if (!cookies?.jwt) {
         res.status(401).json({
           success: false,
-          message: "Not authenticated",
+          message: "Refresh token required",
         });
         return;
       }
 
-      // Generate new token
-      const newToken = generateToken({
-        id: req.user.id,
-        email: req.user.email,
+      const refreshToken = cookies.jwt;
+      const decoded = verifyRefreshToken(refreshToken);
+
+      if (!decoded || decoded.type !== "consumer") {
+        res.status(403).json({
+          success: false,
+          message: "Invalid or expired refresh token",
+        });
+        return;
+      }
+
+      // (Optional) Strict check: Ensure consumer is not suspended before issuing new token
+      // const consumer = await ConsumerService.getConsumerById(decoded.id);
+      // if (!consumer || consumer.status === 'suspended') return res.status(403)...
+
+      // Generate NEW Access Token
+      const newAccessToken = generateAccessToken({
+        id: decoded.id,
+        email: decoded.email,
         type: "consumer",
       });
 
       res.status(200).json({
         success: true,
         message: "Token refreshed",
-        token: newToken,
+        accessToken: newAccessToken,
       });
     } catch (error) {
       console.error("Token refresh error:", error);

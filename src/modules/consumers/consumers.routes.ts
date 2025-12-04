@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { checkSchema } from "express-validator";
-import { AdminAuthMiddleware, AuthMiddleware } from "../../core/middlewares/adminAuth.middleware.ts";
+import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
 import { addConsumerValidationSchema } from "../../core/middlewares/validationSchemas/addConsumerValidation.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { ConsumerController } from "./consumer.controller.ts";
@@ -11,8 +11,7 @@ const router = Router();
 // get all consumers :  [{name, email, birthDate, mobileNumber, password, address, status}, ...]
 router.get(
   "/",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireStaffOrManager,
+  AuthMiddleware.requireStafforManager, 
   ConsumerController.getAll
 );
 

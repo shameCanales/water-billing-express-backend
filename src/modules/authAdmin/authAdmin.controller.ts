@@ -100,7 +100,7 @@ export const AuthAdminController = {
         return;
       }
 
-      // 3. Optional but recommended: Check if user still exists in DB
+      // 3. Optional but recommended: Check if user still exists in DB // let's add this in the future using redis ba yun, basta. 
       // const foundUser = await UserService.getById(decoded.id);
       // if (!foundUser) return res.status(401)
 

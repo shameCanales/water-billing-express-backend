@@ -52,6 +52,12 @@ export const ConsumerService = {
     return consumer;
   },
 
+  async getConsumerByEmail(email: string): Promise<IConsumerDocument> {
+    const consumer = await ConsumerRepository.findByEmail(email);
+    if (!consumer) throw new Error("Consumer with this email not found");
+    return consumer;
+  },
+
   async updateConsumer(id: string, updates: Partial<IConsumerDocument>) {
     if (updates.password) {
       updates.password = await hashPassword(updates.password);

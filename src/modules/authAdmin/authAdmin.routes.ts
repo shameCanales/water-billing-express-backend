@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { AuthAdminController } from "./authAdmin.controller.ts";
-// import { requireAdminAuth } from "../../core/middlewares/adminAuth.middleware.ts";
-import { AdminAuthMiddleware } from "../../core/middlewares/adminAuth.middleware.ts";
+import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
 
 const router = Router();
 
@@ -13,7 +12,7 @@ router.post("/logout", AuthAdminController.logout);
 
 router.get(
   "/status",
-  AdminAuthMiddleware.requireAuth,
+  AuthMiddleware.requireStafforManager,
   AuthAdminController.status
 );
 
