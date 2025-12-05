@@ -156,6 +156,8 @@ export const AuthMiddleware = {
         role: "consumer",
       };
     }
+
+    next();
   },
 };
 

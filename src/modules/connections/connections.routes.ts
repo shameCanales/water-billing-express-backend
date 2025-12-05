@@ -1,8 +1,5 @@
 import { Router } from "express";
-import {
-  AdminAuthMiddleware,
-  AuthMiddleware,
-} from "../../core/middlewares/auth/auth.middleware.ts";
+import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { addConnectionValidationSchema } from "../../core/middlewares/validationSchemas/addConnectionValidation.ts";
 import { editConnectionValidationSchema } from "../../core/middlewares/validationSchemas/editConnectionValidation.ts";
@@ -15,8 +12,7 @@ const router = Router();
 // Add new connection for a specific consumer
 router.post(
   "/",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireStaffOrManager,
+  AuthMiddleware.requireStafforManager,
   checkSchema(addConnectionValidationSchema),
   validateObjectIdReusable({ key: "consumer", source: "body" }),
   ConnectionController.create
@@ -25,15 +21,14 @@ router.post(
 // Get all connections
 router.get(
   "/",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireStaffOrManager,
+  AuthMiddleware.requireStafforManager,
   ConnectionController.getAll
 );
 
 // Get bills for a specific connection
 router.get(
   "/:connectionId/bills",
-  AuthMiddleware.requireConsumerOrAdmin,
+  AuthMiddleware.requireAnyUser,
   validateObjectIdReusable({ key: "connectionId" }),
   BillController.getByConnection
 );
@@ -41,8 +36,7 @@ router.get(
 // edit connection by id
 router.patch(
   "/:connectionId",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireStaffOrManager,
+  AuthMiddleware.requireStafforManager,
   validateObjectIdReusable({ key: "connectionId" }),
   checkSchema(editConnectionValidationSchema),
   ConnectionController.updateById
@@ -51,8 +45,7 @@ router.patch(
 // delete connection by id
 router.delete(
   "/:connectionId",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireStaffOrManager,
+  AuthMiddleware.requireStafforManager,
   validateObjectIdReusable({ key: "connectionId" }),
   ConnectionController.deleteById
 );
