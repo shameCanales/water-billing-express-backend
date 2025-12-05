@@ -11,15 +11,14 @@ const router = Router();
 // get all consumers :  [{name, email, birthDate, mobileNumber, password, address, status}, ...]
 router.get(
   "/",
-  AuthMiddleware.requireStafforManager, 
+  AuthMiddleware.requireStafforManager,
   ConsumerController.getAll
 );
 
 // Get Consumer by ID
 router.get(
   "/:consumerId",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireStaffOrManager,
+  AuthMiddleware.requireStafforManager,
   validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.getById
 );
@@ -27,7 +26,7 @@ router.get(
 // get connections for a specific consumer
 router.get(
   "/:consumerId/connections",
-  AuthMiddleware.requireConsumerOrAdmin,
+  AuthMiddleware.requireAnyUser,
   validateObjectIdReusable({ key: "consumerId" }),
   ConnectionController.getByConsumerId
 );
@@ -35,8 +34,7 @@ router.get(
 //add consumer
 router.post(
   "/",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireStaffOrManager,
+  AuthMiddleware.requireStafforManager,
   checkSchema(addConsumerValidationSchema),
   ConsumerController.create
 );
@@ -44,8 +42,7 @@ router.post(
 // Edit Consumer by ID
 router.patch(
   "/:consumerId",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireStaffOrManager,
+  AuthMiddleware.requireStafforManager,
   validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.editById
 );
@@ -53,8 +50,7 @@ router.patch(
 // Delete Consumer by ID
 router.delete(
   "/:consumerId",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireStaffOrManager,
+  AuthMiddleware.requireStafforManager,
   validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.deleteById
 );
