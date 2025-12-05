@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { registerProcessorValidationSchema } from "../../core/middlewares/validationSchemas/registerProcessorValidation.ts";
 import { checkSchema } from "express-validator";
-import { AdminAuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
+import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { editProcessorValidationSchema } from "../../core/middlewares/validationSchemas/editProcessorValidation.ts";
 import { ProcessorController } from "./processor.controller.ts";
@@ -10,18 +10,12 @@ import { registerManagerValidationSchema } from "../../core/middlewares/validati
 const router = Router();
 
 // Get all processors
-router.get(
-  "/",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireManager,
-  ProcessorController.getAll
-);
+router.get("/", AuthMiddleware.requireManager, ProcessorController.getAll);
 
 // Get Processor by ID
 router.get(
   "/:processorId",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireManager,
+  AuthMiddleware.requireManager,
   validateObjectIdReusable({ key: "processorId" }),
   ProcessorController.getById
 );
@@ -34,8 +28,7 @@ router.get(
  */
 router.post(
   "/",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireManager, // middleware that checks for authentication and manager role
+  AuthMiddleware.requireManager,
   checkSchema(registerProcessorValidationSchema), // middleware for validating request body
   ProcessorController.create
 );
@@ -43,8 +36,7 @@ router.post(
 // Edit Processor by ID
 router.patch(
   "/:processorId",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireManager,
+  AuthMiddleware.requireManager,
   validateObjectIdReusable({ key: "processorId" }),
   checkSchema(editProcessorValidationSchema),
   ProcessorController.update
@@ -53,8 +45,7 @@ router.patch(
 // Delete Processor by ID
 router.delete(
   "/:processorId",
-  AdminAuthMiddleware.requireAuth,
-  AdminAuthMiddleware.requireManager,
+  AuthMiddleware.requireManager,
   validateObjectIdReusable({ key: "processorId" }),
   ProcessorController.delete
 );
