@@ -12,7 +12,7 @@ const router = Router();
 // Add new connection for a specific consumer
 router.post(
   "/",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   checkSchema(addConnectionValidationSchema),
   validateObjectIdReusable({ key: "consumer", source: "body" }),
   ConnectionController.create
@@ -21,7 +21,7 @@ router.post(
 // Get all connections
 router.get(
   "/",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   ConnectionController.getAll
 );
 
@@ -36,7 +36,7 @@ router.get(
 // edit connection by id
 router.patch(
   "/:connectionId",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "connectionId" }),
   checkSchema(editConnectionValidationSchema),
   ConnectionController.updateById
@@ -45,7 +45,7 @@ router.patch(
 // delete connection by id
 router.delete(
   "/:connectionId",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "connectionId" }),
   ConnectionController.deleteById
 );

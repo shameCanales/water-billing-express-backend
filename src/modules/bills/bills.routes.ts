@@ -9,12 +9,12 @@ import { BillController } from "./bill.controller.ts";
 const router = Router();
 
 // Get all bills
-router.get("/", AuthMiddleware.requireStafforManager, BillController.getAll);
+router.get("/", AuthMiddleware.requireStaffOrManager, BillController.getAll);
 
 // add bill to a connection
 router.post(
   "/",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ source: "body", key: "connection" }),
   checkSchema(addBillValidationSchema),
   BillController.create
@@ -23,7 +23,7 @@ router.post(
 // update bill information
 router.patch(
   "/:billId",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "billId" }),
   checkSchema(editBillValidationSchema),
   BillController.update
@@ -32,7 +32,7 @@ router.patch(
 // Update bill status (paid, unpaid, overdue)
 router.patch(
   "/:billId/status",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "billId" }),
   BillController.updateStatus
 );
@@ -40,7 +40,7 @@ router.patch(
 // Delete a bill
 router.delete(
   "/:billId",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "billId" }),
   BillController.delete
 );

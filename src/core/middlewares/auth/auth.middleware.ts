@@ -74,7 +74,7 @@ export const AuthMiddleware = {
   },
 
   // L2: admin (staff or consumer)
-  requireStafforManager(req: Request, res: Response, next: NextFunction): void {
+  requireStaffOrManager(req: Request, res: Response, next: NextFunction): void {
     const payload = authenticateRequest(req, res);
     if (!payload) return;
 

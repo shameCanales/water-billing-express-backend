@@ -11,14 +11,14 @@ const router = Router();
 // get all consumers :  [{name, email, birthDate, mobileNumber, password, address, status}, ...]
 router.get(
   "/",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   ConsumerController.getAll
 );
 
 // Get Consumer by ID
 router.get(
   "/:consumerId",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.getById
 );
@@ -34,7 +34,7 @@ router.get(
 //add consumer
 router.post(
   "/",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   checkSchema(addConsumerValidationSchema),
   ConsumerController.create
 );
@@ -42,7 +42,7 @@ router.post(
 // Edit Consumer by ID
 router.patch(
   "/:consumerId",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.editById
 );
@@ -50,7 +50,7 @@ router.patch(
 // Delete Consumer by ID
 router.delete(
   "/:consumerId",
-  AuthMiddleware.requireStafforManager,
+  AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.deleteById
 );
