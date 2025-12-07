@@ -2,6 +2,7 @@ import { Router } from "express";
 import { checkSchema } from "express-validator";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
 import { addConsumerValidationSchema } from "../../core/middlewares/validationSchemas/addConsumerValidation.ts";
+import { editConsumerValidationSchema } from "../../core/middlewares/validationSchemas/editConsumerValidation.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { ConsumerController } from "./consumer.controller.ts";
 import { ConnectionController } from "../connections/connection.controller.ts";
@@ -44,6 +45,7 @@ router.patch(
   "/:consumerId",
   AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "consumerId" }),
+  checkSchema(editConsumerValidationSchema),
   ConsumerController.editById
 );
 
