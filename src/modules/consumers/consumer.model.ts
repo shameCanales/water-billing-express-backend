@@ -1,7 +1,10 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IConsumer {
-  name: string;
+  // name: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   email: string;
   birthDate: Date;
   mobileNumber: string;
@@ -20,7 +23,10 @@ export interface IConsumerDocument extends IConsumer, Document {
 // Lean version - plain object with password INCLUDED (for auth checks)
 export interface IConsumerLean {
   _id: mongoose.Types.ObjectId;
-  name: string;
+  // name: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   email: string;
   birthDate: Date;
   mobileNumber: string;
@@ -34,7 +40,10 @@ export interface IConsumerLean {
 // Public version - for API responses (NO password)
 export interface IConsumerPublic {
   _id: mongoose.Types.ObjectId;
-  name: string;
+  // name: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   email: string;
   birthDate: Date;
   mobileNumber: string;
@@ -47,7 +56,10 @@ export interface IConsumerPublic {
 // For population in other models (minimal fields)
 export interface IConsumerPopulated {
   _id: mongoose.Types.ObjectId;
-  name: string;
+  // name: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   email: string;
   mobileNumber: string;
   address: string;
@@ -55,9 +67,24 @@ export interface IConsumerPopulated {
 
 const consumerSchema = new Schema<IConsumerDocument>(
   {
-    name: {
+    // name: {
+    //   type: String,
+    //   required: [true, "Consumer name is requireds"],
+    //   trim: true,
+    // },
+    firstName: {
       type: String,
-      required: [true, "Consumer name is requireds"],
+      required: [true, "Firstname is required"],
+      trim: true,
+    },
+    middleName: {
+      type: String,
+      trim: true,
+      set: (value: string) => (value === "" ? undefined : value), // this will set the empty string into undefined. 
+    },
+    lastName: {
+      type: String,
+      required: [true, "Lastname is required"],
       trim: true,
     },
     email: {

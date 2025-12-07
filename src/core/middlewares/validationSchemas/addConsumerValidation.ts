@@ -1,18 +1,49 @@
 import type { Schema } from "express-validator";
 
-export const addConsumerValidationSchema : Schema = {
+export const addConsumerValidationSchema: Schema = {
   // NAME
-  name: {
+  firstName: {
     in: ["body"], // means where to look: req.body
     isString: {
-      errorMessage: "Name must be a string",
+      errorMessage: "first name must be a string",
     },
     isLength: {
-      options: { min: 5, max: 40 },
-      errorMessage: "Name must be between 5 and 40 characters",
+      options: { min: 1, max: 40 },
+      errorMessage: "first name must be between 5 and 40 characters",
     },
     notEmpty: {
-      errorMessage: "Name is required",
+      errorMessage: "first name is required",
+    },
+    trim: true,
+  },
+  middleName: {
+    in: ["body"], // means where to look: req.body
+    optional: {
+      options: {
+        nullable: true,
+        checkFalsy: true,
+      },
+    },
+    isString: {
+      errorMessage: "middle name must be a string",
+    },
+    isLength: {
+      options: { min: 1, max: 40 },
+      errorMessage: "middle name must be between 1 and 40 characters",
+    },
+    trim: true,
+  },
+  lastName: {
+    in: ["body"], // means where to look: req.body
+    isString: {
+      errorMessage: "last name must be a string",
+    },
+    isLength: {
+      options: { min: 1, max: 40 },
+      errorMessage: "last name must be between 1 and 40 characters",
+    },
+    notEmpty: {
+      errorMessage: "last name is required",
     },
     trim: true,
   },
@@ -39,7 +70,8 @@ export const addConsumerValidationSchema : Schema = {
       errorMessage: "Birth date is required",
     },
     isISO8601: {
-      errorMessage: "Birth date must be a valid ISO 8601 date (e.g., 2000-12-31)",
+      errorMessage:
+        "Birth date must be a valid ISO 8601 date (e.g., 2000-12-31)",
     },
     toDate: true, // automatically converts to JS Date
   },

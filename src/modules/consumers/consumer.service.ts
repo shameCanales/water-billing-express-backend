@@ -21,8 +21,17 @@ export const ConsumerService = {
   },
 
   async createConsumer(data: CreateConsumerData): Promise<ConsumerResponse> {
-    const { name, email, birthDate, mobileNumber, password, address, status } =
-      data;
+    const {
+      firstName,
+      middleName,
+      lastName,
+      email,
+      birthDate,
+      mobileNumber,
+      password,
+      address,
+      status,
+    } = data;
 
     const existingConsumer = await ConsumerRepository.findByEmail(email);
     if (existingConsumer) {
@@ -31,7 +40,9 @@ export const ConsumerService = {
     const hashedPassword = await hashPassword(password);
 
     const newConsumer = await ConsumerRepository.create({
-      name,
+      firstName,
+      middleName,
+      lastName,
       email,
       birthDate,
       mobileNumber,
