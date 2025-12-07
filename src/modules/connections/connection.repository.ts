@@ -10,7 +10,7 @@ import mongoose from "mongoose";
 export const ConnectionRepository = {
   async findAll(): Promise<IConnectionPopulated[]> {
     return (await Connection.find()
-      .populate("consumer", "name email mobileNumber")
+      .populate("consumer", "firstName middleName lastName email mobileNumber")
       .sort({ createdAt: -1 })
       .lean()) as unknown as IConnectionPopulated[];
   },
@@ -19,7 +19,7 @@ export const ConnectionRepository = {
     id: string | mongoose.Types.ObjectId
   ): Promise<IConnectionPopulated | null> {
     return (await Connection.findById(id)
-      .populate("consumer", "name email mobileNumber")
+      .populate("consumer", "firstName middleName lastName email mobileNumber")
       .lean()) as unknown as IConnectionPopulated | null;
   },
 
@@ -33,7 +33,7 @@ export const ConnectionRepository = {
 
   async findByConsumerId(consumer: string | mongoose.Types.ObjectId) {
     return Connection.find({ consumer })
-      .populate("consumer", "name email mobileNumber")
+      .populate("consumer", "firstName middleName lastName email mobileNumber")
       .sort({ createdAt: -1 })
       .lean() as unknown as IConnectionPopulated[];
   },
@@ -42,7 +42,7 @@ export const ConnectionRepository = {
     const newConnection = await Connection.create(data);
     return newConnection.populate(
       "consumer",
-      "name email mobileNumber"
+      "firstName middleName lastName email mobileNumber"
     ) as unknown as IConnectionPopulated;
   },
 
@@ -54,7 +54,7 @@ export const ConnectionRepository = {
       new: true,
       runValidators: true,
     })
-      .populate("consumer", "name email mobileNumber")
+      .populate("consumer", "firstName middleName lastName email mobileNumber")
       .lean()) as unknown as IConnectionPopulated | null;
   },
 
@@ -63,7 +63,7 @@ export const ConnectionRepository = {
   ): Promise<IConnectionPopulated | null> {
     const deleted = await Connection.findByIdAndDelete(id)?.populate(
       "consumer",
-      "name email mobileNumber"
+      "firstName middleName lastName email mobileNumber"
     );
     return deleted as unknown as IConnectionPopulated | null;
   },

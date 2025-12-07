@@ -1,7 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IConsumer {
-  // name: string;
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -23,7 +22,6 @@ export interface IConsumerDocument extends IConsumer, Document {
 // Lean version - plain object with password INCLUDED (for auth checks)
 export interface IConsumerLean {
   _id: mongoose.Types.ObjectId;
-  // name: string;
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -40,7 +38,6 @@ export interface IConsumerLean {
 // Public version - for API responses (NO password)
 export interface IConsumerPublic {
   _id: mongoose.Types.ObjectId;
-  // name: string;
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -56,7 +53,6 @@ export interface IConsumerPublic {
 // For population in other models (minimal fields)
 export interface IConsumerPopulated {
   _id: mongoose.Types.ObjectId;
-  // name: string;
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -80,7 +76,7 @@ const consumerSchema = new Schema<IConsumerDocument>(
     middleName: {
       type: String,
       trim: true,
-      set: (value: string) => (value === "" ? undefined : value), // this will set the empty string into undefined. 
+      set: (value: string) => (value === "" ? undefined : value), // this will set the empty string into undefined.
     },
     lastName: {
       type: String,
