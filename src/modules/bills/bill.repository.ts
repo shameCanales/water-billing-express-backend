@@ -13,7 +13,7 @@ export const BillRepository = {
         path: "connection",
         populate: {
           path: "consumer",
-          select: "name email mobileNumber address",
+          select: "firstName middleName lastName email mobileNumber address",
         },
       })
       .sort({ createdAt: -1 })
@@ -56,7 +56,7 @@ export const BillRepository = {
         path: "connection",
         populate: {
           path: "consumer",
-          select: "name email mobileNumber",
+          select: "firstName middleName lastName email mobileNumber",
         },
       })
       .lean();
@@ -70,7 +70,7 @@ export const BillRepository = {
         path: "connection",
         populate: {
           path: "consumer",
-          select: "name email mobileNumber address",
+          select: "firstName middleName lastName email mobileNumber address",
         },
       })
       .sort({ createdAt: -1 });
@@ -88,7 +88,7 @@ export const BillRepository = {
       path: "connection",
       populate: {
         path: "consumer",
-        select: "name email mobileNumber",
+        select: "firstName middleName lastName email mobileNumber",
       },
     });
   },
