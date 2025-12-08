@@ -30,7 +30,7 @@ export const ProcessorService = {
   async create(
     data: IProcessor
   ): Promise<Omit<IProcessorDocument, "password">> {
-    const { name, email, password, role } = data;
+    const { firstName, middleName, lastName, email, password, role } = data;
 
     const existing = await ProcessorRepository.findByEmail(email);
     if (existing) throw new Error("Processor with this email already exists");
@@ -38,7 +38,9 @@ export const ProcessorService = {
     const hashedPassword = await hashPassword(password);
 
     const newProcessor = await ProcessorRepository.create({
-      name,
+      firstName,
+      middleName,
+      lastName,
       email,
       password: hashedPassword,
       role: role ?? "staff",
@@ -49,16 +51,21 @@ export const ProcessorService = {
   },
 
   async createFirstManager(
-    data: Pick<IProcessor, "name" | "email" | "password">
+    data: Pick<
+      IProcessor,
+      "firstName" | "middleName" | "lastName" | "email" | "password"
+    >
   ) {
-    const { name, email, password } = data;
+    const { firstName, middleName, lastName, email, password } = data;
 
     const existing = await ProcessorRepository.findByEmail(email);
     if (existing) throw new Error("Processor with this email already exists");
 
     const hashedPassword = await hashPassword(password);
     const newManager = await ProcessorRepository.create({
-      name,
+      firstName,
+      middleName,
+      lastName,
       email,
       password: hashedPassword,
       role: "manager",

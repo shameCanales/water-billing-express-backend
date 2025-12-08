@@ -1,7 +1,9 @@
 import mongoose, { Document } from "mongoose";
 
 export interface IProcessor {
-  name: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   email: string;
   password: string;
   role?: "staff" | "manager";
@@ -17,7 +19,9 @@ export interface IProcessorDocument extends IProcessor, Document {
 // Lean version (plain JS object, e.g. when using .lean())
 export interface IProcessorLean {
   _id: mongoose.Types.ObjectId;
-  name: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   email: string;
   role: "staff" | "manager";
   createdAt: Date;
@@ -29,7 +33,9 @@ export interface IProcessorLean {
 // Public API version (no password, safe to return in responses)
 export interface IProcessorPublic {
   _id: mongoose.Types.ObjectId;
-  name: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   email: string;
   role: "staff" | "manager";
   createdAt: Date;
@@ -38,16 +44,28 @@ export interface IProcessorPublic {
 
 export interface IProcessorPopulated {
   _id: mongoose.Types.ObjectId;
-  name: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   email: string;
   role: "staff" | "manager";
 }
 
 const processorSchema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
       type: String,
-      required: true,
+      required: [true, "FirstName is required"],
+      trim: true,
+    },
+    middleName: {
+      type: String,
+      trim: true,
+      set: (value: string) => (value === "" ? undefined : value),
+    },
+    lastName: {
+      type: String,
+      required: [true, "LastName is required"],
       trim: true,
     },
     email: {

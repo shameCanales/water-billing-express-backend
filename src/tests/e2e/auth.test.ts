@@ -22,7 +22,9 @@ describe("E2E: Admin Authentication Flow", () => {
     // 2. Seed: Create a Manager directly in DB
     const hashedPassword = await hashPassword("securePassword123");
     await Processor.create({
-      name: "Test Admin",
+      firstName: "Test",
+      middleName: "middle",
+      lastName: "admin",
       email: "admin@test.com",
       password: hashedPassword,
       role: "manager",

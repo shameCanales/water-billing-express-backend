@@ -20,7 +20,6 @@ router.get(
   ProcessorController.getById
 );
 
-// Add a new processor
 /**
  * @route   POST /api/processors
  * @desc    Register a new processor (Manager only)
@@ -29,7 +28,7 @@ router.get(
 router.post(
   "/",
   AuthMiddleware.requireManager,
-  checkSchema(registerProcessorValidationSchema), // middleware for validating request body
+  checkSchema(registerProcessorValidationSchema), 
   ProcessorController.create
 );
 
