@@ -9,6 +9,7 @@ import consumerRouter from "../modules/consumers/consumers.routes.ts";
 import connectionRouter from "../modules/connections/connections.routes.ts";
 import billRouter from "../modules/bills/bills.routes.ts";
 import processorRouter from "../modules/processors/processors.routes.ts";
+import sharedRouter from "../modules/shared/shared.routes.ts";
 
 export function createApp(): Application {
   const app: Application = express();
@@ -50,6 +51,7 @@ export function createApp(): Application {
   app.use("/api/connections", connectionRouter);
   app.use("/api/bills", billRouter);
   app.use("/api/processors", processorRouter);
+  app.use("/api/shared", sharedRouter);
 
   app.get("/", (request: Request, response: Response): void => {
     response.status(200).json({
