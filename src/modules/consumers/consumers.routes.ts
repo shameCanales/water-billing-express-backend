@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { checkSchema } from "express-validator";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
-import { addConsumerValidationSchema } from "../../core/middlewares/validationSchemas/addConsumerValidation.ts";
 import { editConsumerValidationSchema } from "../../core/middlewares/validationSchemas/editConsumerValidation.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { ConsumerController } from "./consumer.controller.ts";
 import { ConnectionController } from "../connections/connection.controller.ts";
+import { ConsumerValidationSchema } from "../../core/middlewares/validationSchemas/consumers.validation.ts";
 
 const router = Router();
 
@@ -13,6 +13,7 @@ const router = Router();
 router.get(
   "/",
   AuthMiddleware.requireStaffOrManager,
+  checkSchema(ConsumerValidationSchema.getAll),
   ConsumerController.getAll
 );
 
@@ -36,7 +37,7 @@ router.get(
 router.post(
   "/",
   AuthMiddleware.requireStaffOrManager,
-  checkSchema(addConsumerValidationSchema),
+  checkSchema(ConsumerValidationSchema.add),
   ConsumerController.create
 );
 

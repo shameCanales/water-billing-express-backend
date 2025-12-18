@@ -61,6 +61,16 @@ export interface IConsumerPopulated {
   address: string;
 }
 
+export interface PaginatedConsumersResult {
+  consumers: IConsumerLean[];
+  pagination: {
+    total: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+  };
+}
+
 const consumerSchema = new Schema<IConsumerDocument>(
   {
     // name: {

@@ -1,10 +1,30 @@
 import type mongoose from "mongoose";
 import { Consumer } from "./consumer.model.ts";
-import type { IConsumer, IConsumerDocument } from "./consumer.model.ts";
+import type {
+  IConsumer,
+  IConsumerDocument,
+  IConsumerLean,
+} from "./consumer.model.ts";
 
 export const ConsumerRepository = {
-  async findAll(): Promise<IConsumerDocument[]> {
-    return Consumer.find().select("-password");
+  async findAll(
+    filter: Record<string, any> = {},
+    sort: Record<string, any> = { createdAt: -1 },
+    skip: number = 0,
+    limit: number = 0
+  ): Promise<IConsumerLean[]> {
+    return Consumer.find(filter)
+      .select("-password")
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .lean();
+  },
+
+
+  //to calculate total pages for the frontend
+  async count(filter: Record<string, any> = {}): Promise<number> {
+    return Consumer.countDocuments(filter);
   },
 
   async findById(

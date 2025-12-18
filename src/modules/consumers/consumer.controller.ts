@@ -5,13 +5,37 @@ import type { IConsumer } from "./consumer.model.ts";
 
 export const ConsumerController = {
   async getAll(req: Request, res: Response): Promise<Response> {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
+    }
+
     try {
-      const consumers = await ConsumerService.getAllConsumers();
+      const { page, limit, search, status, sortBy, sortOrder } =
+        matchedData(req);
+
+      // 2. Call Service
+      const result = await ConsumerService.getAllConsumers({
+        page,
+        limit,
+        search,
+        sortBy,
+        sortOrder,
+        status,
+      });
+
+      // 3. Send Standardized Response
       return res.status(200).json({
         success: true,
-        data: consumers,
+        message: "Consumers fetched successfully",
+        data: result, // result contain {consumers, pagination}
       });
-    } catch (error) {
+    } catch (err) {
+      console.error("fetched Consumers Error: ", err);
+
       return res.status(500).json({
         success: false,
         message: "Failed to fetch consumers",

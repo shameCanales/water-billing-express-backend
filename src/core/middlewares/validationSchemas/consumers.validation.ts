@@ -1,6 +1,68 @@
 import type { Schema } from "express-validator";
 
-export const addConsumerValidationSchema: Schema = {
+const getAllConsumersQuerySchema: Schema = {
+  page: {
+    in: ["query"],
+    optional: true,
+    isInt: {
+      options: {
+        min: 1,
+      },
+      errorMessage: "Page must be a positive integer",
+    },
+    toInt: true,
+  },
+
+  limit: {
+    in: ["query"],
+    optional: true,
+    isInt: {
+      options: {
+        min: 1,
+        max: 100,
+      },
+      errorMessage: "Limit must be between 1 and 100",
+    },
+    toInt: true,
+  },
+
+  search: {
+    in: ["query"],
+    optional: true,
+    trim: true,
+    escape: true, // Sanitizes input (e.g. converts < to &lt;)
+  },
+
+  status: {
+    in: ["query"],
+    optional: true,
+    isIn: {
+      options: [["active", "suspended", "all"]],
+      errorMessage: "Status must be 'active', 'suspended', or 'all'",
+    },
+    trim: true,
+  },
+
+  sortBy: {
+    in: ["query"],
+    optional: true,
+    trim: true,
+    // You can add an isIn check here if you want to strictly limit which fields can be sorted
+    // isIn: { options: [['firstName', 'lastName', 'createdAt']] }
+  },
+
+  sortOrder: {
+    in: ["query"],
+    optional: true,
+    isIn: {
+      options: [["asc", "desc"]],
+      errorMessage: "Sort order must be 'asc' or 'desc'",
+    },
+    trim: true,
+  },
+};
+
+const addConsumerValidationSchema: Schema = {
   // NAME
   firstName: {
     in: ["body"], // means where to look: req.body
@@ -133,4 +195,9 @@ export const addConsumerValidationSchema: Schema = {
       errorMessage: "Status must be either 'active' or 'suspended'",
     },
   },
+};
+
+export const ConsumerValidationSchema = {
+  add: addConsumerValidationSchema,
+  getAll: getAllConsumersQuerySchema,
 };
