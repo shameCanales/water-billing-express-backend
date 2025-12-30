@@ -48,8 +48,8 @@ export const AuthAdminController = {
 
       res.cookie("jwt", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // HTTPS only in prod
-        sameSite: "strict", // CSRF protection
+        secure: process.env.NODE_ENV === "production", // NODE_ENV = 'development'
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // CSRF protection
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
       });
 
