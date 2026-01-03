@@ -21,7 +21,6 @@ export const ConsumerRepository = {
       .lean();
   },
 
-
   //to calculate total pages for the frontend
   async count(filter: Record<string, any> = {}): Promise<number> {
     return Consumer.countDocuments(filter);
@@ -58,5 +57,19 @@ export const ConsumerRepository = {
   async consumerExists(consumerId: string): Promise<boolean> {
     const exists = await Consumer.exists({ _id: consumerId });
     return exists !== null;
+  },
+
+  async updateStatus(
+    id: string,
+    status: "active" | "suspended"
+  ): Promise<IConsumerDocument | null> {
+    return Consumer.findByIdAndUpdate(
+      id,
+      { status: status },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
   },
 };

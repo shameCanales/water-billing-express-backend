@@ -153,6 +153,33 @@ export const ConsumerController = {
       });
     }
   },
+
+  async updateStatusById(req: Request<{ consumerId: string }>, res: Response) {
+    try {
+      const { consumerId } = req.params;
+      const { status } = matchedData(req) as { status: "active" | "suspended" };
+
+      const updatedConsumer = await ConsumerService.updateStatus(
+        consumerId,
+        status
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Consumer status updated successfully",
+        data: updatedConsumer,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      const status = errorMessage.includes("not found") ? 404 : 500;
+
+      return res.status(status).json({
+        success: false,
+        message: errorMessage,
+      });
+    }
+  },
 };
 
 // BEFORE SEPARATING CODES TO CONTROLLERS, SERVICES, AND REPOSITORIES :::::::::::::::::::::::

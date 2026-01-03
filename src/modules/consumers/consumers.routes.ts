@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { checkSchema } from "express-validator";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
-import { editConsumerValidationSchema } from "../../core/middlewares/validationSchemas/editConsumerValidation.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { ConsumerController } from "./consumer.controller.ts";
 import { ConnectionController } from "../connections/connection.controller.ts";
@@ -46,7 +45,7 @@ router.patch(
   "/:consumerId",
   AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "consumerId" }),
-  checkSchema(editConsumerValidationSchema),
+  checkSchema(ConsumerValidationSchema.edit),
   ConsumerController.editById
 );
 
@@ -56,6 +55,15 @@ router.delete(
   AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "consumerId" }),
   ConsumerController.deleteById
+);
+
+// Update Consumer Status (suspend/activate)
+router.patch(
+  "/:consumerId/status",
+  AuthMiddleware.requireStaffOrManager,
+  validateObjectIdReusable({ key: "consumerId" }),
+  checkSchema(ConsumerValidationSchema.updateStatus),
+  ConsumerController.updateStatusById
 );
 
 export default router;

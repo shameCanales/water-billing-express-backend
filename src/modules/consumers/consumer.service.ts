@@ -152,4 +152,16 @@ export const ConsumerService = {
     if (!deletedConsumer) throw new Error("Consumer not found");
     return deletedConsumer;
   },
+
+  async updateStatus(id: string, status: "active" | "suspended") {
+    const existingConsumer = await ConsumerRepository.findById(id);
+    if (!existingConsumer) throw new Error("Consumer not found");
+    if (existingConsumer?.status === status) {
+      throw new Error(`Consumer is already ${status}`);
+    }
+
+    const updatedConsumer = await ConsumerRepository.updateStatus(id, status);
+
+    return updatedConsumer;
+  },
 };
