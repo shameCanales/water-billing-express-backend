@@ -252,7 +252,7 @@ const editConsumerSchema: Schema = {
     },
     trim: true,
   },
-
+  
   email: {
     in: ["body"],
     optional: true,

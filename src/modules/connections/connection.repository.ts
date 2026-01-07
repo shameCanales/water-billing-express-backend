@@ -8,11 +8,22 @@ import type {
 import mongoose from "mongoose";
 
 export const ConnectionRepository = {
-  async findAll(): Promise<IConnectionPopulated[]> {
-    return (await Connection.find()
+  async findAll(
+    filter: Record<string, any> = {},
+    sort: Record<string, any> = { createdAt: -1 },
+    skip: number = 0,
+    limit: number = 0
+  ): Promise<IConnectionPopulated[]> {
+    return (await Connection.find(filter)
       .populate("consumer", "firstName middleName lastName email mobileNumber")
-      .sort({ createdAt: -1 })
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
       .lean()) as unknown as IConnectionPopulated[];
+  },
+
+  async count(filter: Record<string, any> = {}): Promise<number> {
+    return Connection.countDocuments(filter);
   },
 
   async findById(

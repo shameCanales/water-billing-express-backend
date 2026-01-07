@@ -1,8 +1,7 @@
 import { Router } from "express";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
-import { addConnectionValidationSchema } from "../../core/middlewares/validationSchemas/addConnectionValidation.ts";
-import { editConnectionValidationSchema } from "../../core/middlewares/validationSchemas/editConnectionValidation.ts";
+import { ConnectionValidationSchema } from "../../core/middlewares/validationSchemas/connection.validation.ts";
 import { checkSchema } from "express-validator";
 import { BillController } from "../bills/bill.controller.ts";
 import { ConnectionController } from "./connection.controller.ts";
@@ -13,7 +12,7 @@ const router = Router();
 router.post(
   "/",
   AuthMiddleware.requireStaffOrManager,
-  checkSchema(addConnectionValidationSchema),
+  checkSchema(ConnectionValidationSchema.add),
   validateObjectIdReusable({ key: "consumer", source: "body" }),
   ConnectionController.create
 );
@@ -22,6 +21,7 @@ router.post(
 router.get(
   "/",
   AuthMiddleware.requireStaffOrManager,
+  checkSchema(ConnectionValidationSchema.getAll),
   ConnectionController.getAll
 );
 
@@ -38,7 +38,7 @@ router.patch(
   "/:connectionId",
   AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "connectionId" }),
-  checkSchema(editConnectionValidationSchema),
+  checkSchema(ConnectionValidationSchema.edit),
   ConnectionController.updateById
 );
 
@@ -52,9 +52,7 @@ router.delete(
 
 // get connection by id
 
-// deactivate connection
-
-// activate connection
+// update connection status
 
 // get active connections
 

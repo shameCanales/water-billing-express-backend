@@ -36,8 +36,28 @@ export const ConnectionController = {
   },
 
   async getAll(req: Request, res: Response): Promise<Response> {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
+    }
+
     try {
-      const connections = await ConnectionService.getAll();
+      const { page, limit, search, status, type, sortBy, sortOrder } =
+        matchedData(req);
+
+      const connections = await ConnectionService.getAll({
+        page,
+        limit,
+        search,
+        status,
+        type,
+        sortBy,
+        sortOrder,
+      });
+      
       return res.status(200).json({
         success: true,
         message: "Connections retrieved successfully",
