@@ -46,7 +46,7 @@ export const ConnectionService = {
     if (type && type !== "all") filter.type = type;
 
     if (search) {
-      const searchRegex = new RegExp(search, "i");
+      const searchRegex = new RegExp(search, "i"); // i = case sensitive
 
       const matchingConsumers = await ConsumerRepository.findAll({
         $or: [
@@ -59,11 +59,10 @@ export const ConnectionService = {
       const consumerIds = matchingConsumers.map((c) => c._id);
 
       const orConditions: any[] = [
-        { address: searchRegex },         // Search Address
-        { consumer: { $in: consumerIds } } // Search Consumer Name
+        { address: searchRegex }, // Search Address
+        { consumer: { $in: consumerIds } }, // Search Consumer Name
       ];
 
-      // C. CRITICAL FIX: Only search meterNumber if input is a valid number
       if (!isNaN(Number(search))) {
         orConditions.push({ meterNumber: Number(search) });
       }
@@ -87,7 +86,6 @@ export const ConnectionService = {
         limit,
       },
     };
-
   },
 
   async updateById(
