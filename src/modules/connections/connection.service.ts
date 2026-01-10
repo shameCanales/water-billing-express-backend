@@ -58,11 +58,17 @@ export const ConnectionService = {
 
       const consumerIds = matchingConsumers.map((c) => c._id);
 
-      filter.$or = [
-        { meterNumber: searchRegex },
-        { address: searchRegex },
-        { consumer: { $in: consumerIds } },
+      const orConditions: any[] = [
+        { address: searchRegex },         // Search Address
+        { consumer: { $in: consumerIds } } // Search Consumer Name
       ];
+
+      // C. CRITICAL FIX: Only search meterNumber if input is a valid number
+      if (!isNaN(Number(search))) {
+        orConditions.push({ meterNumber: Number(search) });
+      }
+
+      filter.$or = orConditions;
     }
 
     const sort: any = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
