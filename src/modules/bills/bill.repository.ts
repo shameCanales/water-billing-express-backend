@@ -7,8 +7,13 @@ import type {
 } from "./bill.model.ts";
 
 export const BillRepository = {
-  async findAll(): Promise<IBillPopulatedLean[]> {
-    const result = await Bill.find()
+  async findAll(
+    filter: Record<string, any> = {},
+    sort: Record<string, any> = { createdAt: -1 },
+    skip: number = 0,
+    limit: number = 0,
+  ): Promise<IBillPopulatedLean[]> {
+    const result = await Bill.find(filter)
       .populate({
         path: "connection",
         populate: {
@@ -16,15 +21,21 @@ export const BillRepository = {
           select: "firstName middleName lastName email mobileNumber address",
         },
       })
-      .sort({ createdAt: -1 })
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
       .lean();
 
     return result as unknown as IBillPopulatedLean[];
   },
 
+  async count(filter: Record<string, any> = {}): Promise<number> {
+    return Bill.countDocuments(filter);
+  },
+
   async findOneByConnectionAndMonth(
     connection: string,
-    monthOf: Date
+    monthOf: Date,
   ): Promise<IBillDocument | null> {
     return await Bill.findOne({ connection, monthOf });
   },
@@ -79,7 +90,7 @@ export const BillRepository = {
 
   async updateById(
     bill: string,
-    updates: Partial<IBill>
+    updates: Partial<IBill>,
   ): Promise<IBillDocument | null> {
     return await Bill.findByIdAndUpdate(bill, updates, {
       new: true,

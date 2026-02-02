@@ -56,6 +56,16 @@ export interface IBillPopulatedLean {
   __v: number;
 }
 
+export interface PaginatedBillsResult {
+  bills: IBillPopulatedLean[];
+  pagination: {
+    total: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+  };
+}
+
 const BillSchema: Schema = new Schema<IBillDocument>(
   {
     connection: {
@@ -103,7 +113,7 @@ const BillSchema: Schema = new Schema<IBillDocument>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // prevent duplicates for the same connection and same month

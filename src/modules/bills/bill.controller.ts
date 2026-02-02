@@ -5,14 +5,31 @@ import type { IBill } from "./bill.model.ts";
 
 export const BillController = {
   async getAll(req: Request, res: Response): Promise<Response> {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
+    }
+
     try {
-      const bills = await BillService.getAllBills();
+      const { page, limit, search, status, sortBy, sortOrder } =
+        matchedData(req);
+
+      const result = await BillService.getAllBills({
+        page,
+        limit,
+        search,
+        sortBy,
+        sortOrder,
+        status,
+      });
 
       return res.status(200).json({
         success: true,
         message: "Bills retrieved successfully",
-        count: bills.length,
-        data: bills,
+        data: result,
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown Error";
@@ -26,7 +43,7 @@ export const BillController = {
 
   async getByConnection(
     req: Request<{ connectionId: string }>,
-    res: Response
+    res: Response,
   ): Promise<Response> {
     try {
       const { connectionId } = req.params;
@@ -84,7 +101,7 @@ export const BillController = {
 
   async update(
     req: Request<{ billId: string }>,
-    res: Response
+    res: Response,
   ): Promise<Response> {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -121,7 +138,7 @@ export const BillController = {
       any,
       { status: "paid" | "unpaid" | "overdue" }
     >, // three objects: params, body, query
-    res: Response
+    res: Response,
   ): Promise<Response> {
     try {
       const { billId } = req.params;
@@ -145,7 +162,7 @@ export const BillController = {
 
   async delete(
     req: Request<{ billId: string }>,
-    res: Response
+    res: Response,
   ): Promise<Response> {
     try {
       const { billId } = req.params;
