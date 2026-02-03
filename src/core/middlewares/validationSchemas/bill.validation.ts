@@ -93,11 +93,14 @@ const addBillValidationSchema: Schema = {
     isNumeric: { errorMessage: "meterReading must be a number" },
     toFloat: true,
   },
-  chargePerCubicMeter: {
+  status: {
     in: ["body"],
     optional: true,
-    isNumeric: { errorMessage: "chargePerCubicMeter must be a number" },
-    toFloat: true,
+    isIn: {
+      options: [["paid", "unpaid", "overdue"]],
+      errorMessage: "Status must be 'paid', 'unpaid', or 'overdue'",
+    },
+    trim: true,
   },
 };
 

@@ -16,7 +16,7 @@ import mongoose from "mongoose";
 
 export type CreateBillData = Omit<
   IBill,
-  "status" | "amount" | "chargePerCubicMeter" | "consumedUnits" | "paidAt"
+  "amount" | "chargePerCubicMeter" | "consumedUnits" | "paidAt" //NOTE: omit =  take Ibill without these fields
 >;
 
 interface GetAllBillsParams {
@@ -101,7 +101,7 @@ export const BillService = {
   },
 
   async addBill(data: CreateBillData): Promise<IBillPopulatedLean> {
-    const { connection, monthOf, dueDate, meterReading } = data;
+    const { connection, monthOf, dueDate, meterReading, status } = data;
 
     const connectionId = new mongoose.Types.ObjectId(connection);
 
@@ -150,8 +150,8 @@ export const BillService = {
       chargePerCubicMeter: BILLING_SETTINGS.chargePerCubicMeter,
       consumedUnits,
       amount,
-      status: "unpaid",
-      paidAt: null,
+      status,
+      paidAt: status === "paid" ? new Date() : null,
     });
 
     const createdBill = await BillRepository.findById(newBill._id.toString());
