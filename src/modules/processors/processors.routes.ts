@@ -1,23 +1,26 @@
 import { Router } from "express";
-import { registerProcessorValidationSchema } from "../../core/middlewares/validationSchemas/registerProcessorValidation.ts";
 import { checkSchema } from "express-validator";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
 import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
-import { editProcessorValidationSchema } from "../../core/middlewares/validationSchemas/editProcessorValidation.ts";
 import { ProcessorController } from "./processor.controller.ts";
-import { registerManagerValidationSchema } from "../../core/middlewares/validationSchemas/registerManagerValidation.ts";
+import { ProcessorValidationSchema } from "../../core/middlewares/validationSchemas/processor.validation.ts";
 
 const router = Router();
 
 // Get all processors
-router.get("/", AuthMiddleware.requireManager, ProcessorController.getAll);
+router.get(
+  "/",
+  AuthMiddleware.requireManager,
+  checkSchema(ProcessorValidationSchema.getAll),
+  ProcessorController.getAll,
+);
 
 // Get Processor by ID
 router.get(
   "/:processorId",
   AuthMiddleware.requireManager,
   validateObjectIdReusable({ key: "processorId" }),
-  ProcessorController.getById
+  ProcessorController.getById,
 );
 
 /**
@@ -28,8 +31,8 @@ router.get(
 router.post(
   "/",
   AuthMiddleware.requireManager,
-  checkSchema(registerProcessorValidationSchema), 
-  ProcessorController.create
+  checkSchema(ProcessorValidationSchema.registerStaff),
+  ProcessorController.create,
 );
 
 // Edit Processor by ID
@@ -37,8 +40,8 @@ router.patch(
   "/:processorId",
   AuthMiddleware.requireManager,
   validateObjectIdReusable({ key: "processorId" }),
-  checkSchema(editProcessorValidationSchema),
-  ProcessorController.update
+  checkSchema(ProcessorValidationSchema.edit),
+  ProcessorController.update,
 );
 
 // Delete Processor by ID
@@ -46,7 +49,7 @@ router.delete(
   "/:processorId",
   AuthMiddleware.requireManager,
   validateObjectIdReusable({ key: "processorId" }),
-  ProcessorController.delete
+  ProcessorController.delete,
 );
 
 /**
@@ -56,8 +59,8 @@ router.delete(
  */
 router.post(
   "/register",
-  checkSchema(registerManagerValidationSchema),
-  ProcessorController.createManager
+  checkSchema(ProcessorValidationSchema.registerManager),
+  ProcessorController.createManager,
 );
 
 export default router;

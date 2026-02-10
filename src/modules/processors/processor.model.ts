@@ -7,6 +7,7 @@ export interface IProcessor {
   email: string;
   password: string;
   role?: "staff" | "manager";
+  status?: "active" | "inactive";
 }
 
 // MongoDB document version (includes _id, timestamps)
@@ -24,6 +25,7 @@ export interface IProcessorLean {
   lastName: string;
   email: string;
   role: "staff" | "manager";
+  status: "active" | "inactive";
   createdAt: Date;
   updatedAt: Date;
   __v: number;
@@ -38,6 +40,7 @@ export interface IProcessorPublic {
   lastName: string;
   email: string;
   role: "staff" | "manager";
+  status: "active" | "inactive";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,6 +52,7 @@ export interface IProcessorPopulated {
   lastName: string;
   email: string;
   role: "staff" | "manager";
+  status: "active" | "inactive";
 }
 
 const processorSchema = new mongoose.Schema(
@@ -86,13 +90,18 @@ const processorSchema = new mongoose.Schema(
       enum: ["staff", "manager"],
       default: "staff",
     },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const Processor = mongoose.model<IProcessorDocument>(
   "Processor",
-  processorSchema
+  processorSchema,
 );

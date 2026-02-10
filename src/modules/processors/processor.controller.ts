@@ -5,8 +5,18 @@ import type { IProcessor } from "./processor.model.ts";
 
 export const ProcessorController = {
   async getAll(req: Request, res: Response): Promise<Response> {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
+    }
+
     try {
-      const processors = await ProcessorService.getAll();
+      const {role} = matchedData(req);
+
+      const processors = await ProcessorService.getAll(role);
       return res.status(200).json({
         success: true,
         data: processors,
@@ -23,7 +33,7 @@ export const ProcessorController = {
 
   async getById(
     req: Request<{ processorId: string }>,
-    res: Response
+    res: Response,
   ): Promise<Response> {
     try {
       const { processorId } = req.params;
@@ -99,7 +109,7 @@ export const ProcessorController = {
 
   async update(
     req: Request<{ processorId: string }>,
-    res: Response
+    res: Response,
   ): Promise<Response> {
     const errors = validationResult(req);
 
@@ -131,7 +141,7 @@ export const ProcessorController = {
 
   async delete(
     req: Request<{ processorId: string }>,
-    res: Response
+    res: Response,
   ): Promise<Response> {
     try {
       const { processorId } = req.params;

@@ -7,8 +7,10 @@ import type {
 import type { Types } from "mongoose";
 
 export const ProcessorRepository = {
-  async findAll(): Promise<IProcessorDocument[]> {
-    return await Processor.find().select("-password").sort({
+  async findAll(
+    filter: Record<string, any> = {},
+  ): Promise<IProcessorDocument[]> {
+    return await Processor.find(filter).select("-password").sort({
       createdAt: -1,
     });
   },
@@ -28,7 +30,7 @@ export const ProcessorRepository = {
 
   async updateById(
     id: string | Types.ObjectId,
-    updates: Partial<IProcessor>
+    updates: Partial<IProcessor>,
   ): Promise<IProcessorDocument | null> {
     return await Processor.findByIdAndUpdate(id, updates, {
       new: true,
@@ -37,7 +39,7 @@ export const ProcessorRepository = {
   },
 
   async deleteById(
-    id: string | Types.ObjectId
+    id: string | Types.ObjectId,
   ): Promise<IProcessorDocument | null> {
     return await Processor.findByIdAndDelete(id);
   },

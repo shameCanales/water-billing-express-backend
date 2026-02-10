@@ -8,10 +8,19 @@ import type {
 import { Types } from "mongoose";
 
 export const ProcessorService = {
-  async getAll(): Promise<IProcessorDocument[]> {
-    const processors = await ProcessorRepository.findAll();
-    if (processors.length === 0)
-      throw new Error("you don't have any processors recorded.");
+  async getAll(role: string): Promise<IProcessorDocument[]> {
+    const filter: any = {};
+    if (role) {
+      filter.role = role;
+    }
+
+    const processors = await ProcessorRepository.findAll(filter);
+    if (processors.length === 0) {
+      const errorMessage = role
+        ? `No processors found with role ${role}`
+        : "You don't have any processors recorded.";
+      throw new Error(errorMessage);
+    }
 
     return processors;
   },
@@ -28,9 +37,10 @@ export const ProcessorService = {
   },
 
   async create(
-    data: IProcessor
+    data: IProcessor,
   ): Promise<Omit<IProcessorDocument, "password">> {
-    const { firstName, middleName, lastName, email, password, role } = data;
+    const { firstName, middleName, lastName, email, password, role, status } =
+      data;
 
     const existing = await ProcessorRepository.findByEmail(email);
     if (existing) throw new Error("Processor with this email already exists");
@@ -44,6 +54,7 @@ export const ProcessorService = {
       email,
       password: hashedPassword,
       role: role ?? "staff",
+      status: status ?? "active",
     });
 
     const { password: _, ...safeProcessor } = newProcessor.toObject();
@@ -54,7 +65,7 @@ export const ProcessorService = {
     data: Pick<
       IProcessor,
       "firstName" | "middleName" | "lastName" | "email" | "password"
-    >
+    >,
   ) {
     const { firstName, middleName, lastName, email, password } = data;
 
@@ -77,7 +88,7 @@ export const ProcessorService = {
 
   async updateById(
     id: Types.ObjectId | string,
-    updates: Partial<IProcessor>
+    updates: Partial<IProcessor>,
   ): Promise<IProcessorDocument> {
     if (updates.password) {
       updates.password = await hashPassword(updates.password);
