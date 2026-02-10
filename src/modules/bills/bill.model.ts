@@ -117,6 +117,6 @@ const BillSchema: Schema = new Schema<IBillDocument>(
 );
 
 // prevent duplicates for the same connection and same month
-BillSchema.index({ connection: 1, monthOf: 1 }, { unique: true }); // means
+BillSchema.index({ connection: 1, monthOf: 1 }, { unique: true }); // means a bill for a given connection and month can only be created once
 
 export const Bill = mongoose.model<IBillDocument>("Bill", BillSchema);

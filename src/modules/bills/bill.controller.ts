@@ -17,7 +17,7 @@ export const BillController = {
       const { page, limit, search, status, sortBy, sortOrder } =
         matchedData(req);
 
-      const result = await BillService.getAllBills({
+      const bills = await BillService.getAllBills({
         page,
         limit,
         search,
@@ -29,7 +29,7 @@ export const BillController = {
       return res.status(200).json({
         success: true,
         message: "Bills retrieved successfully",
-        data: result,
+        data: bills,
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown Error";

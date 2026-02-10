@@ -73,11 +73,6 @@ export interface PaginatedConsumersResult {
 
 const consumerSchema = new Schema<IConsumerDocument>(
   {
-    // name: {
-    //   type: String,
-    //   required: [true, "Consumer name is requireds"],
-    //   trim: true,
-    // },
     firstName: {
       type: String,
       required: [true, "Firstname is required"],

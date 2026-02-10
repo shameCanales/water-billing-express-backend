@@ -10,6 +10,7 @@ import connectionRouter from "../modules/connections/connections.routes.ts";
 import billRouter from "../modules/bills/bills.routes.ts";
 import processorRouter from "../modules/processors/processors.routes.ts";
 import sharedRouter from "../modules/shared/shared.routes.ts";
+import settingsRouter from "../modules/settings/Settings.routes.ts"
 
 export function createApp(): Application {
   const app: Application = express();
@@ -19,7 +20,7 @@ export function createApp(): Application {
     cors({
       origin: "http://localhost:3000", // Explicitly allow your Frontend
       credentials: true, // Allow Cookies to travel between ports
-    })
+    }),
   );
 
   app.use(express.json());
@@ -28,7 +29,7 @@ export function createApp(): Application {
   const loggingMiddleware = (
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): void => {
     console.log(`log: ${request.method} - ${request.url}`);
     next();
@@ -39,7 +40,7 @@ export function createApp(): Application {
     (request: Request, response: Response, next: NextFunction): void => {
       console.log("finished logging...");
       next();
-    }
+    },
   );
 
   // AUth
@@ -52,6 +53,7 @@ export function createApp(): Application {
   app.use("/api/bills", billRouter);
   app.use("/api/processors", processorRouter);
   app.use("/api/shared", sharedRouter);
+  app.use("/api/settings", settingsRouter);
 
   app.get("/", (request: Request, response: Response): void => {
     response.status(200).json({
