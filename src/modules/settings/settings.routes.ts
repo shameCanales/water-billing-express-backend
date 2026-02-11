@@ -4,10 +4,15 @@ import { SettingsController } from "./settings.controller.ts";
 
 const router = Router();
 
-router.get("/chargePerCubicMeter", SettingsController.getChargePerCubicMeter);
+router.get(
+  "/chargePerCubicMeter",
+  AuthMiddleware.requireStaffOrManager,
+  SettingsController.getChargePerCubicMeter,
+);
 
 router.patch(
   "/chargePerCubicMeter",
+  AuthMiddleware.requireManager,
   SettingsController.updateChargePerCubicMeter,
 );
 
