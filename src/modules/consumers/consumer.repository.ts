@@ -27,9 +27,9 @@ export const ConsumerRepository = {
   },
 
   async findById(
-    id: mongoose.Types.ObjectId | string
+    _id: mongoose.Types.ObjectId | string
   ): Promise<IConsumerDocument | null> {
-    return Consumer.findById(id).select("-password");
+    return Consumer.findById(_id).select("-password");
   },
 
   async findByEmail(email: string): Promise<IConsumerDocument | null> {
@@ -41,17 +41,17 @@ export const ConsumerRepository = {
   },
 
   async editById(
-    id: string,
+    _id: string,
     updates: Partial<IConsumer>
   ): Promise<IConsumerDocument | null> {
-    return Consumer.findByIdAndUpdate(id, updates, {
+    return Consumer.findByIdAndUpdate(_id, updates, {
       new: true,
       runValidators: true,
     });
   },
 
-  async deleteById(id: string): Promise<IConsumerDocument | null> {
-    return Consumer.findByIdAndDelete(id);
+  async deleteById(_id: string): Promise<IConsumerDocument | null> {
+    return Consumer.findByIdAndDelete(_id);
   },
 
   async consumerExists(consumerId: string): Promise<boolean> {
@@ -60,11 +60,11 @@ export const ConsumerRepository = {
   },
 
   async updateStatus(
-    id: string,
+    _id: string,
     status: "active" | "suspended"
   ): Promise<IConsumerDocument | null> {
     return Consumer.findByIdAndUpdate(
-      id,
+      _id,
       { status: status },
       {
         new: true,

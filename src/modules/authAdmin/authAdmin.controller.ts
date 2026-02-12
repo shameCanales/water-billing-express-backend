@@ -37,7 +37,7 @@ export const AuthAdminController = {
       }
 
       const payload = {
-        id: admin._id.toString(),
+        _id: admin._id.toString(),
         email: admin.email,
         role: admin.role!,
         type: "admin" as const,
@@ -58,7 +58,7 @@ export const AuthAdminController = {
         message: "Login successful",
         accessToken,
         user: {
-          id: admin._id,
+          _id: admin._id,
           email: admin.email,
           role: admin.role,
           type: "admin",
@@ -107,7 +107,7 @@ export const AuthAdminController = {
 
       // 4. Generate NEW Access Token
       const newAccessToken = generateAccessToken({
-        id: decoded.id,
+        _id: decoded._id,
         email: decoded.email,
         role: (decoded as any).role,
         type: decoded.type as any,
@@ -145,7 +145,7 @@ export const AuthAdminController = {
 
       // Optionally fetch resh data from database
 
-      const admin = await ProcessorService.getById(req.user.id);
+      const admin = await ProcessorService.getById(req.user._id);
 
       if (!admin) {
         res.status(404).json({

@@ -58,10 +58,10 @@ export const ConnectionRepository = {
   },
 
   async updateById(
-    id: string | mongoose.Types.ObjectId,
+    _id: string | mongoose.Types.ObjectId,
     updates: Partial<IConnection>
   ): Promise<IConnectionPopulated | null> {
-    return (await Connection.findByIdAndUpdate(id, updates, {
+    return (await Connection.findByIdAndUpdate(_id, updates, {
       new: true,
       runValidators: true,
     })
@@ -70,9 +70,9 @@ export const ConnectionRepository = {
   },
 
   async deleteById(
-    id: string | mongoose.Types.ObjectId
+    _id: string | mongoose.Types.ObjectId
   ): Promise<IConnectionPopulated | null> {
-    const deleted = await Connection.findByIdAndDelete(id)?.populate(
+    const deleted = await Connection.findByIdAndDelete(_id)?.populate(
       "consumer",
       "firstName middleName lastName email mobileNumber"
     );

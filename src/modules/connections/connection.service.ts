@@ -89,18 +89,18 @@ export const ConnectionService = {
   },
 
   async updateById(
-    id: string | mongoose.Types.ObjectId,
+    _id: string | mongoose.Types.ObjectId,
     updates: Partial<IConnection>
   ): Promise<IConnectionPopulated> {
-    const updated = await ConnectionRepository.updateById(id, updates);
+    const updated = await ConnectionRepository.updateById(_id, updates);
     if (!updated) throw new Error("Connection not found");
     return updated;
   },
 
   async deleteById(
-    id: string | mongoose.Types.ObjectId
+    _id: string | mongoose.Types.ObjectId
   ): Promise<IConnectionPopulated> {
-    const deleted = await ConnectionRepository.deleteById(id);
+    const deleted = await ConnectionRepository.deleteById(_id);
     if (!deleted) throw new Error("Connection not found");
     return deleted;
   },

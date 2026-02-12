@@ -12,13 +12,13 @@ export const SharedController = {
         });
       }
 
-      const { id, type } = req.user;
+      const { _id, type } = req.user;
       let userProfile = null;
 
       if (type === "admin") {
-        userProfile = await ProcessorService.getById(id);
+        userProfile = await ProcessorService.getById(_id);
       } else if (type === "consumer") {
-        userProfile = await ConsumerService.getConsumerById(id);
+        userProfile = await ConsumerService.getConsumerById(_id);
       }
 
       if (!userProfile) {

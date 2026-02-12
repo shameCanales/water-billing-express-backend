@@ -9,7 +9,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: {
-        id: string;
+        _id: string;
         email: string;
         type: "admin" | "consumer";
         role?: "staff" | "manager" | "consumer";
@@ -65,7 +65,7 @@ export const AuthMiddleware = {
     }
 
     req.user = {
-      id: payload.id,
+      _id: payload._id,
       email: payload.email,
       role: "consumer",
       type: "consumer",
@@ -96,7 +96,7 @@ export const AuthMiddleware = {
     }
 
     req.user = {
-      id: payload.id,
+      _id: payload._id,
       email: payload.email,
       role: payload.role,
       type: "admin",
@@ -127,7 +127,7 @@ export const AuthMiddleware = {
     }
 
     req.user = {
-      id: payload.id,
+      _id: payload._id,
       email: payload.email,
       role: payload.role,
       type: "admin",
@@ -143,14 +143,14 @@ export const AuthMiddleware = {
 
     if (payload.type === "admin") {
       req.user = {
-        id: payload.id,
+        _id: payload._id,
         email: payload.email,
         role: payload.role,
         type: "admin",
       };
     } else {
       req.user = {
-        id: payload.id,
+        _id: payload._id,
         email: payload.email,
         type: "consumer",
         role: "consumer",

@@ -55,7 +55,7 @@ export const AuthConsumerController = {
 
       // set the payload
       const payload = {
-        id: consumer._id.toString(),
+        _id: consumer._id.toString(),
         email: consumer.email,
         type: "consumer" as const,
       };
@@ -135,7 +135,7 @@ export const AuthConsumerController = {
         return;
       }
 
-      const consumer = await ConsumerService.getConsumerById(req.user.id);
+      const consumer = await ConsumerService.getConsumerById(req.user._id);
 
       if (!consumer) {
         res.status(404).json({
@@ -234,7 +234,7 @@ export const AuthConsumerController = {
 
       // Generate NEW Access Token
       const newAccessToken = generateAccessToken({
-        id: decoded.id,
+        _id: decoded._id,
         email: decoded.email,
         type: "consumer",
       });

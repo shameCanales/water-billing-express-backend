@@ -25,8 +25,8 @@ export const ProcessorService = {
     return processors;
   },
 
-  async getById(id: Types.ObjectId | string): Promise<IProcessorLean | null> {
-    const processor = await ProcessorRepository.findById(id);
+  async getById(_id: Types.ObjectId | string): Promise<IProcessorLean | null> {
+    const processor = await ProcessorRepository.findById(_id);
     if (!processor) throw new Error("Processor not found");
     return processor;
   },
@@ -87,21 +87,21 @@ export const ProcessorService = {
   },
 
   async updateById(
-    id: Types.ObjectId | string,
+    _id: Types.ObjectId | string,
     updates: Partial<IProcessor>,
   ): Promise<IProcessorDocument> {
     if (updates.password) {
       updates.password = await hashPassword(updates.password);
     }
 
-    const updated = await ProcessorRepository.updateById(id, updates);
+    const updated = await ProcessorRepository.updateById(_id, updates);
     if (!updated) throw new Error("Processor not found");
 
     return updated;
   },
 
-  async deleteById(id: Types.ObjectId | string): Promise<IProcessorDocument> {
-    const deleted = await ProcessorRepository.deleteById(id);
+  async deleteById(_id: Types.ObjectId | string): Promise<IProcessorDocument> {
+    const deleted = await ProcessorRepository.deleteById(_id);
     if (!deleted) throw new Error("Processor not found");
     return deleted;
   },

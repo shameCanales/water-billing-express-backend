@@ -15,8 +15,8 @@ export const ProcessorRepository = {
     });
   },
 
-  async findById(id: string | Types.ObjectId): Promise<IProcessorLean | null> {
-    const result = await Processor.findById(id).select("-password").lean();
+  async findById(_id: string | Types.ObjectId): Promise<IProcessorLean | null> {
+    const result = await Processor.findById(_id).select("-password").lean();
     return result as unknown as IProcessorLean | null;
   },
 
@@ -29,18 +29,18 @@ export const ProcessorRepository = {
   },
 
   async updateById(
-    id: string | Types.ObjectId,
+    _id: string | Types.ObjectId,
     updates: Partial<IProcessor>,
   ): Promise<IProcessorDocument | null> {
-    return await Processor.findByIdAndUpdate(id, updates, {
+    return await Processor.findByIdAndUpdate(_id, updates, {
       new: true,
       runValidators: true,
     }).select("-password");
   },
 
   async deleteById(
-    id: string | Types.ObjectId,
+    _id: string | Types.ObjectId,
   ): Promise<IProcessorDocument | null> {
-    return await Processor.findByIdAndDelete(id);
+    return await Processor.findByIdAndDelete(_id);
   },
 };

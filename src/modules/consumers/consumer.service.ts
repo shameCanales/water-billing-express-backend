@@ -123,9 +123,9 @@ export const ConsumerService = {
   },
 
   async getConsumerById(
-    id: mongoose.Types.ObjectId | string
+    _id: mongoose.Types.ObjectId | string
   ): Promise<IConsumerDocument> {
-    const consumer = await ConsumerRepository.findById(id);
+    const consumer = await ConsumerRepository.findById(_id);
     if (!consumer) throw new Error("Consumer not found");
     return consumer;
   },
@@ -136,31 +136,31 @@ export const ConsumerService = {
     return consumer;
   },
 
-  async updateConsumer(id: string, updates: Partial<IConsumerDocument>) {
+  async updateConsumer(_id: string, updates: Partial<IConsumerDocument>) {
     if (updates.password) {
       updates.password = await hashPassword(updates.password);
     }
 
-    const updatedConsumer = await ConsumerRepository.editById(id, updates);
+    const updatedConsumer = await ConsumerRepository.editById(_id, updates);
     if (!updatedConsumer) throw new Error("Consumer not found");
 
     return updatedConsumer;
   },
 
-  async deleteConsumer(id: string): Promise<IConsumerDocument> {
-    const deletedConsumer = await ConsumerRepository.deleteById(id);
+  async deleteConsumer(_id: string): Promise<IConsumerDocument> {
+    const deletedConsumer = await ConsumerRepository.deleteById(_id);
     if (!deletedConsumer) throw new Error("Consumer not found");
     return deletedConsumer;
   },
 
-  async updateStatus(id: string, status: "active" | "suspended") {
-    const existingConsumer = await ConsumerRepository.findById(id);
+  async updateStatus(_id: string, status: "active" | "suspended") {
+    const existingConsumer = await ConsumerRepository.findById(_id);
     if (!existingConsumer) throw new Error("Consumer not found");
     if (existingConsumer?.status === status) {
       throw new Error(`Consumer is already ${status}`);
     }
 
-    const updatedConsumer = await ConsumerRepository.updateStatus(id, status);
+    const updatedConsumer = await ConsumerRepository.updateStatus(_id, status);
 
     return updatedConsumer;
   },

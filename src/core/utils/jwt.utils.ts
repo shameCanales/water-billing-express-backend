@@ -11,14 +11,14 @@ if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
 }
 
 export interface AdminJWTPayload {
-  id: string;
+  _id: string;
   email: string;
   role: "staff" | "manager";
   type: "admin";
 }
 
 export interface ConsumerJWTPayload {
-  id: string;
+  _id: string;
   email: string;
   type: "consumer";
 }
