@@ -26,8 +26,8 @@ export const AuthAdminController = {
         return;
       }
 
-      // Find admin by email (includes password field)
       const admin = await ProcessorService.getByEmail(email);
+
       if (!admin || !(await comparePassword(password, admin.password))) {
         res.status(401).json({
           success: false,
@@ -36,11 +36,20 @@ export const AuthAdminController = {
         return;
       }
 
+      if (admin.status === "restricted") {
+        res.status(403).json({
+          success: false,
+          message: "Account is restricted by the Manager.",
+        });
+        return;
+      }
+
       const payload = {
         _id: admin._id.toString(),
         email: admin.email,
-        role: admin.role!,
-        type: "admin" as const,
+        role: admin.role!, // staff || manager
+        type: "admin" as const, //admin lahat ng processor. as const because in types string !== "admin". it's like "admin" | "consumer". because if string, it could be "hello" and is not equal to type "admin". basta
+        status: admin.status!, // active || restricted
       };
 
       const accessToken = generateAccessToken(payload);
@@ -62,6 +71,7 @@ export const AuthAdminController = {
           email: admin.email,
           role: admin.role,
           type: "admin",
+          status: admin.status,
         },
       });
     } catch (err) {
@@ -90,13 +100,21 @@ export const AuthAdminController = {
       }
 
       const refreshToken = cookies.jwt;
-
-      //verify Refresh token
       const decoded = verifyRefreshToken(refreshToken);
+
       if (!decoded) {
+        res.clearCookie("jwt");
         res.status(403).json({
           success: false,
           message: "Invalid refresh token",
+        });
+        return;
+      }
+
+      if (decoded.type !== "admin") {
+        res.status(403).json({
+          success: false,
+          message: "Invalid token type",
         });
         return;
       }
@@ -109,8 +127,9 @@ export const AuthAdminController = {
       const newAccessToken = generateAccessToken({
         _id: decoded._id,
         email: decoded.email,
-        role: (decoded as any).role,
-        type: decoded.type as any,
+        role: decoded.role,
+        type: decoded.type,
+        status: decoded.status,
       });
 
       res.status(200).json({
@@ -150,11 +169,13 @@ export const AuthAdminController = {
       if (!admin) {
         res.status(404).json({
           success: false,
-          message: "Admin not found",
+          message: "Admin account not found",
         });
 
         return;
       }
+
+      // const adminObj = admin.toObject ? admin.toObject() : admin;
 
       const { password: _, ...adminData } = admin as any;
 

@@ -109,8 +109,8 @@ const registerManagerSchema: Schema = {
 
   status: {
     isIn: {
-      options: [["active", "inactive"]],
-      errorMessage: "Status must be either 'active' or 'inactive'.",
+      options: [["active", "restricted"]],
+      errorMessage: "Status must be either 'active' or 'restricted'.",
     },
     notEmpty: {
       errorMessage: "Status is required.",
@@ -214,8 +214,8 @@ const registerStaffSchema: Schema = {
 
   status: {
     isIn: {
-      options: [["active", "inactive"]],
-      errorMessage: "Status must be either 'active' or 'inactive'.",
+      options: [["active", "restricted"]],
+      errorMessage: "Status must be either 'active' or 'restricted'.",
     },
     notEmpty: {
       errorMessage: "Status is required.",
@@ -290,8 +290,8 @@ const editProcessorValidationSchema: Schema = {
 
   status: {
     isIn: {
-      options: [["active", "inactive"]],
-      errorMessage: "Status must be either 'active' or 'inactive'.",
+      options: [["active", "restricted"]],
+      errorMessage: "Status must be either 'active' or 'restricted'.",
     },
     notEmpty: {
       errorMessage: "Status is required.",
