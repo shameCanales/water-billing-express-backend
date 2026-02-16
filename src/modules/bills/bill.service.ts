@@ -1,6 +1,5 @@
 import { BillRepository } from "./bill.repository.ts";
 import { ConnectionRepository } from "../connections/connection.repository.ts";
-import { BILLING_SETTINGS } from "../../config/settings.ts"; //{chargePerCubicMeter: 20,}
 import { SettingsRepository } from "../settings/settings.repository.ts";
 import {
   type IBill,
@@ -140,8 +139,9 @@ export const BillService = {
         "Current meter reading cannot be lower than previous reading",
       );
 
-    // const amount = consumedUnits * BILLING_SETTINGS.chargePerCubicMeter; // 
-    const amount = consumedUnits * BILLING_SETTINGS.chargePerCubicMeter; // 
+    const chargePerCubicMeter =
+      await SettingsRepository.getChargePerCubicMeter();
+    const amount = consumedUnits * chargePerCubicMeter;
 
     // create
     const newBill = await BillRepository.create({
@@ -149,7 +149,7 @@ export const BillService = {
       monthOf: monthDate,
       dueDate: dueDateObj,
       meterReading,
-      chargePerCubicMeter: BILLING_SETTINGS.chargePerCubicMeter,
+      chargePerCubicMeter,
       consumedUnits,
       amount,
       status,
