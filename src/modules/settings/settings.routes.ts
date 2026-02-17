@@ -7,16 +7,24 @@ import { SettingsValidationSchema } from "../../core/middlewares/validationSchem
 const router = Router();
 
 router.get(
-  "/chargePerCubicMeter",
+  "/",
   AuthMiddleware.requireStaffOrManager,
-  SettingsController.getChargePerCubicMeter,
+  SettingsController.getSettings,
 );
 
 router.patch(
-  "/chargePerCubicMeter",
+  "/",
   AuthMiddleware.requireManager,
-  checkSchema(SettingsValidationSchema.updateChargePercubicMeter),
-  SettingsController.updateChargePerCubicMeter,
+  checkSchema(SettingsValidationSchema.updateSetting),
+  SettingsController.updateSetting,
 );
+
+router.get(
+  "/history/:key",
+  AuthMiddleware.requireStaffOrManager,
+  SettingsController.getHistory,
+);
+
+
 
 export default router;

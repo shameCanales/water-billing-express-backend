@@ -139,8 +139,11 @@ export const BillService = {
         "Current meter reading cannot be lower than previous reading",
       );
 
-    const chargePerCubicMeter =
-      await SettingsRepository.getChargePerCubicMeter();
+    const chargePerCubicMeter = await SettingsRepository.getSettingValue(
+      "chargePerCubicMeter",
+    );
+    // const chargePerCubicMeter =
+    //   await SettingsRepository.getChargePerCubicMeter();
     const amount = consumedUnits * chargePerCubicMeter;
 
     // create

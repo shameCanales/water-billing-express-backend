@@ -1,32 +1,92 @@
-import { Settings, type ISettingsLean } from "./settings.model.ts";
+import mongoose, { mongo } from "mongoose";
+import {
+  Settings,
+  type ISettingsLean,
+  type Settingkey,
+} from "./settings.model.ts";
+import {
+  SettingsHistory,
+  type ISettingsHistoryLean,
+} from "./settingsHistory.model.ts";
 
 export const SettingsRepository = {
-  async getChargePerCubicMeter(): Promise<number> {
-    const settings =
-      ((await Settings.findOne()
-        .sort({ createdAt: -1 })
-        .lean()) as unknown as ISettingsLean) || null;
-
-    if (!settings) {
-      const newSettings = await Settings.create({ chargePerCubicMeter: 0 });
-      return newSettings.chargePerCubicMeter;
-    }
-
-    return settings.chargePerCubicMeter;
+  async getSettings(): Promise<ISettingsLean> {
+    const settings = (await Settings.findOne().lean()) as ISettingsLean | null;
+    if (!settings) throw new Error("Settings not initialized");
+    return settings;
   },
 
-  async updateChargePerCubicMeter(amount: number): Promise<number> {
-    const updated = await Settings.findOneAndUpdate(
-      {}, // match any (singleton)
-      { chargePerCubicMeter: amount },
-      {
-        new: true,
-        upsert: true, // create a new document if none exists
-        runValidators: true,
-      },
-    ).lean();
+  async getSettingValue(key: Settingkey): Promise<number> {
+    const settings = await this.getSettings();
+    return settings[key];
+  },
 
+  async initialize(defaults: {
+    chargePerCubicMeter: number;
+    surchargeRate: number;
+  }): Promise<void> {
+    const existing = await Settings.findOne().lean();
+    if (existing) return;
 
-    return updated!.chargePerCubicMeter;
+    const now = new Date();
+
+    await mongoose.connection.transaction(async (session) => {
+      await Settings.create([defaults], { session });
+
+      await SettingsHistory.insertMany(
+        Object.entries(defaults).map(([key, value]) => ({
+          key,
+          value,
+          effectiveFrom: now,
+        })),
+        { session },
+      );
+    });
+  },
+
+  async updateSetting(key: Settingkey, value: number): Promise<ISettingsLean> {
+    const now = new Date();
+
+    const updated = await mongoose.connection.transaction(async () => {
+      // update the singleton
+      const updatedSettings = (await Settings.findOneAndUpdate(
+        {},
+        { [key]: value },
+        { new: true, upsert: true, runValidators: true },
+      ).lean()) as ISettingsLean;
+      // append to history
+      await SettingsHistory.create({ key, value, effectiveFrom: now });
+
+      return updatedSettings;
+    });
+
+    return updated;
+  },
+
+  async getHistory(
+    key: Settingkey,
+    months = 12,
+  ): Promise<ISettingsHistoryLean[]> {
+    const since = new Date();
+    since.setMonth(since.getMonth() - months);
+
+    return (await SettingsHistory.find({
+      key,
+      effectiveFrom: { $gte: since },
+    })
+      .sort({ effectiveFrom: 1 })
+      .lean()) as ISettingsHistoryLean[];
+  },
+
+  async getValueAsOf(key: Settingkey, asOf: Date): Promise<number> {
+    const record = (await SettingsHistory.findOne({
+      key,
+      effectiveFrom: { $lte: asOf },
+    })
+      .sort({ effectiveFrom: -1 })
+      .lean()) as ISettingsHistoryLean | null;
+
+    if (!record) throw new Error(`No history found for setting: ${key}`);
+    return record.value;
   },
 };
