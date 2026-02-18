@@ -1,9 +1,12 @@
-import "../core/emv.ts"; // import first to 
+import "../core/emv.ts"; // import first to
 import mongoose from "mongoose";
 import { createApp } from "./createApp.ts";
 
 mongoose
-  .connect("mongodb://localhost/water_billing_system")
+  // .connect("mongodb://localhost/water_billing_system")
+  .connect(
+    process.env.MONGODB_CONNECTION_URL || "mongodb://localhost/water_billing_system",
+  )
   .then(() => {
     console.log("Connected to WBS Database");
   })

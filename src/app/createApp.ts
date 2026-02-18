@@ -10,7 +10,7 @@ import connectionRouter from "../modules/connections/connections.routes.ts";
 import billRouter from "../modules/bills/bills.routes.ts";
 import processorRouter from "../modules/processors/processors.routes.ts";
 import sharedRouter from "../modules/shared/shared.routes.ts";
-import settingsRouter from "../modules/settings/settings.routes.ts"
+import settingsRouter from "../modules/settings/settings.routes.ts";
 
 export function createApp(): Application {
   const app: Application = express();
@@ -18,7 +18,7 @@ export function createApp(): Application {
   // 1. CORS MUST come before routes
   app.use(
     cors({
-      origin: "http://localhost:3000", // Explicitly allow your Frontend
+      origin: process.env.FRONTEND_ADMIN_URL, // Explicitly allow your Frontend
       credentials: true, // Allow Cookies to travel between ports
     }),
   );
