@@ -8,7 +8,7 @@ mongoose
     process.env.MONGODB_CONNECTION_URL || "mongodb://localhost/water_billing_system",
   )
   .then(() => {
-    console.log("Connected to WBS Database");
+    console.log("Connected to WBS mongo Database");
   })
   .catch((err) => {
     console.log("failed to connect to database", err);

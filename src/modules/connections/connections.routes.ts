@@ -5,6 +5,7 @@ import { ConnectionValidationSchema } from "../../core/middlewares/validationSch
 import { checkSchema } from "express-validator";
 import { BillController } from "../bills/bill.controller.ts";
 import { ConnectionController } from "./connection.controller.ts";
+import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.ts";
 
 const router = Router();
 
@@ -14,7 +15,7 @@ router.post(
   AuthMiddleware.requireStaffOrManager,
   checkSchema(ConnectionValidationSchema.add),
   validateObjectIdReusable({ key: "consumer", source: "body" }),
-  ConnectionController.create
+  ConnectionController.create,
 );
 
 // Get all connections
@@ -22,7 +23,7 @@ router.get(
   "/",
   AuthMiddleware.requireStaffOrManager,
   checkSchema(ConnectionValidationSchema.getAll),
-  ConnectionController.getAll
+  ConnectionController.getAll,
 );
 
 // Get bills for a specific connection
@@ -30,7 +31,7 @@ router.get(
   "/:connectionId/bills",
   AuthMiddleware.requireAnyUser,
   validateObjectIdReusable({ key: "connectionId" }),
-  BillController.getByConnection
+  BillController.getByConnection,
 );
 
 // edit connection by id
@@ -39,25 +40,27 @@ router.patch(
   AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "connectionId" }),
   checkSchema(ConnectionValidationSchema.edit),
-  ConnectionController.updateById
+  ConnectionController.updateById,
 );
+
+//update connection status by id (activate | disconnect)
+router.patch(
+  "/:connectionId/status",
+  AuthMiddleware.requireStaffOrManager,
+  validateObjectIdReusable({ key: "connectionId" }),
+  checkSchema(ConnectionValidationSchema.editStatus),
+  handleValidationErrors,
+  ConnectionController.updateStatusById,
+); // all goods
 
 // delete connection by id
 router.delete(
   "/:connectionId",
   AuthMiddleware.requireStaffOrManager,
   validateObjectIdReusable({ key: "connectionId" }),
-  ConnectionController.deleteById
+  ConnectionController.deleteById,
 );
 
 // get connection by id
-
-// update connection status
-
-// get active connections
-
-// get disconnected connections
-
-// get connections by type
 
 export default router;

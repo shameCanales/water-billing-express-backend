@@ -40,6 +40,7 @@ router.patch(
   validateObjectIdReusable({ key: "billId" }),
   BillController.updateStatus,
 );
+// add validation schema here
 
 // Delete a bill
 router.delete(

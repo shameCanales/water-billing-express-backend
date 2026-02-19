@@ -1,6 +1,12 @@
 import { ConnectionRepository } from "./connection.repository.ts";
 import { ConsumerRepository } from "../consumers/consumer.repository.ts";
-import type { IConnection, IConnectionPopulated } from "./connection.model.ts";
+import type {
+  IConnection,
+  IConnectionPopulated,
+  ConnectionStatus,
+  ConnectionType,
+  IConnectionDocument,
+} from "./connection.types.ts";
 import type mongoose from "mongoose";
 
 interface GetAllConnectionsParams {
@@ -90,7 +96,7 @@ export const ConnectionService = {
 
   async updateById(
     _id: string | mongoose.Types.ObjectId,
-    updates: Partial<IConnection>
+    updates: Partial<IConnection>,
   ): Promise<IConnectionPopulated> {
     const updated = await ConnectionRepository.updateById(_id, updates);
     if (!updated) throw new Error("Connection not found");
@@ -98,7 +104,7 @@ export const ConnectionService = {
   },
 
   async deleteById(
-    _id: string | mongoose.Types.ObjectId
+    _id: string | mongoose.Types.ObjectId,
   ): Promise<IConnectionPopulated> {
     const deleted = await ConnectionRepository.deleteById(_id);
     if (!deleted) throw new Error("Connection not found");
@@ -107,5 +113,25 @@ export const ConnectionService = {
 
   async getByConsumerId(consumer: mongoose.Types.ObjectId | string) {
     return await ConnectionRepository.findByConsumerId(consumer);
+  },
+
+  async updateStatusById(
+    _id: string,
+    status: ConnectionStatus,
+  ): Promise<IConnectionDocument | null> {
+    const existingConnection = await ConnectionRepository.findStatusById(_id);
+
+    if (!existingConnection) throw new Error("Connection not found");
+
+    if (existingConnection?.status === status) {
+      throw new Error(`Connection is already ${status}`);
+    }
+
+    const updatedConnection = await ConnectionRepository.updateStatusById(
+      _id,
+      status,
+    );
+
+    return updatedConnection;
   },
 };

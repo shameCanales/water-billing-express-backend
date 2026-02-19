@@ -1,49 +1,9 @@
-import mongoose, { Document } from "mongoose";
-import type { IConsumerPopulated } from "../consumers/consumer.model.js";
-// consumer, meterNumber, address, connectionDate, type: residential | , status: active | disconnected
-
-export interface IConnection {
-  consumer: mongoose.Types.ObjectId;
-  meterNumber: number;
-  address: string;
-  connectionDate: Date;
-  type: "residential" | "commercial";
-  status: "active" | "disconnected";
-}
-
-export interface IConnectionDocument extends IConnection, Document {
-  _id: mongoose.Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
-}
-
-/** Lean version without population */
-export interface IConnectionLean {
-  _id: string;
-  consumer: mongoose.Types.ObjectId;
-  meterNumber: number;
-  address: string;
-  connectionDate: Date;
-  type: "residential" | "commercial";
-  status: "active" | "disconnected";
-  createdAt: string;
-  updatedAt: string;
-}
-
-/** Connection → consumer populated */
-export interface IConnectionPopulated {
-  _id: mongoose.Types.ObjectId;
-  consumer: IConsumerPopulated;
-  meterNumber: number;
-  address: string;
-  connectionDate: Date;
-  type: "residential" | "commercial";
-  status: "active" | "disconnected";
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
-}
+import mongoose from "mongoose";
+import {
+  CONNECTION_STATUSES,
+  CONNECTION_TYPES,
+  type IConnectionDocument,
+} from "./connection.types.ts";
 
 const ConnectionSchema = new mongoose.Schema(
   {
@@ -69,19 +29,22 @@ const ConnectionSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["residential", "commercial"],
+      enum: CONNECTION_TYPES,
       required: [true, "Connection type is required"],
       default: "residential",
     },
     status: {
       type: String,
-      enum: ["active", "disconnected"],
+      enum: CONNECTION_STATUSES,
       default: "active",
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const Connection = mongoose.model("Connection", ConnectionSchema);
+export const Connection = mongoose.model<IConnectionDocument>(
+  "Connection",
+  ConnectionSchema,
+);

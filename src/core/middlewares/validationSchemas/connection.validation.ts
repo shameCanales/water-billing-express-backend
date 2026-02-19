@@ -1,5 +1,9 @@
 import type { Schema } from "express-validator";
 import mongoose from "mongoose";
+import {
+  CONNECTION_STATUSES,
+  CONNECTION_TYPES,
+} from "../../../modules/connections/connection.types.ts";
 
 const getAllConnectionsQuerySchema: Schema = {
   page: {
@@ -109,10 +113,23 @@ const editConnectionValidationSchema: Schema = {
 
   status: {
     in: ["body"],
-    optional: true,
+    // optional: true,
     isIn: {
       options: [["active", "disconnected"]],
       errorMessage: "Status must be either 'active' or 'disconnected'",
+    },
+  },
+};
+
+const editConnectionStatusValidationSchema: Schema = {
+  connectionId: {
+    in: ["params"],
+  },
+  status: {
+    in: ["body"],
+    isIn: {
+      options: [CONNECTION_STATUSES],
+      errorMessage: `Status must be one of: ${CONNECTION_STATUSES.join(", ")}`,
     },
   },
 };
@@ -180,4 +197,5 @@ export const ConnectionValidationSchema = {
   getAll: getAllConnectionsQuerySchema,
   add: addConnectionValidationSchema,
   edit: editConnectionValidationSchema,
+  editStatus: editConnectionStatusValidationSchema,
 };

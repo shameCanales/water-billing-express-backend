@@ -1,7 +1,11 @@
 import { validationResult, matchedData } from "express-validator";
 import { ConnectionService } from "./connection.service.ts";
 import type { Request, Response } from "express";
-import type { IConnection } from "./connection.model.ts";
+import type {
+  IConnection,
+  ConnectionStatus,
+  ConnectionType,
+} from "./connection.types.ts";
 
 export const ConnectionController = {
   async create(req: Request, res: Response): Promise<Response> {
@@ -25,8 +29,8 @@ export const ConnectionController = {
       const status = error.message.includes("not found")
         ? 404
         : error.message.includes("exists")
-        ? 400
-        : 500;
+          ? 400
+          : 500;
 
       return res.status(status).json({
         success: false,
@@ -57,7 +61,7 @@ export const ConnectionController = {
         sortBy,
         sortOrder,
       });
-      
+
       return res.status(200).json({
         success: true,
         message: "Connections retrieved successfully",
@@ -102,6 +106,34 @@ export const ConnectionController = {
       return res.status(status).json({
         success: false,
         message: error.message,
+      });
+    }
+  },
+
+  async updateStatusById(req: Request, res: Response): Promise<Response> {
+    try {
+      const { connectionId, status } = matchedData(req) as {
+        connectionId: string;
+        status: ConnectionStatus;
+      };
+
+      const updatedConnection = await ConnectionService.updateStatusById(
+        connectionId,
+        status,
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: `Connection status updated to ${status} successfully`,
+        data: updatedConnection,
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      const status = errorMessage.includes("not found") ? 404 : 500;
+
+      return res.status(status).json({
+        success: false,
+        message: errorMessage,
       });
     }
   },
