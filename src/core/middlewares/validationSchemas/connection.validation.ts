@@ -5,6 +5,19 @@ import {
   CONNECTION_TYPES,
 } from "../../../modules/connections/connection.types.ts";
 
+const connectionIdParam: Schema[string] = {
+  in: ["params"],
+  isMongoId: { errorMessage: "Invalid Connection ID format" },
+};
+
+const consumerIdParam: Schema[string] = {
+  in: ["params"],
+  isMongoId: { errorMessage: "Invalid Consumer ID format" },
+};
+
+const statusOptions = [...CONNECTION_STATUSES, "all"];
+const typeOptions = [...CONNECTION_TYPES, "all"];
+
 const getAllConnectionsQuerySchema: Schema = {
   page: {
     in: ["query"],
@@ -42,8 +55,8 @@ const getAllConnectionsQuerySchema: Schema = {
     in: ["query"],
     optional: true,
     isIn: {
-      options: [["active", "disconnected", "all"]],
-      errorMessage: "Status must be 'active', 'disconnected', or 'all'",
+      options: [statusOptions],
+      errorMessage: `Status must be one of: ${statusOptions.join(", ")}`,
     },
     trim: true,
   },
@@ -52,8 +65,8 @@ const getAllConnectionsQuerySchema: Schema = {
     in: ["query"],
     optional: true,
     isIn: {
-      options: [["residential", "commercial", "all"]],
-      errorMessage: "Status must be 'residential', 'commercial', or 'all'",
+      options: [typeOptions],
+      errorMessage: `Type must be one of: ${typeOptions.join(", ")}`,
     },
     trim: true,
   },
@@ -62,8 +75,6 @@ const getAllConnectionsQuerySchema: Schema = {
     in: ["query"],
     optional: true,
     trim: true,
-    // You can add an isIn check here if you want to strictly limit which fields can be sorted
-    // isIn: { options: [['firstName', 'lastName', 'createdAt']] }
   },
 
   sortOrder: {
@@ -78,6 +89,8 @@ const getAllConnectionsQuerySchema: Schema = {
 };
 
 const editConnectionValidationSchema: Schema = {
+  connectionId: connectionIdParam,
+
   meterNumber: {
     in: ["body"],
     optional: true,
@@ -90,6 +103,9 @@ const editConnectionValidationSchema: Schema = {
   address: {
     in: ["body"],
     optional: true,
+    notEmpty: {
+      errorMessage: "Address cannot be empty",
+    },
     trim: true,
   },
 
@@ -106,17 +122,18 @@ const editConnectionValidationSchema: Schema = {
     in: ["body"],
     optional: true,
     isIn: {
-      options: [["residential", "commercial"]],
-      errorMessage: "Type must be either 'residential' or 'commercial'",
+      options: [CONNECTION_TYPES],
+      errorMessage: `Type must be one of: ${CONNECTION_TYPES.join(", ")}`,
     },
   },
 
+  // we might want to remove this and only allow status changes through the dedicated endpoint. because we already have a separate endpoint for changing status.
   status: {
     in: ["body"],
-    // optional: true,
+    optional: true,
     isIn: {
-      options: [["active", "disconnected"]],
-      errorMessage: "Status must be either 'active' or 'disconnected'",
+      options: [CONNECTION_STATUSES],
+      errorMessage: `Status must be one of: ${CONNECTION_STATUSES.join(", ")}`,
     },
   },
 };
@@ -127,11 +144,16 @@ const editConnectionStatusValidationSchema: Schema = {
   },
   status: {
     in: ["body"],
+    exists: { errorMessage: "Status is required" },
     isIn: {
       options: [CONNECTION_STATUSES],
       errorMessage: `Status must be one of: ${CONNECTION_STATUSES.join(", ")}`,
     },
   },
+};
+
+const deleteConnectionByIdValidationSchema: Schema = {
+  connectionId: connectionIdParam,
 };
 
 const addConnectionValidationSchema: Schema = {
@@ -140,10 +162,7 @@ const addConnectionValidationSchema: Schema = {
     notEmpty: {
       errorMessage: "Consumer ID is required",
     },
-    custom: {
-      options: (value) => mongoose.Types.ObjectId.isValid(value),
-      errorMessage: "Invalid Consumer ID format",
-    },
+    isMongoId: { errorMessage: "Invalid Consumer ID format" },
   },
 
   meterNumber: {
@@ -178,8 +197,8 @@ const addConnectionValidationSchema: Schema = {
     in: ["body"],
     optional: { options: { nullable: true } },
     isIn: {
-      options: [["residential", "commercial"]],
-      errorMessage: "Type must be either 'residential' or 'commercial'",
+      options: [CONNECTION_TYPES],
+      errorMessage: `Type must be one of: ${CONNECTION_TYPES.join(", ")}`,
     },
   },
 
@@ -187,8 +206,8 @@ const addConnectionValidationSchema: Schema = {
     in: ["body"],
     optional: { options: { nullable: true } },
     isIn: {
-      options: [["active", "disconnected"]],
-      errorMessage: "Status must be either 'active' or 'disconnected'",
+      options: [CONNECTION_STATUSES],
+      errorMessage: `Status must be one of: ${CONNECTION_STATUSES.join(", ")}`,
     },
   },
 };
@@ -198,4 +217,7 @@ export const ConnectionValidationSchema = {
   add: addConnectionValidationSchema,
   edit: editConnectionValidationSchema,
   editStatus: editConnectionStatusValidationSchema,
+  delete: deleteConnectionByIdValidationSchema,
+  idOnly: { connectionId: connectionIdParam } as Schema,
+  consumerIdOnly: { consumerId: consumerIdParam } as Schema,
 };

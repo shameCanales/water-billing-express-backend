@@ -57,10 +57,13 @@ export const ConnectionRepository = {
 
   async create(data: IConnection): Promise<IConnectionPopulated> {
     const newConnection = await Connection.create(data);
-    return newConnection.populate(
+
+    await newConnection.populate(
       "consumer",
       "firstName middleName lastName email mobileNumber",
-    ) as unknown as IConnectionPopulated;
+    );
+
+    return newConnection.toObject() as unknown as IConnectionPopulated;
   },
 
   async updateById(
@@ -78,11 +81,9 @@ export const ConnectionRepository = {
   async deleteById(
     _id: string | mongoose.Types.ObjectId,
   ): Promise<IConnectionPopulated | null> {
-    const deleted = await Connection.findByIdAndDelete(_id)?.populate(
-      "consumer",
-      "firstName middleName lastName email mobileNumber",
-    );
-    return deleted as unknown as IConnectionPopulated | null;
+    return (await Connection.findByIdAndDelete(_id)
+      .populate("consumer", "firstName middleName lastName email mobileNumber")
+      .lean()) as unknown as IConnectionPopulated | null;
   },
 
   async updateStatusById(

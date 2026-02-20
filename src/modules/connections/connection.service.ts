@@ -4,7 +4,6 @@ import type {
   IConnection,
   IConnectionPopulated,
   ConnectionStatus,
-  ConnectionType,
   IConnectionDocument,
 } from "./connection.types.ts";
 import type mongoose from "mongoose";
@@ -92,6 +91,12 @@ export const ConnectionService = {
         limit,
       },
     };
+  },
+
+  async getById(_id: string): Promise<IConnectionPopulated> {
+    const connection = await ConnectionRepository.findById(_id);
+    if (!connection) throw new Error("Connection not found");
+    return connection;
   },
 
   async updateById(

@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
-import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { ConnectionValidationSchema } from "../../core/middlewares/validationSchemas/connection.validation.ts";
 import { checkSchema } from "express-validator";
 import { BillController } from "../bills/bill.controller.ts";
@@ -14,7 +13,7 @@ router.post(
   "/",
   AuthMiddleware.requireStaffOrManager,
   checkSchema(ConnectionValidationSchema.add),
-  validateObjectIdReusable({ key: "consumer", source: "body" }),
+  handleValidationErrors,
   ConnectionController.create,
 );
 
@@ -23,6 +22,7 @@ router.get(
   "/",
   AuthMiddleware.requireStaffOrManager,
   checkSchema(ConnectionValidationSchema.getAll),
+  handleValidationErrors,
   ConnectionController.getAll,
 );
 
@@ -30,7 +30,8 @@ router.get(
 router.get(
   "/:connectionId/bills",
   AuthMiddleware.requireAnyUser,
-  validateObjectIdReusable({ key: "connectionId" }),
+  checkSchema(ConnectionValidationSchema.idOnly),
+  handleValidationErrors,
   BillController.getByConnection,
 );
 
@@ -38,8 +39,8 @@ router.get(
 router.patch(
   "/:connectionId",
   AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ key: "connectionId" }),
   checkSchema(ConnectionValidationSchema.edit),
+  handleValidationErrors,
   ConnectionController.updateById,
 );
 
@@ -47,7 +48,6 @@ router.patch(
 router.patch(
   "/:connectionId/status",
   AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ key: "connectionId" }),
   checkSchema(ConnectionValidationSchema.editStatus),
   handleValidationErrors,
   ConnectionController.updateStatusById,
@@ -57,10 +57,18 @@ router.patch(
 router.delete(
   "/:connectionId",
   AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ key: "connectionId" }),
+  checkSchema(ConnectionValidationSchema.delete),
+  handleValidationErrors,
   ConnectionController.deleteById,
 );
 
 // get connection by id
+router.get(
+  "/:connectionId",
+  AuthMiddleware.requireAnyUser,
+  checkSchema(ConnectionValidationSchema.idOnly),
+  handleValidationErrors,
+  ConnectionController.getById,
+);
 
 export default router;
