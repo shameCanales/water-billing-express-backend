@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { checkSchema } from "express-validator";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
-import { validateObjectIdReusable } from "../../core/middlewares/validateObjectId.ts";
 import { ConsumerController } from "./consumer.controller.ts";
 import { ConnectionController } from "../connections/connection.controller.ts";
 import { ConsumerValidationSchema } from "../../core/middlewares/validationSchemas/consumers.validation.ts";
@@ -10,11 +9,21 @@ import { handleValidationErrors } from "../../core/middlewares/validation/valida
 
 const router = Router();
 
+//add consumer
+router.post(
+  "/",
+  AuthMiddleware.requireStaffOrManager,
+  checkSchema(ConsumerValidationSchema.add),
+  handleValidationErrors,
+  ConsumerController.create,
+);
+
 // get all consumers :  [{name, email, birthDate, mobileNumber, password, address, status}, ...]
 router.get(
   "/",
   AuthMiddleware.requireStaffOrManager,
   checkSchema(ConsumerValidationSchema.getAll),
+  handleValidationErrors,
   ConsumerController.getAll,
 );
 
@@ -22,7 +31,8 @@ router.get(
 router.get(
   "/:consumerId",
   AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ key: "consumerId" }),
+  checkSchema(ConsumerValidationSchema.idOnly),
+  handleValidationErrors,
   ConsumerController.getById,
 );
 
@@ -35,46 +45,31 @@ router.get(
   ConnectionController.getByConsumerId,
 );
 
-//add consumer
-router.post(
-  "/",
-  AuthMiddleware.requireStaffOrManager,
-  checkSchema(ConsumerValidationSchema.add),
-  ConsumerController.create,
-);
-
 // Edit Consumer by ID
 router.patch(
   "/:consumerId",
   AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ key: "consumerId" }),
   checkSchema(ConsumerValidationSchema.edit),
+  handleValidationErrors,
   ConsumerController.editById,
-);
-
-// Delete Consumer by ID
-router.delete(
-  "/:consumerId",
-  AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ key: "consumerId" }),
-  ConsumerController.deleteById,
 );
 
 // Update Consumer Status (suspend/activate)
 router.patch(
   "/:consumerId/status",
   AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ key: "consumerId" }),
   checkSchema(ConsumerValidationSchema.updateStatus),
+  handleValidationErrors,
   ConsumerController.updateStatusById,
 );
 
-export default router;
+// Delete Consumer by ID
+router.delete(
+  "/:consumerId",
+  AuthMiddleware.requireStaffOrManager,
+  checkSchema(ConsumerValidationSchema.idOnly),
+  handleValidationErrors,
+  ConsumerController.deleteById,
+);
 
-// // 1st architecture: no multilayer architecture
-// // get all consumers :  [{name, email, birthDate, mobileNumber, password, address, status}, ...]
-// router.get(
-//   "/api/consumers",
-//   requireAuthAndStaffOrManager,
-//   getAllConsumersHandler
-// );
+export default router;

@@ -5,7 +5,7 @@ import type { Application, Request, Response, NextFunction } from "express";
 
 import authAdminRouter from "../modules/authAdmin/authAdmin.routes.ts";
 import authConsumerRouter from "../modules/authConsumer/authConsumer.routes.ts";
-import consumerRouter from "../modules/consumers/consumers.routes.ts";
+import consumerRouter from "../modules/consumers/consumer.routes.ts";
 import connectionRouter from "../modules/connections/connections.routes.ts";
 import billRouter from "../modules/bills/bills.routes.ts";
 import processorRouter from "../modules/processors/processors.routes.ts";

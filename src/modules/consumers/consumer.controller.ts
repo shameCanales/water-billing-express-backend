@@ -1,18 +1,10 @@
-import { matchedData, validationResult } from "express-validator";
+import { matchedData } from "express-validator";
 import { ConsumerService } from "./consumer.service.ts";
 import type { Request, Response } from "express";
-import type { IConsumer } from "./consumer.model.ts";
+import type { ConsumerStatus, IConsumer } from "./consumer.types.ts";
 
 export const ConsumerController = {
   async getAll(req: Request, res: Response): Promise<Response> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
-
     try {
       const { page, limit, search, status, sortBy, sortOrder } =
         matchedData(req);
@@ -34,26 +26,19 @@ export const ConsumerController = {
         data: result, // result contain {consumers, pagination}
       });
     } catch (err) {
-      console.error("fetched Consumers Error: ", err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
 
       return res.status(500).json({
         success: false,
-        message: "Failed to fetch consumers",
+        message: errorMessage,
         // error: error.message, should not send to client.
       });
     }
   },
 
   async create(req: Request, res: Response): Promise<Response> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, errors: errors.array() });
-    }
-
     try {
-      const data = matchedData(req) as Omit<IConsumer, "status"> & {
-        status?: "active" | "suspended";
-      };
+      const data = matchedData(req) as IConsumer;
       const newConsumer = await ConsumerService.createConsumer(data);
 
       return res.status(201).json({
@@ -75,10 +60,10 @@ export const ConsumerController = {
 
   async getById(
     req: Request<{ consumerId: string }>,
-    res: Response
+    res: Response,
   ): Promise<Response> {
     try {
-      const { consumerId } = req.params;
+      const { consumerId } = matchedData(req);
       const consumer = await ConsumerService.getConsumerById(consumerId);
 
       return res.status(200).json({
@@ -98,23 +83,15 @@ export const ConsumerController = {
     }
   },
 
-  async editById(
-    req: Request<{ consumerId: string }>,
-    res: Response
-  ): Promise<Response> {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, errors: errors.array() });
-    }
-
+  async editById(req: Request, res: Response): Promise<Response> {
     try {
-      const { consumerId } = req.params;
-      const updates = matchedData(req) as Partial<IConsumer>;
+      const { consumerId, ...updates } = matchedData(req) as {
+        consumerId: string;
+      } & Partial<IConsumer>;
 
       const updatedConsumer = await ConsumerService.updateConsumer(
         consumerId,
-        updates
+        updates,
       );
 
       return res.status(200).json({
@@ -134,9 +111,10 @@ export const ConsumerController = {
     }
   },
 
-  async deleteById(req: Request<{ consumerId: string }>, res: Response) {
+  async deleteById(req: Request, res: Response) {
     try {
-      await ConsumerService.deleteConsumer(req.params.consumerId);
+      const { consumerId } = matchedData(req) as { consumerId: string };
+      await ConsumerService.deleteConsumer(consumerId);
 
       return res.status(200).json({
         success: true,
@@ -154,14 +132,16 @@ export const ConsumerController = {
     }
   },
 
-  async updateStatusById(req: Request<{ consumerId: string }>, res: Response) {
+  async updateStatusById(req: Request, res: Response) {
     try {
-      const { consumerId } = req.params;
-      const { status } = matchedData(req) as { status: "active" | "suspended" };
+      const { consumerId, status } = matchedData(req) as {
+        consumerId: string;
+        status: ConsumerStatus;
+      };
 
       const updatedConsumer = await ConsumerService.updateStatus(
         consumerId,
-        status
+        status,
       );
 
       return res.status(200).json({

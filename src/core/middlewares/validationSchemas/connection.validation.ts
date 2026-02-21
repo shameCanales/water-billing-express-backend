@@ -1,9 +1,9 @@
 import type { Schema } from "express-validator";
-import mongoose from "mongoose";
 import {
   CONNECTION_STATUSES,
   CONNECTION_TYPES,
 } from "../../../modules/connections/connection.types.ts";
+import { capitalizeFirstLetter } from "../../utils/validationHelpers.ts";
 
 const connectionIdParam: Schema[string] = {
   in: ["params"],
@@ -107,6 +107,9 @@ const editConnectionValidationSchema: Schema = {
       errorMessage: "Address cannot be empty",
     },
     trim: true,
+    customSanitizer: {
+      options: capitalizeFirstLetter,
+    },
   },
 
   connectionDate: {
@@ -182,6 +185,9 @@ const addConnectionValidationSchema: Schema = {
       errorMessage: "Address is required",
     },
     trim: true,
+    customSanitizer: {
+      options: capitalizeFirstLetter,
+    },
   },
 
   connectionDate: {

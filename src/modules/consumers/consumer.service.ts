@@ -1,24 +1,14 @@
 import { ConsumerRepository } from "./consumer.repository.ts";
 import { hashPassword } from "../../core/utils/helpers.ts";
+
 import type {
   IConsumer,
+  ConsumerStatus,
   IConsumerDocument,
-  IConsumerLean,
   PaginatedConsumersResult,
-} from "./consumer.model.ts";
+  IConsumerLean,
+} from "./consumer.types.ts";
 import type mongoose from "mongoose";
-
-// Type for consumer creation (without generated fields)
-type CreateConsumerData = Omit<IConsumer, "status"> & {
-  status?: "active" | "suspended";
-};
-
-// Type for consumer response (without password)
-type ConsumerResponse = Omit<IConsumer, "password"> & {
-  _id: string;
-  createAt: Date;
-  updatedAt: Date;
-};
 
 // Define the Input DTO (Data Transfrer Oject)
 interface GetAllConsumersParams {
@@ -32,7 +22,7 @@ interface GetAllConsumersParams {
 
 export const ConsumerService = {
   async getAllConsumers(
-    params: GetAllConsumersParams
+    params: GetAllConsumersParams,
   ): Promise<PaginatedConsumersResult> {
     const {
       page,
@@ -49,9 +39,7 @@ export const ConsumerService = {
     const filter: any = {};
 
     // Filter by status (Exact match)
-    if (status && status !== "all") {
-      filter.status = status;
-    }
+    if (status && status !== "all") filter.status = status;
 
     // Filter by Search (Regex Partial Match)
     if (search) {
@@ -87,7 +75,7 @@ export const ConsumerService = {
     };
   },
 
-  async createConsumer(data: CreateConsumerData): Promise<ConsumerResponse> {
+  async createConsumer(data: IConsumer): Promise<IConsumerLean> {
     const {
       firstName,
       middleName,
@@ -119,24 +107,27 @@ export const ConsumerService = {
     });
 
     const { password: _, ...consumerData } = newConsumer.toObject();
-    return consumerData;
+    return consumerData as unknown as IConsumerLean; // do we need to cast it to IConsumerLean?
   },
 
   async getConsumerById(
-    _id: mongoose.Types.ObjectId | string
-  ): Promise<IConsumerDocument> {
+    _id: mongoose.Types.ObjectId | string,
+  ): Promise<IConsumerLean> {
     const consumer = await ConsumerRepository.findById(_id);
     if (!consumer) throw new Error("Consumer not found");
     return consumer;
   },
 
-  async getConsumerByEmail(email: string): Promise<IConsumerDocument> {
+  async getConsumerByEmail(email: string): Promise<IConsumerLean> {
     const consumer = await ConsumerRepository.findByEmail(email);
     if (!consumer) throw new Error("Consumer with this email not found");
     return consumer;
   },
 
-  async updateConsumer(_id: string, updates: Partial<IConsumerDocument>) {
+  async updateConsumer(
+    _id: string,
+    updates: Partial<IConsumerDocument>,
+  ): Promise<IConsumerLean> {
     if (updates.password) {
       updates.password = await hashPassword(updates.password);
     }
@@ -147,13 +138,16 @@ export const ConsumerService = {
     return updatedConsumer;
   },
 
-  async deleteConsumer(_id: string): Promise<IConsumerDocument> {
+  async deleteConsumer(_id: string): Promise<IConsumerLean> {
     const deletedConsumer = await ConsumerRepository.deleteById(_id);
     if (!deletedConsumer) throw new Error("Consumer not found");
     return deletedConsumer;
   },
 
-  async updateStatus(_id: string, status: "active" | "suspended") {
+  async updateStatus(
+    _id: string,
+    status: ConsumerStatus,
+  ): Promise<IConsumerLean | null> {
     const existingConsumer = await ConsumerRepository.findById(_id);
     if (!existingConsumer) throw new Error("Consumer not found");
     if (existingConsumer?.status === status) {

@@ -6,6 +6,7 @@ import { SettingsValidationSchema } from "../../core/middlewares/validationSchem
 
 const router = Router();
 
+
 router.get(
   "/",
   AuthMiddleware.requireStaffOrManager,

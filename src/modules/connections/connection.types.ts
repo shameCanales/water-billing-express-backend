@@ -1,5 +1,5 @@
 import mongoose, { Document } from "mongoose";
-import type { IConsumerPopulated } from "../consumers/consumer.model.ts";
+import type { IConsumerPopulated } from "../consumers/consumer.types.ts";
 
 export const CONNECTION_STATUSES = ["active", "disconnected"] as const;
 export type ConnectionStatus = (typeof CONNECTION_STATUSES)[number];

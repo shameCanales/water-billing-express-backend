@@ -35,6 +35,15 @@ router.get(
   BillController.getByConnection,
 );
 
+// get connection by id
+router.get(
+  "/:connectionId",
+  AuthMiddleware.requireAnyUser,
+  checkSchema(ConnectionValidationSchema.idOnly),
+  handleValidationErrors,
+  ConnectionController.getById,
+);
+
 // edit connection by id
 router.patch(
   "/:connectionId",
@@ -60,15 +69,6 @@ router.delete(
   checkSchema(ConnectionValidationSchema.delete),
   handleValidationErrors,
   ConnectionController.deleteById,
-);
-
-// get connection by id
-router.get(
-  "/:connectionId",
-  AuthMiddleware.requireAnyUser,
-  checkSchema(ConnectionValidationSchema.idOnly),
-  handleValidationErrors,
-  ConnectionController.getById,
 );
 
 export default router;

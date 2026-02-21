@@ -6,7 +6,6 @@ import {
   type IBillDocument,
   type BillStatus,
   type IBillPopulatedLean,
-  Bill,
   type PaginatedBillsResult,
 } from "./bill.model.ts";
 import { Consumer } from "../consumers/consumer.model.ts";

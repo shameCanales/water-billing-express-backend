@@ -1,4 +1,15 @@
 import type { Schema } from "express-validator";
+import { CONSUMER_STATUSES } from "../../../modules/consumers/consumer.types.ts";
+import { capitalizeFirstLetter } from "../../utils/validationHelpers.ts";
+
+const consumerIdParam: Schema[string] = {
+  in: ["params"],
+  isMongoId: {
+    errorMessage: "Invalid Consumer ID format",
+  },
+};
+
+const statusOptions = [...CONSUMER_STATUSES, "all"];
 
 const getAllConsumersQuerySchema: Schema = {
   page: {
@@ -37,8 +48,8 @@ const getAllConsumersQuerySchema: Schema = {
     in: ["query"],
     optional: true,
     isIn: {
-      options: [["active", "suspended", "all"]],
-      errorMessage: "Status must be 'active', 'suspended', or 'all'",
+      options: [statusOptions],
+      errorMessage: `Status must be one of: ${statusOptions.join(", ")}`,
     },
     trim: true,
   },
@@ -77,7 +88,11 @@ const addConsumerValidationSchema: Schema = {
       errorMessage: "first name is required",
     },
     trim: true,
+    customSanitizer: {
+      options: capitalizeFirstLetter,
+    },
   },
+
   middleName: {
     in: ["body"], // means where to look: req.body
     optional: {
@@ -94,7 +109,11 @@ const addConsumerValidationSchema: Schema = {
       errorMessage: "middle name must be between 1 and 40 characters",
     },
     trim: true,
+    customSanitizer: {
+      options: capitalizeFirstLetter,
+    },
   },
+
   lastName: {
     in: ["body"], // means where to look: req.body
     isString: {
@@ -108,6 +127,9 @@ const addConsumerValidationSchema: Schema = {
       errorMessage: "last name is required",
     },
     trim: true,
+    customSanitizer: {
+      options: capitalizeFirstLetter,
+    },
   },
 
   // EMAIL
@@ -184,6 +206,9 @@ const addConsumerValidationSchema: Schema = {
       errorMessage: "Address must be between 5 and 100 characters",
     },
     trim: true,
+    customSanitizer: {
+      options: capitalizeFirstLetter,
+    },
   },
 
   // STATUS
@@ -191,24 +216,28 @@ const addConsumerValidationSchema: Schema = {
     in: ["body"],
     optional: true, // optional, defaults to "active" if not provided
     isIn: {
-      options: [["active", "suspended"]],
-      errorMessage: "Status must be either 'active' or 'suspended'",
+      options: [CONSUMER_STATUSES],
+      errorMessage: `Status must be one of: ${CONSUMER_STATUSES.join(", ")}`,
     },
   },
 };
 
 const updateConsumerStatusSchema: Schema = {
+  consumerId: consumerIdParam,
   status: {
     in: ["body"],
-    optional: true, // optional, defaults to "active" if not provided
+    exists: {
+      errorMessage: "Status is required",
+    },
     isIn: {
-      options: [["active", "suspended"]],
-      errorMessage: "Status must be either 'active' or 'suspended'",
+      options: [CONSUMER_STATUSES],
+      errorMessage: `Status must be one of: ${CONSUMER_STATUSES.join(", ")}`,
     },
   },
 };
 
 const editConsumerSchema: Schema = {
+  consumerId: consumerIdParam,
   firstName: {
     in: ["body"],
     optional: true,
@@ -220,6 +249,9 @@ const editConsumerSchema: Schema = {
       errorMessage: "first name must be between 5 and 40 characters",
     },
     trim: true,
+    customSanitizer: {
+      options: capitalizeFirstLetter,
+    },
   },
 
   middleName: {
@@ -238,6 +270,9 @@ const editConsumerSchema: Schema = {
       errorMessage: "middle name must be between 1 and 40 characters",
     },
     trim: true,
+    customSanitizer: {
+      options: capitalizeFirstLetter,
+    },
   },
 
   lastName: {
@@ -251,8 +286,11 @@ const editConsumerSchema: Schema = {
       errorMessage: "last name must be between 1 and 40 characters",
     },
     trim: true,
+    customSanitizer: {
+      options: capitalizeFirstLetter,
+    },
   },
-  
+
   email: {
     in: ["body"],
     optional: true,
@@ -313,14 +351,19 @@ const editConsumerSchema: Schema = {
       errorMessage: "Address must be between 5 and 100 characters",
     },
     trim: true,
+    customSanitizer: {
+      options: capitalizeFirstLetter,
+    },
   },
+
+  // we might want to remove this and only allow status changes through the dedicated endpoint. because we already have a separate endpoint for changing status.
 
   status: {
     in: ["body"],
     optional: true,
     isIn: {
-      options: [["active", "suspended"]],
-      errorMessage: "Status must be either 'active' or 'suspended'",
+      options: [CONSUMER_STATUSES],
+      errorMessage: `Status must be one of: ${CONSUMER_STATUSES.join(", ")}`,
     },
   },
 };
@@ -330,4 +373,5 @@ export const ConsumerValidationSchema = {
   getAll: getAllConsumersQuerySchema,
   edit: editConsumerSchema,
   updateStatus: updateConsumerStatusSchema,
+  idOnly: { consumerId: consumerIdParam } as Schema,
 };
