@@ -27,13 +27,8 @@ export const ConsumerController = {
         data: result, // result contain {consumers, pagination}
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-
-      return res.status(500).json({
-        success: false,
-        message: errorMessage,
-        // error: error.message, should not send to client.
-      });
+      // should we really send error message to client? i think not
+      return handleControllerError(err, res);
     }
   },
 
@@ -47,15 +42,8 @@ export const ConsumerController = {
         message: "Consumer added successfully",
         data: newConsumer,
       });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      const status = errorMessage.includes("already exists") ? 409 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+    } catch (err) {
+      return handleControllerError(err, res);
     }
   },
 
@@ -72,15 +60,8 @@ export const ConsumerController = {
         message: "successfully fetched consumer by id",
         data: consumer,
       });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown Error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+    } catch (err) {
+      return handleControllerError(err, res);
     }
   },
 
@@ -100,15 +81,8 @@ export const ConsumerController = {
         message: "Consumer updated successfully",
         data: updatedConsumer,
       });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+    } catch (err) {
+      return handleControllerError(err, res);
     }
   },
 
@@ -121,15 +95,8 @@ export const ConsumerController = {
         success: true,
         message: "Consumer deleted successfully",
       });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+    } catch (err) {
+      return handleControllerError(err, res);
     }
   },
 
@@ -150,15 +117,8 @@ export const ConsumerController = {
         message: "Consumer status updated successfully",
         data: updatedConsumer,
       });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+    } catch (err) {
+      return handleControllerError(err, res);
     }
   },
 };
