@@ -15,17 +15,8 @@ export const ConnectionController = {
         message: "Connection added successfully",
         data: newConnection,
       });
-    } catch (error: any) {
-      const status = error.message.includes("not found")
-        ? 404
-        : error.message.includes("exists")
-          ? 400
-          : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: error.message,
-      });
+    } catch (err: any) {
+      return handleControllerError(err, res);
     }
   },
 
@@ -49,11 +40,8 @@ export const ConnectionController = {
         message: "Connections retrieved successfully",
         data: connections,
       });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to fetch connections",
-      });
+    } catch (err) {
+      return handleControllerError(err, res);
     }
   },
 
@@ -64,13 +52,7 @@ export const ConnectionController = {
 
       return res.status(200).json({ success: true, data: connection });
     } catch (err: any) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 
@@ -86,13 +68,7 @@ export const ConnectionController = {
         data: updated,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 
@@ -111,13 +87,7 @@ export const ConnectionController = {
         data: updatedConnection,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 
@@ -132,13 +102,7 @@ export const ConnectionController = {
         message: "Connection deleted successfully",
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 
@@ -156,13 +120,7 @@ export const ConnectionController = {
         data,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 };
