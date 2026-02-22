@@ -1,5 +1,13 @@
 import type { Schema } from "express-validator";
 import mongoose from "mongoose";
+import { BILL_STATUSES } from "../../../modules/bills/bill.types.ts";
+
+const billIdParam: Schema[string] = {
+  in: ["params"],
+  isMongoId: { errorMessage: "Invalid Bill ID format" },
+};
+
+const statusQueryOptions = [...BILL_STATUSES, "all"];
 
 const getAllBillsQuerySchema: Schema = {
   page: {
@@ -38,8 +46,8 @@ const getAllBillsQuerySchema: Schema = {
     in: ["query"],
     optional: true,
     isIn: {
-      options: [["paid", "unpaid", "overdue", "all"]],
-      errorMessage: "Status must be 'paid', 'unpaid', 'overdue', or 'all'",
+      options: [statusQueryOptions],
+      errorMessage: `Status must be one of: ${statusQueryOptions.join(", ")}`,
     },
     trim: true,
   },
@@ -67,16 +75,11 @@ const addBillValidationSchema: Schema = {
   connection: {
     in: ["body"],
     notEmpty: { errorMessage: "Connection id is required" },
-    custom: {
-      options: (value) => mongoose.Types.ObjectId.isValid(value),
-      errorMessage: "Invalid connection ID format",
-    },
+    isMongoId: { errorMessage: "Invalid connection ID format" }, // Native validation
   },
   monthOf: {
     in: ["body"],
-    notEmpty: {
-      errorMessage: "monthOf is required (e.g. 2025-11-01 or November 2025)",
-    },
+    notEmpty: { errorMessage: "monthOf is required" },
     trim: true,
   },
   dueDate: {
@@ -97,28 +100,31 @@ const addBillValidationSchema: Schema = {
     in: ["body"],
     optional: true,
     isIn: {
-      options: [["paid", "unpaid", "overdue"]],
-      errorMessage: "Status must be 'paid', 'unpaid', or 'overdue'",
+      options: [BILL_STATUSES],
+      errorMessage: `Status must be one of: ${BILL_STATUSES.join(", ")}`,
     },
     trim: true,
   },
 };
 
 const editBillValidationSchema: Schema = {
+  billId: billIdParam,
   connection: {
     in: ["body"],
-    notEmpty: { errorMessage: "Connection id is required" },
+    optional: true, // Optional on edit
+    notEmpty: { errorMessage: "Connection id cannot be empty" },
+    isMongoId: { errorMessage: "Invalid connection ID format" },
   },
   monthOf: {
     in: ["body"],
-    notEmpty: {
-      errorMessage: "monthOf is required (e.g. 2025-11-01 or November 2025)",
-    },
+    optional: true,
+    notEmpty: { errorMessage: "monthOf cannot be empty" },
     trim: true,
   },
   dueDate: {
     in: ["body"],
-    notEmpty: { errorMessage: "dueDate is required" },
+    optional: true,
+    notEmpty: { errorMessage: "dueDate cannot be empty" },
     isISO8601: {
       errorMessage: "dueDate must be a valid date or ISO8601 string",
     },
@@ -126,7 +132,8 @@ const editBillValidationSchema: Schema = {
   },
   meterReading: {
     in: ["body"],
-    notEmpty: { errorMessage: "meterReading is required" },
+    optional: true,
+    notEmpty: { errorMessage: "meterReading cannot be empty" },
     isNumeric: { errorMessage: "meterReading must be a number" },
     toFloat: true,
   },
@@ -138,8 +145,22 @@ const editBillValidationSchema: Schema = {
   },
 };
 
+const editBillStatusValidationSchema: Schema = {
+  billId: billIdParam,
+  status: {
+    in: ["body"],
+    exists: { errorMessage: "Status is required" },
+    isIn: {
+      options: [BILL_STATUSES],
+      errorMessage: `Status must be one of: ${BILL_STATUSES.join(", ")}`,
+    },
+  },
+};
+
 export const BillValidationSchema = {
   getAll: getAllBillsQuerySchema,
   add: addBillValidationSchema,
   edit: editBillValidationSchema,
+  editStatus: editBillStatusValidationSchema,
+  idOnly: { billId: billIdParam } as Schema,
 };

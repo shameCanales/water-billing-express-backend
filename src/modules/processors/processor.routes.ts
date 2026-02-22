@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { checkSchema } from "express-validator";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
-import { validateObjectIdReusable } from "../../core/middlewares/validation/validateObjectId.ts";
 import { ProcessorController } from "./processor.controller.ts";
 import { ProcessorValidationSchema } from "../../core/middlewares/validationSchemas/processor.validation.ts";
 
@@ -19,7 +18,7 @@ router.get(
 router.get(
   "/:processorId",
   AuthMiddleware.requireManager,
-  validateObjectIdReusable({ key: "processorId" }),
+  // validateObjectIdReusable({ key: "processorId" }),
   ProcessorController.getById,
 );
 
@@ -39,7 +38,7 @@ router.post(
 router.patch(
   "/:processorId",
   AuthMiddleware.requireManager,
-  validateObjectIdReusable({ key: "processorId" }),
+  // validateObjectIdReusable({ key: "processorId" }),
   checkSchema(ProcessorValidationSchema.edit),
   ProcessorController.update,
 );
@@ -48,7 +47,7 @@ router.patch(
 router.delete(
   "/:processorId",
   AuthMiddleware.requireManager,
-  validateObjectIdReusable({ key: "processorId" }),
+  // validateObjectIdReusable({ key: "processorId" }),
   ProcessorController.delete,
 );
 

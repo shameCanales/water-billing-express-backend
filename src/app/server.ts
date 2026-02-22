@@ -5,7 +5,8 @@ import { createApp } from "./createApp.ts";
 mongoose
   // .connect("mongodb://localhost/water_billing_system")
   .connect(
-    process.env.MONGODB_CONNECTION_URL || "mongodb://localhost/water_billing_system",
+    // process.env.MONGODB_CONNECTION_URL || "mongodb://localhost/water_billing_system",
+    process.env.MONGODB_CONNECTION_URL!,
   )
   .then(() => {
     console.log("Connected to WBS mongo Database");

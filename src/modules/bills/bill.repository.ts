@@ -1,10 +1,19 @@
+import type mongoose from "mongoose";
 import { Bill } from "./bill.model.ts";
 import type {
   IBill,
   IBillDocument,
   IBillLean,
   IBillPopulatedLean,
-} from "./bill.model.ts";
+} from "./bill.types.ts";
+
+const populateConfig = {
+  path: "connection",
+  populate: {
+    path: "consumer",
+    select: "firstName middleName lastName email mobileNumber address",
+  },
+};
 
 export const BillRepository = {
   async findAll(
@@ -14,13 +23,7 @@ export const BillRepository = {
     limit: number = 0,
   ): Promise<IBillPopulatedLean[]> {
     const result = await Bill.find(filter)
-      .populate({
-        path: "connection",
-        populate: {
-          path: "consumer",
-          select: "firstName middleName lastName email mobileNumber address",
-        },
-      })
+      .populate(populateConfig)
       .sort(sort)
       .skip(skip)
       .limit(limit)
@@ -34,79 +37,61 @@ export const BillRepository = {
   },
 
   async findOneByConnectionAndMonth(
-    connection: string,
+    connection: string | mongoose.Types.ObjectId,
     monthOf: Date,
-  ): Promise<IBillDocument | null> {
-    return await Bill.findOne({ connection, monthOf });
+  ): Promise<IBillLean | null> {
+    return await Bill.findOne({ connection, monthOf }).lean();
   },
 
-  async findOneByConnection(connection: string): Promise<IBillLean | null> {
-    const result = await Bill.findOne({ connection })
-      .sort({ monthOf: -1 })
-      .lean();
-    return result as unknown as IBillLean | null;
-  },
-
-  async findLastBill(connection: string): Promise<IBillLean | null> {
-    const result = await Bill.findOne({
-      connection,
-    })
-      .sort({ monthOf: -1 })
-      .lean();
-
-    return result as unknown as IBillLean | null;
+  async findLastBill(
+    connection: string | mongoose.Types.ObjectId,
+  ): Promise<IBillLean | null> {
+    return Bill.findOne({ connection }).sort({ monthOf: -1 }).lean();
   },
 
   async create(data: IBill): Promise<IBillDocument> {
     return await Bill.create(data);
   },
 
-  async findById(bill: string): Promise<IBillPopulatedLean | null> {
-    const result = await Bill.findById(bill)
-      .populate({
-        path: "connection",
-        populate: {
-          path: "consumer",
-          select: "firstName middleName lastName email mobileNumber",
-        },
-      })
-      .lean();
-
-    return result as unknown as IBillPopulatedLean | null;
+  async findById(billId: string): Promise<IBillPopulatedLean | null> {
+    return (await Bill.findById(billId)
+      .populate(populateConfig)
+      .lean()) as unknown as IBillPopulatedLean | null;
   },
 
-  async findByConnection(connection: string): Promise<IBillDocument[]> {
-    return await Bill.find({ connection })
-      .populate({
-        path: "connection",
-        populate: {
-          path: "consumer",
-          select: "firstName middleName lastName email mobileNumber address",
-        },
-      })
-      .sort({ createdAt: -1 });
-    // No cast needed - returns IBillDocument[]
+  async findByConnection(
+    connection: string | mongoose.Types.ObjectId,
+  ): Promise<IBillPopulatedLean[]> {
+    return (await Bill.find({ connection })
+      .populate(populateConfig)
+      .sort({ createdAt: -1 })
+      .lean()) as unknown as IBillPopulatedLean[];
   },
 
   async updateById(
     bill: string,
     updates: Partial<IBill>,
-  ): Promise<IBillDocument | null> {
-    return await Bill.findByIdAndUpdate(bill, updates, {
+  ): Promise<IBillPopulatedLean | null> {
+    return (await Bill.findByIdAndUpdate(bill, updates, {
       new: true,
       runValidators: true,
-    }).populate({
-      path: "connection",
-      populate: {
-        path: "consumer",
-        select: "firstName middleName lastName email mobileNumber",
-      },
-    });
+    })
+      .populate(populateConfig)
+      .lean()) as unknown as IBillPopulatedLean | null;
   },
 
-  async deleteById(bill: string): Promise<IBillDocument | null> {
-    return Bill.findByIdAndDelete(bill);
+  async deleteById(billId: string): Promise<IBillPopulatedLean | null> {
+    return (await Bill.findByIdAndDelete(billId)
+      .populate(populateConfig)
+      .lean()) as unknown as IBillPopulatedLean | null;
   },
+
+  // async findOneByConnection(connection: string): Promise<IBillLean | null> {
+  //   const result = await Bill.findOne({ connection })
+  //     .sort({ monthOf: -1 })
+  //     .lean();
+  //   return result as unknown as IBillLean | null;
+  // },
 };
 
 // Quick Reference - When to use which type

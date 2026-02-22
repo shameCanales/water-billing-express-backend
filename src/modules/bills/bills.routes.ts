@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
-import { validateObjectIdReusable } from "../../core/middlewares/validation/validateObjectId.ts";
 import { checkSchema } from "express-validator";
 import { BillValidationSchema } from "../../core/middlewares/validationSchemas/bill.validation.ts";
 import { BillController } from "./bill.controller.ts";
+import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.ts";
 
 const router = Router();
 
@@ -12,6 +12,7 @@ router.get(
   "/",
   AuthMiddleware.requireStaffOrManager,
   checkSchema(BillValidationSchema.getAll),
+  handleValidationErrors,
   BillController.getAll,
 );
 
@@ -19,8 +20,8 @@ router.get(
 router.post(
   "/",
   AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ source: "body", key: "connection" }),
   checkSchema(BillValidationSchema.add),
+  handleValidationErrors,
   BillController.create,
 );
 
@@ -28,8 +29,8 @@ router.post(
 router.patch(
   "/:billId",
   AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ key: "billId" }),
   checkSchema(BillValidationSchema.edit),
+  handleValidationErrors,
   BillController.update,
 );
 
@@ -37,7 +38,8 @@ router.patch(
 router.patch(
   "/:billId/status",
   AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ key: "billId" }),
+  checkSchema(BillValidationSchema.editStatus),
+  handleValidationErrors,
   BillController.updateStatus,
 );
 // add validation schema here
@@ -46,7 +48,8 @@ router.patch(
 router.delete(
   "/:billId",
   AuthMiddleware.requireStaffOrManager,
-  validateObjectIdReusable({ key: "billId" }),
+  checkSchema(BillValidationSchema.idOnly),
+  handleValidationErrors,
   BillController.delete,
 );
 

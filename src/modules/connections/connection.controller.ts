@@ -2,6 +2,7 @@ import { matchedData } from "express-validator";
 import { ConnectionService } from "./connection.service.ts";
 import type { Request, Response } from "express";
 import type { IConnection } from "./connection.types.ts";
+import { handleControllerError } from "../../core/utils/errorHandler.ts";
 
 export const ConnectionController = {
   async create(req: Request, res: Response): Promise<Response> {
@@ -62,8 +63,14 @@ export const ConnectionController = {
       const connection = await ConnectionService.getById(connectionId);
 
       return res.status(200).json({ success: true, data: connection });
-    } catch (error: any) {
-      return res.status(404).json({ success: false, message: error.message });
+    } catch (err: any) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
+      const status = errorMessage.includes("not found") ? 404 : 500;
+
+      return res.status(status).json({
+        success: false,
+        message: errorMessage,
+      });
     }
   },
 
@@ -78,11 +85,13 @@ export const ConnectionController = {
         message: "Connection updated successfully",
         data: updated,
       });
-    } catch (error: any) {
-      const status = error.message.includes("not found") ? 404 : 500;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
+      const status = errorMessage.includes("not found") ? 404 : 500;
+
       return res.status(status).json({
         success: false,
-        message: error.message,
+        message: errorMessage,
       });
     }
   },
@@ -122,11 +131,13 @@ export const ConnectionController = {
         success: true,
         message: "Connection deleted successfully",
       });
-    } catch (error: any) {
-      const status = error.message.includes("not found") ? 404 : 500;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
+      const status = errorMessage.includes("not found") ? 404 : 500;
+
       return res.status(status).json({
         success: false,
-        message: error.message,
+        message: errorMessage,
       });
     }
   },
@@ -144,10 +155,13 @@ export const ConnectionController = {
           : "No connections found for this consumer",
         data,
       });
-    } catch (error) {
-      return res.status(500).json({
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
+      const status = errorMessage.includes("not found") ? 404 : 500;
+
+      return res.status(status).json({
         success: false,
-        message: "Failed to fetch connections",
+        message: errorMessage,
       });
     }
   },

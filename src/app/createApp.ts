@@ -8,7 +8,7 @@ import authConsumerRouter from "../modules/authConsumer/authConsumer.routes.ts";
 import consumerRouter from "../modules/consumers/consumer.routes.ts";
 import connectionRouter from "../modules/connections/connections.routes.ts";
 import billRouter from "../modules/bills/bills.routes.ts";
-import processorRouter from "../modules/processors/processors.routes.ts";
+import processorRouter from "../modules/processors/processor.routes.ts";
 import sharedRouter from "../modules/shared/shared.routes.ts";
 import settingsRouter from "../modules/settings/settings.routes.ts";
 

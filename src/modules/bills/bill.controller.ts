@@ -1,18 +1,11 @@
-import { matchedData, validationResult } from "express-validator";
-import { BillService, type CreateBillData } from "./bill.service.ts";
+import { matchedData } from "express-validator";
+import type { BillStatus, CreateBillData, IBill } from "./bill.types.ts";
 import type { Request, Response } from "express";
-import type { IBill } from "./bill.model.ts";
+import { BillService } from "./bill.service.ts";
+import { handleControllerError } from "../../core/utils/errorHandler.ts";
 
 export const BillController = {
   async getAll(req: Request, res: Response): Promise<Response> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
-
     try {
       const { page, limit, search, status, sortBy, sortOrder } =
         matchedData(req);
@@ -32,21 +25,13 @@ export const BillController = {
         data: bills,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-
-      return res.status(500).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 
-  async getByConnection(
-    req: Request<{ connectionId: string }>,
-    res: Response,
-  ): Promise<Response> {
+  async getByConnection(req: Request, res: Response): Promise<Response> {
     try {
-      const { connectionId } = req.params;
+      const { connectionId } = matchedData(req) as { connectionId: string };
       const bills = await BillService.getBillsByConnection(connectionId);
 
       return res.status(200).json({
@@ -56,26 +41,11 @@ export const BillController = {
         data: bills,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 
   async create(req: Request, res: Response): Promise<Response> {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
-
     try {
       const data = matchedData(req) as CreateBillData;
       const bill = await BillService.addBill(data);
@@ -86,34 +56,15 @@ export const BillController = {
         data: bill,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-      const status =
-        errorMessage.includes("exists") || errorMessage.includes("duplicate")
-          ? 409
-          : 400;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 
-  async update(
-    req: Request<{ billId: string }>,
-    res: Response,
-  ): Promise<Response> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
-
+  async update(req: Request, res: Response): Promise<Response> {
     try {
-      const update = matchedData(req) as Partial<IBill>;
-      const { billId } = req.params;
+      const { billId, ...update } = matchedData(req) as {
+        billId: string;
+      } & Partial<IBill>;
       const bill = await BillService.updateBill(billId, update);
 
       return res.status(200).json({
@@ -122,27 +73,16 @@ export const BillController = {
         data: bill,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 
-  async updateStatus(
-    req: Request<
-      { billId: string },
-      any,
-      { status: "paid" | "unpaid" | "overdue" }
-    >, // three objects: params, body, query
-    res: Response,
-  ): Promise<Response> {
+  async updateStatus(req: Request, res: Response): Promise<Response> {
     try {
-      const { billId } = req.params;
-      const { status } = req.body;
+      const { billId, status } = matchedData(req) as {
+        billId: string;
+        status: BillStatus;
+      };
       const bill = await BillService.updateBillStatus(billId, status);
 
       return res.status(200).json({
@@ -150,22 +90,14 @@ export const BillController = {
         message: "Bill status updated successfully",
         data: bill,
       });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-
-      return res.status(400).json({
-        success: false,
-        message: errorMessage,
-      });
+    } catch (err: any) {
+      return handleControllerError(err, res);
     }
   },
 
-  async delete(
-    req: Request<{ billId: string }>,
-    res: Response,
-  ): Promise<Response> {
+  async delete(req: Request, res: Response): Promise<Response> {
     try {
-      const { billId } = req.params;
+      const { billId } = matchedData(req) as { billId: string };
       const bill = await BillService.deleteBill(billId);
 
       return res.status(200).json({
@@ -174,13 +106,7 @@ export const BillController = {
         data: bill,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-      const status = errorMessage.includes("not found") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 };

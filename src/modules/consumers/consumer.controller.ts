@@ -2,6 +2,7 @@ import { matchedData } from "express-validator";
 import { ConsumerService } from "./consumer.service.ts";
 import type { Request, Response } from "express";
 import type { ConsumerStatus, IConsumer } from "./consumer.types.ts";
+import { handleControllerError } from "../../core/utils/errorHandler.ts";
 
 export const ConsumerController = {
   async getAll(req: Request, res: Response): Promise<Response> {

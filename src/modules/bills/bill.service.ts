@@ -1,22 +1,18 @@
 import { BillRepository } from "./bill.repository.ts";
 import { ConnectionRepository } from "../connections/connection.repository.ts";
 import { SettingsRepository } from "../settings/settings.repository.ts";
-import {
-  type IBill,
-  type IBillDocument,
-  type BillStatus,
-  type IBillPopulatedLean,
-  type PaginatedBillsResult,
-} from "./bill.model.ts";
+
+import type {
+  IBill,
+  CreateBillData,
+  BillStatus,
+  IBillPopulatedLean,
+  PaginatedBillsResult,
+} from "./bill.types.ts";
 import { Consumer } from "../consumers/consumer.model.ts";
 import { Connection } from "../connections/connection.model.ts";
 
 import mongoose from "mongoose";
-
-export type CreateBillData = Omit<
-  IBill,
-  "amount" | "chargePerCubicMeter" | "consumedUnits" | "paidAt" //NOTE: omit =  take Ibill without these fields
->;
 
 interface GetAllBillsParams {
   page: number;
@@ -30,16 +26,14 @@ interface GetAllBillsParams {
 export const BillService = {
   async getAllBills(params: GetAllBillsParams): Promise<PaginatedBillsResult> {
     const {
-      page,
-      limit,
+      page = 1,
+      limit = 10,
       search,
       sortBy = "createdAt",
       sortOrder = "desc",
       status,
     } = params;
-
     const skip = (page - 1) * limit;
-
     const filter: any = {};
 
     if (status && status !== "all") {
@@ -57,7 +51,9 @@ export const BillService = {
           { firstName: searchRegex },
           { lastName: searchRegex },
         ],
-      }).select("_id"); // We only need the IDs
+      })
+        .select("_id")
+        .lean(); // We only need the IDs
 
       const consumerIds = matchingConsumers.map((c) => c._id);
 
@@ -67,10 +63,11 @@ export const BillService = {
           { consumer: { $in: consumerIds } }, // Matches Consumer Name/Email
           { meterNumber: !isNaN(Number(search)) ? Number(search) : null }, // Matches Meter #
         ],
-      }).select("_id");
+      })
+        .select("_id")
+        .lean();
 
       const connectionIds = matchingConnections.map((c) => c._id);
-
       // Step C: Filter Bills that belong to these Connections
       filter.connection = { $in: connectionIds };
     }
@@ -93,7 +90,9 @@ export const BillService = {
     };
   },
 
-  async getBillsByConnection(connection: string): Promise<IBillDocument[]> {
+  async getBillsByConnection(
+    connection: string,
+  ): Promise<IBillPopulatedLean[]> {
     const connectionExists = await ConnectionRepository.findById(connection);
     if (!connectionExists) throw new Error("Connection not found");
     return await BillRepository.findByConnection(connection);
@@ -102,12 +101,8 @@ export const BillService = {
   async addBill(data: CreateBillData): Promise<IBillPopulatedLean> {
     const { connection, monthOf, dueDate, meterReading, status } = data;
 
-    const connectionId = new mongoose.Types.ObjectId(connection);
-
     // validate connection
-    const findConnection = await ConnectionRepository.findById(
-      connectionId.toString(),
-    );
+    const findConnection = await ConnectionRepository.findById(connection);
     if (!findConnection) throw new Error("Connection not found");
 
     // year, month, day
@@ -115,7 +110,6 @@ export const BillService = {
     const monthDate = new Date(
       Date.UTC(m.getUTCFullYear(), m.getUTCMonth(), 1),
     );
-
     const dueDateObj = new Date(dueDate);
 
     if (isNaN(monthDate.getTime()) || isNaN(dueDateObj.getTime()))
@@ -123,13 +117,13 @@ export const BillService = {
 
     // prevent duplicate bill
     const existing = await BillRepository.findOneByConnectionAndMonth(
-      connectionId.toString(),
+      connection,
       monthDate,
     );
     if (existing) throw new Error("A bill for this month already exists");
 
     //find last bill for consumption calculation
-    const lastBill = await BillRepository.findLastBill(connectionId.toString());
+    const lastBill = await BillRepository.findLastBill(connection);
     const lastReading = lastBill ? lastBill.meterReading : 0;
     const consumedUnits = meterReading - lastReading;
 
@@ -170,26 +164,25 @@ export const BillService = {
   async updateBill(
     bill: string,
     updates: Partial<IBill>,
-  ): Promise<IBillDocument | null> {
+  ): Promise<IBillPopulatedLean> {
     const existingBill = await BillRepository.findById(bill);
     if (!existingBill) throw new Error("Bill not found");
-    return await BillRepository.updateById(bill, updates);
+
+    const updated = await BillRepository.updateById(bill, updates);
+    if (!updated) throw new Error("Failed to update Bill");
+
+    return updated;
   },
 
   async updateBillStatus(
     bill: string,
     status: BillStatus,
-  ): Promise<IBillDocument | null> {
-    const allowed: BillStatus[] = ["paid", "unpaid", "overdue"];
-    if (!allowed.includes(status)) throw new Error(`Invalid status`);
-
+  ): Promise<IBillPopulatedLean> {
     const existingBill = await BillRepository.findById(bill);
     if (!existingBill) throw new Error("Bill not found");
 
     if (existingBill.status === status) {
-      const doc = await BillRepository.updateById(bill, {});
-      return doc;
-      // Can't return lean type as document, fetch as document instead.
+      throw new Error(`Bill is already ${status}`);
     }
 
     const updatedData = {
@@ -197,14 +190,19 @@ export const BillService = {
       paidAt: status === "paid" ? new Date() : null,
     };
 
-    return await BillRepository.updateById(bill, updatedData);
+    const updated = await BillRepository.updateById(bill, updatedData);
+    if (!updated) throw new Error("Failed to update bill status");
+
+    return updated;
   },
 
-  async deleteBill(bill: string): Promise<IBillDocument | null> {
+  async deleteBill(bill: string): Promise<IBillPopulatedLean> {
     const existingBill = await BillRepository.findById(bill);
     if (!existingBill) throw new Error("Bill not found");
 
     const deletedBill = await BillRepository.deleteById(bill);
+    if (!deletedBill) throw new Error("Failed to delete bill");
+
     return deletedBill;
   },
 };

@@ -686,3 +686,12 @@ moved settings data to settings table in monggoDB from settings.ts inside config
 - settings.ts: includes BILLING_SETTINGS object with properties of chargePerCubicMeter that is used to compute amount in bills.
 - created settings table with settingsHistory with properties of chargePerCubicMeter and surchargeRate
 - added settings modules and routes
+
+DATABASE::::
+- migrated database from Compass to Atlas: Feb 21, 2026
+
+ID Validation::::
+- instead of having reusable function that check id to be valid mongo id, we moved it to validation schemas because it also support monggoId, making code cleaner.
+
+ERROR HANDLING::::
+- instead having redundant error handling in the controllers, I make a reusable handleControllerError function to follow DRY principle.

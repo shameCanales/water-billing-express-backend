@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import type { Settingkey } from "./settings.model.ts";
 import { validationResult } from "express-validator";
 import { matchedData } from "express-validator";
+import { handleControllerError } from "../../core/utils/errorHandler.ts";
 
 export const SettingsController = {
   async getSettings(req: Request, res: Response): Promise<Response> {

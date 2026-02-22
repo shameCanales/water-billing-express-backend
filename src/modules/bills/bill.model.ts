@@ -1,70 +1,5 @@
-import mongoose, { Document, Schema } from "mongoose";
-import type { IConnectionPopulated } from "../connections/connection.model.js";
-
-export type BillStatus = "paid" | "unpaid" | "overdue";
-
-export interface IBill {
-  connection: mongoose.Types.ObjectId;
-  monthOf: Date;
-  dueDate: Date;
-  meterReading: number;
-  chargePerCubicMeter: number;
-  consumedUnits: number;
-  amount: number;
-  status: BillStatus;
-  paidAt: Date | null;
-}
-
-// Full Mongoose document (with methods)
-export interface IBillDocument extends IBill, Document {
-  _id: mongoose.Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Plain lean object (no Mongoose methods)
-export interface IBillLean {
-  _id: mongoose.Types.ObjectId;
-  connection: mongoose.Types.ObjectId;
-  monthOf: Date;
-  dueDate: Date;
-  meterReading: number;
-  chargePerCubicMeter: number;
-  consumedUnits: number;
-  amount: number;
-  status: BillStatus;
-  paidAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
-}
-
-// Lean with populated connection
-export interface IBillPopulatedLean {
-  _id: mongoose.Types.ObjectId;
-  connection: IConnectionPopulated;
-  monthOf: Date;
-  dueDate: Date;
-  meterReading: number;
-  chargePerCubicMeter: number;
-  consumedUnits: number;
-  amount: number;
-  status: BillStatus;
-  paidAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
-}
-
-export interface PaginatedBillsResult {
-  bills: IBillPopulatedLean[];
-  pagination: {
-    total: number;
-    totalPages: number;
-    currentPage: number;
-    limit: number;
-  };
-}
+import mongoose, { Schema } from "mongoose";
+import { BILL_STATUSES, type IBillDocument } from "./bill.types.ts";
 
 const BillSchema: Schema = new Schema<IBillDocument>(
   {
@@ -103,7 +38,7 @@ const BillSchema: Schema = new Schema<IBillDocument>(
     },
     status: {
       type: String,
-      enum: ["paid", "unpaid", "overdue"],
+      enum: BILL_STATUSES,
       default: "unpaid",
     },
     paidAt: {
