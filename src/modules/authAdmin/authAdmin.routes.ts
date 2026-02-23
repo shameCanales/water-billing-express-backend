@@ -1,10 +1,18 @@
 import { Router } from "express";
 import { AuthAdminController } from "./authAdmin.controller.ts";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
-
+import { checkSchema } from "express-validator";
+import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.ts";
+import { AuthAdminValidationSchema } from "../../core/middlewares/validationSchemas/auth.validation.ts";
 // api/auth/admin/login
 const router = Router();
-router.post("/login", AuthAdminController.login);
+
+router.post(
+  "/login",
+  checkSchema(AuthAdminValidationSchema.login),
+  handleValidationErrors,
+  AuthAdminController.login,
+);
 
 router.post("/refresh", AuthAdminController.refresh);
 
@@ -13,7 +21,7 @@ router.post("/logout", AuthAdminController.logout);
 router.get(
   "/status",
   AuthMiddleware.requireStaffOrManager,
-  AuthAdminController.status
+  AuthAdminController.status,
 );
 
 export default router;

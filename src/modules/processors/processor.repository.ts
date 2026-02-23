@@ -3,21 +3,33 @@ import type {
   IProcessor,
   IProcessorDocument,
   IProcessorLean,
-} from "./processor.model.ts";
-import type { Types } from "mongoose";
+  ProcessorStatus,
+} from "./processor.types.ts";
+import type mongoose from "mongoose";
 
 export const ProcessorRepository = {
   async findAll(
     filter: Record<string, any> = {},
-  ): Promise<IProcessorDocument[]> {
-    return await Processor.find(filter).select("-password").sort({
-      createdAt: -1,
-    });
+    sort: Record<string, any> = { createdAt: -1 },
+    skip: number = 0,
+    limit: number = 10,
+  ): Promise<IProcessorLean[]> {
+    return (await Processor.find(filter)
+      .select("-password")
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .lean()) as unknown as IProcessorLean[];
   },
 
-  async findById(_id: string | Types.ObjectId): Promise<IProcessorLean | null> {
-    const result = await Processor.findById(_id).select("-password").lean();
-    return result as unknown as IProcessorLean | null;
+  async count(filter: Record<string, any> = {}): Promise<number> {
+    return Processor.countDocuments(filter);
+  },
+
+  async findById(
+    _id: string | mongoose.Types.ObjectId,
+  ): Promise<IProcessorLean | null> {
+    return (await Processor.findById(_id).select("-password").lean()) as unknown as IProcessorLean | null;
   },
 
   async findByEmail(email: string): Promise<IProcessorDocument | null> {
@@ -29,18 +41,33 @@ export const ProcessorRepository = {
   },
 
   async updateById(
-    _id: string | Types.ObjectId,
+    _id: string | mongoose.Types.ObjectId,
     updates: Partial<IProcessor>,
-  ): Promise<IProcessorDocument | null> {
-    return await Processor.findByIdAndUpdate(_id, updates, {
+  ): Promise<IProcessorLean | null> {
+    return (await Processor.findByIdAndUpdate(_id, updates, {
       new: true,
       runValidators: true,
-    }).select("-password");
+    })
+      .select("-password")
+      .lean()) as unknown as IProcessorLean | null;
+  },
+
+  async updateStatus(
+    _id: string | mongoose.Types.ObjectId,
+    status: ProcessorStatus,
+  ): Promise<IProcessorLean | null> {
+    return (await Processor.findByIdAndUpdate(
+      _id,
+      { status },
+      { new: true, runValidators: true }
+    )
+      .select("-password")
+      .lean()) as unknown as IProcessorLean | null;
   },
 
   async deleteById(
-    _id: string | Types.ObjectId,
-  ): Promise<IProcessorDocument | null> {
-    return await Processor.findByIdAndDelete(_id);
+    _id: string | mongoose.Types.ObjectId,
+  ): Promise<IProcessorLean | null> {
+    return (await Processor.findByIdAndDelete(_id).select("-password").lean()) as unknown as IProcessorLean | null;
   },
 };

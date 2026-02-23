@@ -1,5 +1,4 @@
 import type { Schema } from "express-validator";
-import mongoose from "mongoose";
 import { BILL_STATUSES } from "../../../modules/bills/bill.types.ts";
 
 const billIdParam: Schema[string] = {

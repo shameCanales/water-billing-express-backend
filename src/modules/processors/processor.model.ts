@@ -1,59 +1,6 @@
-import mongoose, { Document } from "mongoose";
-
-export interface IProcessor {
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role?: "staff" | "manager";
-  status?: "active" | "restricted";
-}
-
-// MongoDB document version (includes _id, timestamps)
-export interface IProcessorDocument extends IProcessor, Document {
-  _id: mongoose.Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Lean version (plain JS object, e.g. when using .lean())
-export interface IProcessorLean {
-  _id: mongoose.Types.ObjectId;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  email: string;
-  role: "staff" | "manager";
-  status: "active" | "restricted";
-  createdAt: Date;
-  updatedAt: Date;
-  __v: number;
-  // password is excluded because .select("-password") is always used
-}
-
-// Public API version (no password, safe to return in responses)
-export interface IProcessorPublic {
-  _id: mongoose.Types.ObjectId;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  email: string;
-  role: "staff" | "manager";
-  status: "active" | "restricted";
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface IProcessorPopulated {
-  _id: mongoose.Types.ObjectId;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  email: string;
-  role: "staff" | "manager";
-  status: "active" | "restricted";
-}
+import mongoose from "mongoose";
+import type { IProcessorDocument } from "./processor.types.ts";
+import { PROCESSOR_ROLES, PROCESSOR_STATUSES } from "./processor.types.ts";
 
 const processorSchema = new mongoose.Schema(
   {
@@ -82,17 +29,17 @@ const processorSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 6,
+      minlength: 8,
       select: false,
     },
     role: {
       type: String,
-      enum: ["staff", "manager"],
+      enum: PROCESSOR_ROLES,
       default: "staff",
     },
     status: {
       type: String,
-      enum: ["active", "restricted"],
+      enum: PROCESSOR_STATUSES,
       default: "active",
     },
   },

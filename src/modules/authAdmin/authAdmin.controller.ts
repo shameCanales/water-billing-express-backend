@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response } from "express";
 import { ProcessorService } from "../processors/processor.service.ts";
 import {
   generateAccessToken,
@@ -6,6 +6,8 @@ import {
   verifyRefreshToken,
 } from "../../core/utils/jwt.utils.ts";
 import { comparePassword } from "../../core/utils/helpers.ts";
+import { matchedData } from "express-validator";
+import { handleControllerError } from "../../core/utils/errorHandler.ts";
 
 export const AuthAdminController = {
   /**
@@ -13,43 +15,35 @@ export const AuthAdminController = {
    * POST /api/auth/admin/login
    */
 
-  async login(req: Request, res: Response): Promise<void> {
+  async login(req: Request, res: Response): Promise<Response> {
     try {
-      const { email, password } = req.body;
-
-      // Validation
-      if (!email || !password) {
-        res.status(400).json({
-          success: false,
-          message: "Email and password are required",
-        });
-        return;
-      }
+      const { email, password } = matchedData(req) as {
+        email: string;
+        password: string;
+      };
 
       const admin = await ProcessorService.getByEmail(email);
 
       if (!admin || !(await comparePassword(password, admin.password))) {
-        res.status(401).json({
+        return res.status(401).json({
           success: false,
           message: "Invalid credentials",
         });
-        return;
       }
 
       if (admin.status === "restricted") {
-        res.status(403).json({
+        return res.status(403).json({
           success: false,
           message: "Account is restricted by the Manager.",
         });
-        return;
       }
 
       const payload = {
         _id: admin._id.toString(),
         email: admin.email,
-        role: admin.role!, // staff || manager
+        role: admin.role, // staff || manager
         type: "admin" as const, //admin lahat ng processor. as const because in types string !== "admin". it's like "admin" | "consumer". because if string, it could be "hello" and is not equal to type "admin". basta
-        status: admin.status!, // active || restricted
+        status: admin.status, // active || restricted
       };
 
       const accessToken = generateAccessToken(payload);
@@ -57,12 +51,12 @@ export const AuthAdminController = {
 
       res.cookie("jwt", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // NODE_ENV = 'development'
+        secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // CSRF protection
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
       });
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: "Login successful",
         accessToken,
@@ -75,11 +69,7 @@ export const AuthAdminController = {
         },
       });
     } catch (err) {
-      console.error("Admin login error:", err);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error.",
-      });
+      return handleControllerError(err, res);
     }
   },
 
@@ -88,15 +78,14 @@ export const AuthAdminController = {
    * POST /api/auth/admin/refresh
    * Requires: requireAdminAuth middleware
    */
-  async refresh(req: Request, res: Response): Promise<void> {
+  async refresh(req: Request, res: Response): Promise<Response> {
     try {
       const cookies = req.cookies;
       if (!cookies?.jwt) {
-        res.status(401).json({
+        return res.status(401).json({
           success: false,
           message: "Refresh token required",
         });
-        return;
       }
 
       const refreshToken = cookies.jwt;
@@ -104,22 +93,20 @@ export const AuthAdminController = {
 
       if (!decoded) {
         res.clearCookie("jwt");
-        res.status(403).json({
+        return res.status(403).json({
           success: false,
           message: "Invalid refresh token",
         });
-        return;
       }
 
       if (decoded.type !== "admin") {
-        res.status(403).json({
+        return res.status(403).json({
           success: false,
           message: "Invalid token type",
         });
-        return;
       }
 
-      // 3. Optional but recommended: Check if user still exists in DB // let's add this in the future using redis ba yun, basta.
+      // 3. Optional but recommended: Check if user still exists in DB // let's add this in the future using redis ba yun, basta kung may loggedIn table tayo.
       // const foundUser = await UserService.getById(decoded.id);
       // if (!foundUser) return res.status(401)
 
@@ -132,16 +119,12 @@ export const AuthAdminController = {
         status: decoded.status,
       });
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         accessToken: newAccessToken,
       });
     } catch (err) {
-      console.error("Refresh Error: ", err);
-      res.status(500).json({
-        success: false,
-        message: "Server error",
-      });
+      return handleControllerError(err, res);
     }
   },
 
@@ -151,50 +134,29 @@ export const AuthAdminController = {
    * Requires: requireAdminAuth middleware
    */
 
-  async status(req: Request, res: Response): Promise<void> {
+  async status(req: Request, res: Response): Promise<Response> {
     try {
       if (!req.user) {
-        res.status(401).json({
+        return res.status(401).json({
           success: false,
           message: "Not authenticated",
         });
-
-        return;
       }
-
-      // Optionally fetch resh data from database
 
       const admin = await ProcessorService.getById(req.user._id);
 
-      if (!admin) {
-        res.status(404).json({
-          success: false,
-          message: "Admin account not found",
-        });
-
-        return;
-      }
-
-      // const adminObj = admin.toObject ? admin.toObject() : admin;
-
-      const { password: _, ...adminData } = admin as any;
-
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
-        user: adminData,
+        user: admin,
       });
     } catch (err) {
-      console.error("Admin status error: ", err);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
+      return handleControllerError(err, res);
     }
   },
 
   // backend should delete the refresh token(the cookie)
   // frontend should delete the Access Token (The variable in memory)
-  async logout(req: Request, res: Response): Promise<void> {
+  async logout(_req: Request, res: Response): Promise<Response> {
     try {
       res.clearCookie("jwt", {
         httpOnly: true,
@@ -202,17 +164,12 @@ export const AuthAdminController = {
         sameSite: "strict",
       });
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: "Logged out successfully",
       });
     } catch (err) {
-      console.error("Logout error: ", err);
-
-      res.status(500).json({
-        success: false,
-        message: "Cannot logout, Internal server error",
-      });
+      return handleControllerError(err, res);
     }
   },
 };

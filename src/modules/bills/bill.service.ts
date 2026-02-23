@@ -12,8 +12,6 @@ import type {
 import { Consumer } from "../consumers/consumer.model.ts";
 import { Connection } from "../connections/connection.model.ts";
 
-import mongoose from "mongoose";
-
 interface GetAllBillsParams {
   page: number;
   limit: number;

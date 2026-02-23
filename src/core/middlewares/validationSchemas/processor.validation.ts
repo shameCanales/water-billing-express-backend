@@ -1,300 +1,173 @@
 import type { Schema } from "express-validator";
+import {
+  PROCESSOR_ROLES,
+  PROCESSOR_STATUSES,
+} from "../../../modules/processors/processor.types.ts";
+import { capitalizeFirstLetter } from "../../utils/validationHelpers.ts";
+
+const processorIdParam: Schema[string] = {
+  in: ["params"],
+  isMongoId: { errorMessage: "Invalid Processor ID format" },
+};
+
+const roleOptions = [...PROCESSOR_ROLES, "all"];
+const statusOptions = [...PROCESSOR_STATUSES, "all"];
 
 const getAllProcessorsSchema: Schema = {
+  page: {
+    in: ["query"],
+    optional: true,
+    isInt: { options: { min: 1 } },
+    toInt: true,
+  },
+  limit: {
+    in: ["query"],
+    optional: true,
+    isInt: { options: { min: 1, max: 100 } },
+    toInt: true,
+  },
+  search: { in: ["query"], optional: true, trim: true, escape: true },
   role: {
     in: ["query"],
     optional: true,
     trim: true,
     isIn: {
-      options: [["staff", "manager"]],
-      errorMessage: "Role filter must be staff or manager",
+      options: [roleOptions],
+      errorMessage: `Role must be one of: ${roleOptions.join(", ")}`,
+    },
+  },
+  status: {
+    in: ["query"],
+    optional: true,
+    trim: true,
+    isIn: {
+      options: [statusOptions],
+      errorMessage: `Status must be one of: ${statusOptions.join(", ")}`,
+    },
+  },
+  sortBy: { in: ["query"], optional: true, trim: true },
+  sortOrder: {
+    in: ["query"],
+    optional: true,
+    isIn: { options: [["asc", "desc"]] },
+    trim: true,
+  },
+};
+
+const baseCreateSchema: Schema = {
+  firstName: {
+    in: ["body"],
+    isString: true,
+    notEmpty: true,
+    trim: true,
+    isLength: { options: { min: 1, max: 40 } },
+    customSanitizer: { options: capitalizeFirstLetter },
+  },
+  middleName: {
+    in: ["body"],
+    optional: { options: { nullable: true, checkFalsy: true } },
+    isString: true,
+    trim: true,
+    isLength: { options: { max: 40 } },
+    customSanitizer: { options: capitalizeFirstLetter },
+  },
+  lastName: {
+    in: ["body"],
+    isString: true,
+    notEmpty: true,
+    trim: true,
+    isLength: { options: { min: 1, max: 40 } },
+    customSanitizer: { options: capitalizeFirstLetter },
+  },
+  email: {
+    in: ["body"],
+    isString: true,
+    notEmpty: true,
+    isEmail: true,
+    normalizeEmail: true,
+    trim: true,
+  },
+  password: {
+    in: ["body"],
+    isString: true,
+    notEmpty: true,
+    isLength: { options: { min: 8 } },
+    matches: {
+      options: [/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/],
+      errorMessage:
+        "Password must contain uppercase, lowercase, number, and special character.",
     },
   },
 };
 
 const registerManagerSchema: Schema = {
-  firstName: {
-    in: ["body"],
-    isString: {
-      errorMessage: "first name must be a string",
-    },
-    isLength: {
-      options: { min: 1, max: 40 },
-    },
-    notEmpty: {
-      errorMessage: "firt name is required",
-    },
-    trim: true,
-  },
-  middleName: {
-    in: ["body"],
-    optional: {
-      options: {
-        nullable: true,
-        checkFalsy: true,
-      },
-    },
-    isString: {
-      errorMessage: "middle name must be a string",
-    },
-    isLength: {
-      options: {
-        min: 1,
-        max: 40,
-      },
-      errorMessage: "middle name must be between 1 and 40 characters",
-    },
-    trim: true,
-  },
-  lastName: {
-    in: ["body"], // means where to look: req.body
-    isString: {
-      errorMessage: "last name must be a string",
-    },
-    isLength: {
-      options: { min: 1, max: 40 },
-      errorMessage: "last name must be between 1 and 40 characters",
-    },
-    notEmpty: {
-      errorMessage: "last name is required",
-    },
-    trim: true,
-  },
-
-  email: {
-    isString: {
-      errorMessage: "email must be a string.",
-    },
-    isLength: {
-      options: { min: 3, max: 30 },
-      errorMessage: "Email must be between 3 and 30 characters.",
-    },
-    notEmpty: {
-      errorMessage: "Email is required.",
-    },
-    trim: true,
-    isEmail: {
-      errorMessage: "Please enter a valid email address",
-    },
-    normalizeEmail: true,
-  },
-
-  password: {
-    isString: {
-      errorMessage: "Password must be a string.",
-    },
-    isLength: {
-      options: { min: 8 },
-      errorMessage: "Password must be at least 8 characters long.",
-    },
-    matches: {
-      options: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
-      errorMessage:
-        "Password must contain uppercase, lowercase, number, and special character.",
-    },
-    notEmpty: {
-      errorMessage: "Password is required.",
-    },
-  },
-
-  role: {
-    isIn: {
-      options: [["manager", "staff"]],
-      errorMessage: "Role must be either 'manager' or 'staff'.",
-    },
-    notEmpty: {
-      errorMessage: "Role is required.",
-    },
-  },
-
-  status: {
-    isIn: {
-      options: [["active", "restricted"]],
-      errorMessage: "Status must be either 'active' or 'restricted'.",
-    },
-    notEmpty: {
-      errorMessage: "Status is required.",
-    },
-  },
+  ...baseCreateSchema,
 };
 
 const registerStaffSchema: Schema = {
-  firstName: {
-    in: ["body"],
-    isString: {
-      errorMessage: "first name must be a string",
-    },
-    isLength: {
-      options: { min: 1, max: 40 },
-    },
-    notEmpty: {
-      errorMessage: "firt name is required",
-    },
-    trim: true,
-  },
-  middleName: {
-    in: ["body"],
-    optional: {
-      options: {
-        nullable: true,
-        checkFalsy: true,
-      },
-    },
-    isString: {
-      errorMessage: "middle name must be a string",
-    },
-    isLength: {
-      options: {
-        min: 1,
-        max: 40,
-      },
-      errorMessage: "middle name must be between 1 and 40 characters",
-    },
-    trim: true,
-  },
-  lastName: {
-    in: ["body"], // means where to look: req.body
-    isString: {
-      errorMessage: "last name must be a string",
-    },
-    isLength: {
-      options: { min: 1, max: 40 },
-      errorMessage: "last name must be between 1 and 40 characters",
-    },
-    notEmpty: {
-      errorMessage: "last name is required",
-    },
-    trim: true,
-  },
-  email: {
-    isString: {
-      errorMessage: "email must be a string.",
-    },
-    isLength: {
-      options: { min: 3, max: 30 },
-      errorMessage: "Email must be between 3 and 30 characters.",
-    },
-    notEmpty: {
-      errorMessage: "Email is required.",
-    },
-    trim: true,
-    isEmail: {
-      errorMessage: "Please enter a valid email address",
-    },
-    normalizeEmail: true,
-  },
-
-  password: {
-    isString: {
-      errorMessage: "Password must be a string.",
-    },
-    isLength: {
-      options: { min: 8 },
-      errorMessage: "Password must be at least 8 characters long.",
-    },
-    matches: {
-      options: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
-      errorMessage:
-        "Password must contain uppercase, lowercase, number, and special character.",
-    },
-    notEmpty: {
-      errorMessage: "Password is required.",
-    },
-  },
-
-  role: {
-    isIn: {
-      options: [["manager", "staff"]],
-      errorMessage: "Role must be either 'manager' or 'staff'.",
-    },
-    notEmpty: {
-      errorMessage: "Role is required.",
-    },
-  },
-
-  status: {
-    isIn: {
-      options: [["active", "restricted"]],
-      errorMessage: "Status must be either 'active' or 'restricted'.",
-    },
-    notEmpty: {
-      errorMessage: "Status is required.",
-    },
-  },
+  ...baseCreateSchema,
+  role: { in: ["body"], isIn: { options: [PROCESSOR_ROLES] } },
 };
 
 const editProcessorValidationSchema: Schema = {
-  name: {
-    isString: {
-      errorMessage: "Name must be a string.",
-    },
-    isLength: {
-      options: { min: 3, max: 32 },
-      errorMessage: "Name must be between 3 and 32 characters.",
-    },
-    notEmpty: {
-      errorMessage: "Name is required.",
-    },
-    trim: true,
+  processorId: processorIdParam,
+  firstName: {
+    in: ["body"],
     optional: true,
+    isString: true,
+    notEmpty: true,
+    trim: true,
+    isLength: { options: { max: 40 } },
+    customSanitizer: { options: capitalizeFirstLetter },
   },
-
+  middleName: {
+    in: ["body"],
+    optional: { options: { nullable: true, checkFalsy: true } },
+    isString: true,
+    trim: true,
+    isLength: { options: { max: 40 } },
+    customSanitizer: { options: capitalizeFirstLetter },
+  },
+  lastName: {
+    in: ["body"],
+    optional: true,
+    isString: true,
+    notEmpty: true,
+    trim: true,
+    isLength: { options: { max: 40 } },
+    customSanitizer: { options: capitalizeFirstLetter },
+  },
   email: {
-    isString: {
-      errorMessage: "email must be a string.",
-    },
-    isLength: {
-      options: { min: 3, max: 30 },
-      errorMessage: "Email must be between 3 and 30 characters.",
-    },
-    notEmpty: {
-      errorMessage: "Email is required.",
-    },
-    trim: true,
-    isEmail: {
-      errorMessage: "Please enter a valid email address",
-    },
-    normalizeEmail: true,
+    in: ["body"],
     optional: true,
+    isString: true,
+    notEmpty: true,
+    isEmail: true,
+    normalizeEmail: true,
   },
-
   password: {
-    isString: {
-      errorMessage: "Password must be a string.",
-    },
-    isLength: {
-      options: { min: 8 },
-      errorMessage: "Password must be at least 8 characters long.",
-    },
+    in: ["body"],
+    optional: true,
+    isString: true,
+    notEmpty: true,
+    isLength: { options: { min: 8 } },
     matches: {
-      options: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
+      options: [/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/],
       errorMessage:
         "Password must contain uppercase, lowercase, number, and special character.",
     },
-    notEmpty: {
-      errorMessage: "Password is required.",
-    },
-    optional: true,
   },
+  role: { in: ["body"], optional: true, isIn: { options: [PROCESSOR_ROLES] } },
+};
 
-  role: {
-    isIn: {
-      options: [["manager", "staff"]],
-      errorMessage: "Role must be either 'manager' or 'staff'.",
-    },
-    notEmpty: {
-      errorMessage: "Role is required.",
-    },
-    optional: true,
-  },
-
+const editStatusSchema: Schema = {
+  processorId: processorIdParam,
   status: {
+    in: ["body"],
+    exists: { errorMessage: "Status is required" },
     isIn: {
-      options: [["active", "restricted"]],
-      errorMessage: "Status must be either 'active' or 'restricted'.",
-    },
-    notEmpty: {
-      errorMessage: "Status is required.",
+      options: [PROCESSOR_STATUSES],
+      errorMessage: `Status must be one of: ${PROCESSOR_STATUSES.join(", ")}`,
     },
   },
 };
@@ -304,4 +177,6 @@ export const ProcessorValidationSchema = {
   registerManager: registerManagerSchema,
   registerStaff: registerStaffSchema,
   edit: editProcessorValidationSchema,
+  editStatus: editStatusSchema,
+  idOnly: { processorId: processorIdParam } as Schema,
 };

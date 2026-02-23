@@ -3,6 +3,7 @@ import { checkSchema } from "express-validator";
 import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
 import { ProcessorController } from "./processor.controller.ts";
 import { ProcessorValidationSchema } from "../../core/middlewares/validationSchemas/processor.validation.ts";
+import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.ts";
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.get(
   "/",
   AuthMiddleware.requireManager,
   checkSchema(ProcessorValidationSchema.getAll),
+  handleValidationErrors,
   ProcessorController.getAll,
 );
 
@@ -18,7 +20,8 @@ router.get(
 router.get(
   "/:processorId",
   AuthMiddleware.requireManager,
-  // validateObjectIdReusable({ key: "processorId" }),
+  checkSchema(ProcessorValidationSchema.idOnly),
+  handleValidationErrors,
   ProcessorController.getById,
 );
 
@@ -31,6 +34,7 @@ router.post(
   "/",
   AuthMiddleware.requireManager,
   checkSchema(ProcessorValidationSchema.registerStaff),
+  handleValidationErrors,
   ProcessorController.create,
 );
 
@@ -38,16 +42,26 @@ router.post(
 router.patch(
   "/:processorId",
   AuthMiddleware.requireManager,
-  // validateObjectIdReusable({ key: "processorId" }),
   checkSchema(ProcessorValidationSchema.edit),
+  handleValidationErrors,
   ProcessorController.update,
+);
+
+// Update Processor Status (active/restricted)
+router.patch(
+  "/:processorId/status",
+  AuthMiddleware.requireManager,
+  checkSchema(ProcessorValidationSchema.editStatus),
+  handleValidationErrors,
+  ProcessorController.updateStatus,
 );
 
 // Delete Processor by ID
 router.delete(
   "/:processorId",
   AuthMiddleware.requireManager,
-  // validateObjectIdReusable({ key: "processorId" }),
+  checkSchema(ProcessorValidationSchema.idOnly),
+  handleValidationErrors,
   ProcessorController.delete,
 );
 
@@ -59,6 +73,7 @@ router.delete(
 router.post(
   "/register",
   checkSchema(ProcessorValidationSchema.registerManager),
+  handleValidationErrors,
   ProcessorController.createManager,
 );
 

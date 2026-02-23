@@ -1,43 +1,38 @@
-import { validationResult, matchedData } from "express-validator";
+import { matchedData } from "express-validator";
 import { ProcessorService } from "./processor.service.ts";
 import type { Request, Response } from "express";
-import type { IProcessor } from "./processor.model.ts";
+import type { IProcessor, ProcessorStatus } from "./processor.types.ts";
 import { handleControllerError } from "../../core/utils/errorHandler.ts";
 
 export const ProcessorController = {
   async getAll(req: Request, res: Response): Promise<Response> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
-
     try {
-      const {role} = matchedData(req);
+      const { page, limit, search, role, status, sortBy, sortOrder } =
+        matchedData(req);
 
-      const processors = await ProcessorService.getAll(role);
+      const result = await ProcessorService.getAll({
+        page,
+        limit,
+        search,
+        role,
+        status,
+        sortBy,
+        sortOrder,
+      });
+
       return res.status(200).json({
         success: true,
-        data: processors,
+        message: "Processors retrieved successfully",
+        data: result,
       });
-    } catch (err: any) {
-      const status = err.message.includes("don't have any") ? 404 : 500;
-
-      return res.status(status).json({
-        success: false,
-        message: err.message,
-      });
+    } catch (err) {
+      return handleControllerError(err, res);
     }
   },
 
-  async getById(
-    req: Request<{ processorId: string }>,
-    res: Response,
-  ): Promise<Response> {
+  async getById(req: Request, res: Response): Promise<Response> {
     try {
-      const { processorId } = req.params;
+      const { processorId } = matchedData(req) as { processorId: string };
       const processor = await ProcessorService.getById(processorId);
 
       return res.status(200).json({
@@ -46,24 +41,11 @@ export const ProcessorController = {
         data: processor,
       });
     } catch (err: any) {
-      const status = err.message.includes("not found") ? 404 : 500;
-      return res.status(status).json({
-        success: false,
-        message: err.message,
-      });
+      return handleControllerError(err, res);
     }
   },
 
   async create(req: Request, res: Response): Promise<Response> {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
-
     try {
       const data = matchedData(req) as IProcessor;
       const processor = await ProcessorService.create(data);
@@ -74,56 +56,30 @@ export const ProcessorController = {
         data: processor,
       });
     } catch (err: any) {
-      const status = err.message.includes("exists") ? 409 : 500;
-      return res.status(status).json({
-        success: false,
-        message: err.message,
-      });
+      return handleControllerError(err, res);
     }
   },
 
   async createManager(req: Request, res: Response): Promise<Response> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
-
     try {
       const data = matchedData(req) as IProcessor;
       const manager = await ProcessorService.createFirstManager(data);
+
       return res.status(201).json({
         success: true,
         message: "Manager registered successfully",
         data: manager,
       });
-    } catch (err: any) {
-      const status = err.message.includes("exists") ? 409 : 500;
-      return res.status(status).json({
-        success: false,
-        message: err.message,
-      });
+    } catch (err) {
+      return handleControllerError(err, res);
     }
   },
 
-  async update(
-    req: Request<{ processorId: string }>,
-    res: Response,
-  ): Promise<Response> {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
-
+  async update(req: Request, res: Response): Promise<Response> {
     try {
-      const { processorId } = req.params;
-      const update = matchedData(req);
+      const { processorId, ...update } = matchedData(req) as {
+        processorId: string;
+      } & Partial<IProcessor>;
       const updated = await ProcessorService.updateById(processorId, update);
 
       return res.status(200).json({
@@ -132,21 +88,31 @@ export const ProcessorController = {
         data: updated,
       });
     } catch (err: any) {
-      const status = err.message.includes("not found") ? 404 : 500;
-      return res.status(status).json({
-        success: false,
-        message: err.message,
-      });
+      return handleControllerError(err, res);
     }
   },
 
-  async delete(
-    req: Request<{ processorId: string }>,
-    res: Response,
-  ): Promise<Response> {
+  async updateStatus(req: Request, res: Response): Promise<Response> {
     try {
-      const { processorId } = req.params;
+      const { processorId, status } = matchedData(req) as {
+        processorId: string;
+        status: ProcessorStatus;
+      };
+      const updated = await ProcessorService.updateStatus(processorId, status);
 
+      return res.status(200).json({
+        success: true,
+        message: "Processor status updated successfully",
+        data: updated,
+      });
+    } catch (err) {
+      return handleControllerError(err, res);
+    }
+  },
+
+  async delete(req: Request, res: Response): Promise<Response> {
+    try {
+      const { processorId } = matchedData(req) as { processorId: string };
       const deleted = await ProcessorService.deleteById(processorId);
 
       return res.status(200).json({
@@ -154,12 +120,8 @@ export const ProcessorController = {
         message: "Processor deleted successfully",
         data: deleted,
       });
-    } catch (err: any) {
-      const status = err.message.includes("not found") ? 404 : 500;
-      return res.status(status).json({
-        success: false,
-        message: err.message,
-      });
+    } catch (err) {
+      return handleControllerError(err, res);
     }
   },
 };
