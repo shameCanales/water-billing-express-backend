@@ -15,6 +15,8 @@ import settingsRouter from "../modules/settings/settings.routes.ts";
 export function createApp(): Application {
   const app: Application = express();
 
+  app.set("trust proxy", 1); // for render: true in cookies when behind proxy like nginx or render.com
+
   // 1. CORS MUST come before routes
   app.use(
     cors({
@@ -28,7 +30,7 @@ export function createApp(): Application {
 
   const loggingMiddleware = (
     request: Request,
-    response: Response,
+    _response: Response,
     next: NextFunction,
   ): void => {
     console.log(`log: ${request.method} - ${request.url}`);
@@ -37,7 +39,7 @@ export function createApp(): Application {
 
   app.use(
     loggingMiddleware,
-    (request: Request, response: Response, next: NextFunction): void => {
+    (_request: Request, _response: Response, next: NextFunction): void => {
       console.log("finished logging...");
       next();
     },
@@ -55,7 +57,7 @@ export function createApp(): Application {
   app.use("/api/shared", sharedRouter);
   app.use("/api/settings", settingsRouter);
 
-  app.get("/", (request: Request, response: Response): void => {
+  app.get("/", (_request: Request, response: Response): void => {
     response.status(200).json({
       success: true,
       message: "Water Billing API is running",

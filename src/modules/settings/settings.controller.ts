@@ -1,12 +1,11 @@
 import { SettingsService } from "./settings.service.ts";
 import type { Request, Response } from "express";
 import type { Settingkey } from "./settings.model.ts";
-import { validationResult } from "express-validator";
 import { matchedData } from "express-validator";
 import { handleControllerError } from "../../core/utils/errorHandler.ts";
 
 export const SettingsController = {
-  async getSettings(req: Request, res: Response): Promise<Response> {
+  async getSettings(_req: Request, res: Response): Promise<Response> {
     try {
       const settings = await SettingsService.getSettings();
       return res.status(200).json({
@@ -14,26 +13,16 @@ export const SettingsController = {
         data: settings,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-
-      return res.status(500).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 
   async updateSetting(req: Request, res: Response): Promise<Response> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
-
     try {
-      const { key, value } = matchedData(req);
+      const { key, value } = matchedData(req) as {
+        key: Settingkey;
+        value: number;
+      };
       const updated = await SettingsService.updateSetting(key, value);
 
       return res.status(200).json({
@@ -42,12 +31,7 @@ export const SettingsController = {
         data: updated,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-
-      return res.status(500).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 
@@ -63,12 +47,7 @@ export const SettingsController = {
         data: history,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown Error";
-
-      return res.status(500).json({
-        success: false,
-        message: errorMessage,
-      });
+      return handleControllerError(err, res);
     }
   },
 };

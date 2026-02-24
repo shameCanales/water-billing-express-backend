@@ -6,10 +6,16 @@ mongoose
   // .connect("mongodb://localhost/water_billing_system")
   .connect(
     // process.env.MONGODB_CONNECTION_URL || "mongodb://localhost/water_billing_system",
-    process.env.MONGODB_CONNECTION_URL!,
+    process.env.MONGODB_CONNECTION_URL || "mongodb://localhost/water_billing_system",
   )
   .then(() => {
-    console.log("Connected to WBS mongo Database");
+    if (!process.env.MONGODB_CONNECTION_URL){
+      console.warn(
+        "Warning: MONGODB_CONNECTION_URL is not set. Defaulting to mongodb://localhost/water_billing_system",
+      );
+    } else {
+      console.log("Connected using MongoDB connection URL from env.");
+    }
   })
   .catch((err) => {
     console.log("failed to connect to database", err);

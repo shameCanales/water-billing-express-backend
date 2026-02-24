@@ -3,21 +3,14 @@ import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
 import { SettingsController } from "./settings.controller.ts";
 import { checkSchema } from "express-validator";
 import { SettingsValidationSchema } from "../../core/middlewares/validationSchemas/settings.validation.ts";
+import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.ts";
 
 const router = Router();
-
 
 router.get(
   "/",
   AuthMiddleware.requireStaffOrManager,
   SettingsController.getSettings,
-);
-
-router.patch(
-  "/",
-  AuthMiddleware.requireManager,
-  checkSchema(SettingsValidationSchema.updateSetting),
-  SettingsController.updateSetting,
 );
 
 router.get(
@@ -26,6 +19,12 @@ router.get(
   SettingsController.getHistory,
 );
 
-
+router.patch(
+  "/",
+  AuthMiddleware.requireManager,
+  checkSchema(SettingsValidationSchema.updateSetting),
+  handleValidationErrors,
+  SettingsController.updateSetting,
+);
 
 export default router;

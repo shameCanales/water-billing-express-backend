@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { ProcessorService } from "../processors/processor.service.ts";
 import { ConsumerService } from "../consumers/consumer.service.ts";
+import { handleControllerError } from "../../core/utils/errorHandler.ts";
 
 export const SharedController = {
   async getMe(req: Request, res: Response): Promise<Response> {
@@ -30,18 +31,15 @@ export const SharedController = {
 
       // for added safety we can destructure document and convert into new plain object pero indi na kay kasamok lang.
 
-      const { password: _, __v, ...safeProfieData } = userProfile as any;
+      const { password: _, __v, ...safeProfileData } = userProfile as any;
 
       return res.status(200).json({
         success: true,
-        messsage: "profileData fetched successfully",
-        data: safeProfieData,
+        message: "profileData fetched successfully",
+        data: safeProfileData,
       });
     } catch (err) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-      });
+      return handleControllerError(err, res);
     }
   },
 };

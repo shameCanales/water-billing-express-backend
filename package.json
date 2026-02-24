@@ -7,7 +7,8 @@
     "test": "jest",
     "test:e2e": "jest --testPathPatterns src/tests/e2e",
     "test:watch": "NODE_ENV=test jest --watch",
-    "start": "nodemon src/app/server.ts",
+    "startLocal": "nodemon src/app/server.ts",
+    "start": "node dist/app/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app/server.ts",
     "build": "tsc -p tsconfig.json",
     "lint": "eslint . --ext .ts,.js"

@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 import {
   Settings,
   type ISettingsLean,
@@ -29,8 +29,9 @@ export const SettingsRepository = {
     if (existing) return;
 
     const now = new Date();
+    const session = await mongoose.startSession();
 
-    await mongoose.connection.transaction(async (session) => {
+    await session.withTransaction(async () => {
       await Settings.create([defaults], { session });
 
       await SettingsHistory.insertMany(
@@ -42,25 +43,33 @@ export const SettingsRepository = {
         { session },
       );
     });
+
+    await session.endSession();
   },
 
   async updateSetting(key: Settingkey, value: number): Promise<ISettingsLean> {
     const now = new Date();
+    const session = await mongoose.startSession();
 
-    const updated = await mongoose.connection.transaction(async () => {
-      // update the singleton
-      const updatedSettings = (await Settings.findOneAndUpdate(
+    let updatedSettings: ISettingsLean | null = null;
+
+    await session.withTransaction(async () => {
+      updatedSettings = (await Settings.findOneAndUpdate(
         {},
         { [key]: value },
-        { new: true, upsert: true, runValidators: true },
+        { new: true, upsert: true, runValidators: true, session },
       ).lean()) as ISettingsLean;
       // append to history
-      await SettingsHistory.create({ key, value, effectiveFrom: now });
-
-      return updatedSettings;
+      await SettingsHistory.create([{ key, value, effectiveFrom: now }], {
+        session,
+      });
     });
 
-    return updated;
+    await session.endSession();
+
+    if (!updatedSettings) throw new Error("Failed to update settings");
+
+    return updatedSettings;
   },
 
   async getHistory(
