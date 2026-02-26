@@ -36,7 +36,7 @@ const ConnectionSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: CONNECTION_STATUSES,
-      default: "active",
+      default: "connected",
     },
   },
   {

@@ -107,6 +107,7 @@ export const ConsumerService = {
     });
 
     const { password: _, ...consumerData } = newConsumer.toObject();
+    console.log("Created Consumer: ", consumerData);
     return consumerData as unknown as IConsumerLean; // do we need to cast it to IConsumerLean?
   },
 
