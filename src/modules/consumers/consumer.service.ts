@@ -151,6 +151,7 @@ export const ConsumerService = {
   ): Promise<IConsumerLean | null> {
     const existingConsumer = await ConsumerRepository.findById(_id);
     if (!existingConsumer) throw new Error("Consumer not found");
+    
     if (existingConsumer?.status === status) {
       throw new Error(`Consumer is already ${status}`);
     }
