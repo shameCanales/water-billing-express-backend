@@ -68,6 +68,14 @@ export const BillRepository = {
       .lean()) as unknown as IBillPopulatedLean[];
   },
 
+  async findOverdueUnprocessed(today: Date): Promise<IBillDocument[]> {
+    return await Bill.find({
+      status: "unpaid",
+      dueDate: { $lt: today },
+      surchargeAmount: 0, // Only those without surcharges applied yet
+    });
+  },
+
   async updateById(
     bill: string,
     updates: Partial<IBill>,

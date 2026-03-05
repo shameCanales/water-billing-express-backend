@@ -10,15 +10,24 @@ export interface IBill {
   dueDate: Date;
   meterReading: number;
   chargePerCubicMeter: number;
+  appliedSurchargePercent: number;
   consumedUnits: number;
-  amount: number;
+  billAmount: number;
+  surchargeAmount: number;
+  totalAmount: number;
   status: BillStatus;
   paidAt: Date | null;
 }
 
 export type CreateBillData = Omit<
   IBill,
-  "amount" | "chargePerCubicMeter" | "consumedUnits" | "paidAt"
+  | "appliedSurchargePercent"
+  | "chargePerCubicMeter"
+  | "consumedUnits"
+  | "billAmount"
+  | "surchargeAmount"
+  | "totalAmount"
+  | "paidAt"
 >;
 
 // Full Mongoose document (with methods)
@@ -29,17 +38,8 @@ export interface IBillDocument extends IBill, Document {
 }
 
 // Plain lean object (no Mongoose methods)
-export interface IBillLean {
+export interface IBillLean extends IBill {
   _id: mongoose.Types.ObjectId;
-  connection: mongoose.Types.ObjectId | string;
-  monthOf: Date;
-  dueDate: Date;
-  meterReading: number;
-  chargePerCubicMeter: number;
-  consumedUnits: number;
-  amount: number;
-  status: BillStatus;
-  paidAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
   __v: number;

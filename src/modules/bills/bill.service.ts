@@ -122,6 +122,10 @@ export const BillService = {
 
     //find last bill for consumption calculation
     const lastBill = await BillRepository.findLastBill(connection);
+    const [chargePerCubicMeter, surchargeRate] = await Promise.all([
+      SettingsRepository.getSettingValue("chargePerCubicMeter"),
+      SettingsRepository.getSettingValue("surchargeRate"),
+    ]);
     const lastReading = lastBill ? lastBill.meterReading : 0;
     const consumedUnits = meterReading - lastReading;
 
@@ -130,12 +134,7 @@ export const BillService = {
         "Current meter reading cannot be lower than previous reading",
       );
 
-    const chargePerCubicMeter = await SettingsRepository.getSettingValue(
-      "chargePerCubicMeter",
-    );
-    // const chargePerCubicMeter =
-    //   await SettingsRepository.getChargePerCubicMeter();
-    const amount = consumedUnits * chargePerCubicMeter;
+    const billAmount = consumedUnits * chargePerCubicMeter;
 
     // create
     const newBill = await BillRepository.create({
@@ -144,8 +143,11 @@ export const BillService = {
       dueDate: dueDateObj,
       meterReading,
       chargePerCubicMeter,
+      appliedSurchargePercent: surchargeRate * 100,
       consumedUnits,
-      amount,
+      billAmount,
+      surchargeAmount: 0,
+      totalAmount: billAmount,
       status,
       paidAt: status === "paid" ? new Date() : null,
     });
@@ -157,6 +159,26 @@ export const BillService = {
     }
 
     return createdBill;
+  },
+
+  async processOverdueSurcharges(): Promise<number> {
+    const today = new Date();
+    const overdueBills = await BillRepository.findOverdueUnprocessed(today);
+
+    if (overdueBills.length === 0) return 0;
+
+    const updatePromises = overdueBills.map(async (bill) => {
+      const surcharge = bill.billAmount * (bill.appliedSurchargePercent / 100);
+
+      bill.surchargeAmount = Math.round(surcharge * 100) / 100;
+      bill.totalAmount = bill.billAmount + bill.surchargeAmount;
+      bill.status = "overdue";
+
+      return bill.save();
+    });
+
+    await Promise.all(updatePromises);
+    return overdueBills.length;
   },
 
   async updateBill(
