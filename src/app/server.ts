@@ -1,21 +1,26 @@
 import "../core/emv.ts"; // import first to
 import mongoose from "mongoose";
 import { createApp } from "./createApp.ts";
+import { initBillCrons } from "../modules/bills/bill.cron.ts";
 
 mongoose
   // .connect("mongodb://localhost/water_billing_system")
   .connect(
     // process.env.MONGODB_CONNECTION_URL || "mongodb://localhost/water_billing_system",
-    process.env.MONGODB_CONNECTION_URL || "mongodb://localhost/water_billing_system",
+    process.env.MONGODB_CONNECTION_URL ||
+      "mongodb://localhost/water_billing_system",
   )
-  .then(() => {
-    if (!process.env.MONGODB_CONNECTION_URL){
+  .then(async () => {
+    if (!process.env.MONGODB_CONNECTION_URL) {
       console.warn(
         "Warning: MONGODB_CONNECTION_URL is not set. Defaulting to mongodb://localhost/water_billing_system",
       );
     } else {
       console.log("Connected using MongoDB connection URL from env.");
     }
+
+    await initBillCrons();
+    console.log("Bill Cron jobs and startup safety sweep initialized");
   })
   .catch((err) => {
     console.log("failed to connect to database", err);

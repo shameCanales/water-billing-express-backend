@@ -1,9 +1,20 @@
 import cron from "node-cron";
 import { BillService } from "./bill.service.ts";
 
-export const initBillCrons = () => {
-  // Scheduled for 6:00 AM daily in Philippine Time (ensure server timezone is correct)
-  cron.schedule("0 6 * * *", async () => {
+export const initBillCrons = async () => {
+  //runs when server starts
+  console.log("[CRON] Running startup surcharge check...");
+  try {
+    const startupCount = await BillService.processOverdueSurcharges();
+    console.log(
+      `[CRON] Startup Sweep Complete: Processed ${startupCount} bills.`,
+    );
+  } catch (error) {
+    console.error("[CRON] Startup Sweep Error:", error);
+  }
+
+  // runs based on scheduled time
+  cron.schedule("0 9 * * *", async () => {
     console.log("[CRON] 06:00 AM: Starting Surcharge & Overdue Sweep...");
 
     try {

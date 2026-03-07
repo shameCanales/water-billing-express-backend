@@ -1,5 +1,6 @@
 import mongoose, { Document } from "mongoose";
 import type { IConnectionPopulated } from "../connections/connection.types.ts";
+import type { IProcessorPopulated } from "../processors/processor.types.ts";
 
 export const BILL_STATUSES = ["paid", "unpaid", "overdue"] as const;
 export type BillStatus = (typeof BILL_STATUSES)[number];
@@ -17,6 +18,10 @@ export interface IBill {
   totalAmount: number;
   status: BillStatus;
   paidAt: Date | null;
+
+  createdBy: mongoose.Types.ObjectId | string;
+  lastEditBy: mongoose.Types.ObjectId | null | string;
+  processedBy: mongoose.Types.ObjectId | null | string;
 }
 
 export type CreateBillData = Omit<
@@ -28,6 +33,8 @@ export type CreateBillData = Omit<
   | "surchargeAmount"
   | "totalAmount"
   | "paidAt"
+  | "lastEditBy"
+  | "processedBy"
 >;
 
 // Full Mongoose document (with methods)
@@ -46,8 +53,14 @@ export interface IBillLean extends IBill {
 }
 
 // Lean with populated connection
-export interface IBillPopulatedLean extends Omit<IBillLean, "connection"> {
+export interface IBillPopulatedLean extends Omit<
+  IBillLean,
+  "connection" | "createdBy" | "lastEditBy" | "processedBy"
+> {
   connection: IConnectionPopulated;
+  createdBy: IProcessorPopulated;
+  lastEditBy: IProcessorPopulated | null;
+  processedBy: IProcessorPopulated | null;
 }
 
 export interface PaginatedBillsResult {

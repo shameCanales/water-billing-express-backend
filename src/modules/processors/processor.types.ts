@@ -22,14 +22,8 @@ export interface IProcessorDocument extends IProcessor, Document {
   updatedAt: Date;
 }
 
-export interface IProcessorLean {
+export interface IProcessorLean extends IProcessor {
   _id: mongoose.Types.ObjectId | string;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  email: string;
-  role: ProcessorRole;
-  status: ProcessorStatus;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
@@ -45,6 +39,14 @@ export interface PaginatedProcessorsResult {
   };
 }
 
+export interface IProcessorPopulated {
+  _id: mongoose.Types.ObjectId;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  role: "staff" | "manager";
+}
+
 // // Public API version (no password, safe to return in responses)
 // export interface IProcessorPublic {
 //   _id: mongoose.Types.ObjectId;
@@ -56,14 +58,4 @@ export interface PaginatedProcessorsResult {
 //   status: "active" | "restricted";
 //   createdAt: Date;
 //   updatedAt: Date;
-// }
-
-// export interface IProcessorPopulated {
-//   _id: mongoose.Types.ObjectId;
-//   firstName: string;
-//   middleName?: string;
-//   lastName: string;
-//   email: string;
-//   role: "staff" | "manager";
-//   status: "active" | "restricted";
 // }

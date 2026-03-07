@@ -52,10 +52,26 @@ const BillSchema: Schema = new Schema<IBillDocument>(
     status: {
       type: String,
       enum: BILL_STATUSES,
+      required: [true, "Status is required"],
       default: "unpaid",
     },
     paidAt: {
       type: Date,
+      default: null,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Processor",
+      required: [true, "Creator reference is required"],
+    },
+    lastEditBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Processor",
+      default: null,
+    },
+    processedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Processor",
       default: null,
     },
   },

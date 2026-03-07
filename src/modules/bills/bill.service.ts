@@ -11,6 +11,10 @@ import type {
 } from "./bill.types.ts";
 import { Consumer } from "../consumers/consumer.model.ts";
 import { Connection } from "../connections/connection.model.ts";
+import {
+  formatCurrency,
+  calculateBillFinancials,
+} from "../../core/utils/finance.utils.ts";
 
 interface GetAllBillsParams {
   page: number;
@@ -92,137 +96,182 @@ export const BillService = {
     connection: string,
   ): Promise<IBillPopulatedLean[]> {
     const connectionExists = await ConnectionRepository.findById(connection);
+
     if (!connectionExists) throw new Error("Connection not found");
     return await BillRepository.findByConnection(connection);
   },
 
-  async addBill(data: CreateBillData): Promise<IBillPopulatedLean> {
-    const { connection, monthOf, dueDate, meterReading, status } = data;
+  async addBill(
+    data: CreateBillData & { createdBy: string },
+  ): Promise<IBillPopulatedLean> {
+    const { connection, monthOf, dueDate, meterReading, status, createdBy } =
+      data;
 
-    // validate connection
+    // 1. Validation Guards
     const findConnection = await ConnectionRepository.findById(connection);
     if (!findConnection) throw new Error("Connection not found");
 
-    // year, month, day
     const m = new Date(monthOf);
     const monthDate = new Date(
       Date.UTC(m.getUTCFullYear(), m.getUTCMonth(), 1),
     );
-    const dueDateObj = new Date(dueDate);
 
+    const dueDateObj = new Date(dueDate);
     if (isNaN(monthDate.getTime()) || isNaN(dueDateObj.getTime()))
       throw new Error("Invalid date format");
 
-    // prevent duplicate bill
     const existing = await BillRepository.findOneByConnectionAndMonth(
       connection,
       monthDate,
     );
     if (existing) throw new Error("A bill for this month already exists");
 
-    //find last bill for consumption calculation
-    const lastBill = await BillRepository.findLastBill(connection);
-    const [chargePerCubicMeter, surchargeRate] = await Promise.all([
+    // 2. Data Fetching
+    const [chargePerCubicMeter, surchargeRate, lastBill] = await Promise.all([
       SettingsRepository.getSettingValue("chargePerCubicMeter"),
       SettingsRepository.getSettingValue("surchargeRate"),
+      BillRepository.findLastBill(connection),
     ]);
-    const lastReading = lastBill ? lastBill.meterReading : 0;
-    const consumedUnits = meterReading - lastReading;
 
-    if (consumedUnits < 0)
-      throw new Error(
-        "Current meter reading cannot be lower than previous reading",
-      );
+    // 3. Calculation Logic
+    const isAddedLate = dueDateObj < new Date();
+    const financials = calculateBillFinancials(
+      meterReading,
+      lastBill?.meterReading || 0,
+      chargePerCubicMeter,
+      surchargeRate,
+      isAddedLate,
+    );
 
-    const billAmount = consumedUnits * chargePerCubicMeter;
+    const finalStatus = isAddedLate && status === "unpaid" ? "overdue" : status;
 
-    // create
+    // 4. Persistence
     const newBill = await BillRepository.create({
+      ...financials, // consumedUnits, billAmount, surchargeAmount, totalAmount
       connection,
       monthOf: monthDate,
       dueDate: dueDateObj,
       meterReading,
       chargePerCubicMeter,
-      appliedSurchargePercent: surchargeRate * 100,
-      consumedUnits,
-      billAmount,
-      surchargeAmount: 0,
-      totalAmount: billAmount,
-      status,
-      paidAt: status === "paid" ? new Date() : null,
-    });
+      appliedSurchargePercent: surchargeRate,
+      status: finalStatus,
+      paidAt: finalStatus === "paid" ? new Date() : null,
+      createdBy,
+      processedBy: finalStatus === "paid" ? createdBy : null,
+      lastEditBy: null,
+    } as IBill);
 
-    const createdBill = await BillRepository.findById(newBill._id.toString());
-
-    if (!createdBill) {
-      throw new Error("Error to retrieve created bill");
-    }
-
-    return createdBill;
+    return (await BillRepository.findById(newBill._id.toString()))!;
   },
 
   async processOverdueSurcharges(): Promise<number> {
-    const today = new Date();
-    const overdueBills = await BillRepository.findOverdueUnprocessed(today);
-
+    const overdueBills = await BillRepository.findOverdueUnprocessed(
+      new Date(),
+    );
     if (overdueBills.length === 0) return 0;
 
-    const updatePromises = overdueBills.map(async (bill) => {
-      const surcharge = bill.billAmount * (bill.appliedSurchargePercent / 100);
-
-      bill.surchargeAmount = Math.round(surcharge * 100) / 100;
-      bill.totalAmount = bill.billAmount + bill.surchargeAmount;
+    const updates = overdueBills.map((bill) => {
+      const surcharge = formatCurrency(
+        bill.billAmount * bill.appliedSurchargePercent,
+      );
+      bill.surchargeAmount = surcharge;
+      bill.totalAmount = formatCurrency(bill.billAmount + surcharge);
       bill.status = "overdue";
-
       return bill.save();
     });
 
-    await Promise.all(updatePromises);
+    await Promise.all(updates);
     return overdueBills.length;
   },
 
   async updateBill(
-    bill: string,
-    updates: Partial<IBill>,
+    billId: string,
+    updates: Partial<IBill> & { lastEditBy: string },
   ): Promise<IBillPopulatedLean> {
-    const existingBill = await BillRepository.findById(bill);
-    if (!existingBill) throw new Error("Bill not found");
+    const bill = await BillRepository.findById(billId);
 
-    const updated = await BillRepository.updateById(bill, updates);
+    // Rule 1: Guard against missing or paid bills
+    if (!bill) throw new Error("Bill not found");
+    if (bill.status === "paid")
+      throw new Error("Invalid update: Paid bills are locked.");
+
+    // Rule 2: Recalculate if meter reading changes
+    if (
+      updates.meterReading !== undefined &&
+      updates.meterReading !== bill.meterReading
+    ) {
+      const lastBill = await BillRepository.findLastBill(
+        bill.connection as any,
+      );
+
+      const previousReading =
+        lastBill && lastBill._id.toString() !== billId
+          ? lastBill.meterReading
+          : 0;
+      const isPastDue = new Date(bill.dueDate) < new Date();
+
+      const financials = calculateBillFinancials(
+        updates.meterReading,
+        previousReading,
+        bill.chargePerCubicMeter,
+        bill.appliedSurchargePercent,
+        isPastDue || bill.surchargeAmount > 0,
+      );
+
+      Object.assign(updates, financials);
+    }
+
+    const updated = await BillRepository.updateById(billId, updates);
     if (!updated) throw new Error("Failed to update Bill");
-
     return updated;
   },
 
   async updateBillStatus(
-    bill: string,
+    billId: string,
     status: BillStatus,
+    adminId: string,
   ): Promise<IBillPopulatedLean> {
-    const existingBill = await BillRepository.findById(bill);
-    if (!existingBill) throw new Error("Bill not found");
+    const bill = await BillRepository.findById(billId);
 
-    if (existingBill.status === status) {
-      throw new Error(`Bill is already ${status}`);
-    }
+    // Guards
+    if (!bill) throw new Error("Bill not found");
+    if (bill.status === "paid")
+      throw new Error("Financial Protection: Cannot modify a paid bill.");
+    if (bill.status === status) throw new Error(`Bill is already ${status}`);
 
-    const updatedData = {
+    const isPastDue = new Date(bill.dueDate) < new Date();
+    
+    const updatedData: Partial<IBill> = {
       status,
       paidAt: status === "paid" ? new Date() : null,
+      processedBy: status === "paid" ? adminId : null,
     };
 
-    const updated = await BillRepository.updateById(bill, updatedData);
-    if (!updated) throw new Error("Failed to update bill status");
+    // Auto-apply Surcharge if moving to a late status
+    const movingToLate =
+      status === "overdue" || (status === "unpaid" && isPastDue);
+    if (movingToLate && bill.surchargeAmount === 0) {
+      const surcharge = formatCurrency(
+        bill.billAmount * bill.appliedSurchargePercent,
+      );
+      updatedData.surchargeAmount = surcharge;
+      updatedData.totalAmount = formatCurrency(bill.billAmount + surcharge);
+      updatedData.lastEditBy = adminId;
+    }
 
+    const updated = await BillRepository.updateById(billId, updatedData);
+    if (!updated) throw new Error("Failed to update bill status");
     return updated;
   },
 
-  async deleteBill(bill: string): Promise<IBillPopulatedLean> {
-    const existingBill = await BillRepository.findById(bill);
-    if (!existingBill) throw new Error("Bill not found");
+  async deleteBill(billId: string): Promise<IBillPopulatedLean> {
+    const bill = await BillRepository.findById(billId);
+    if (!bill) throw new Error("Bill not found");
+    if (bill.status === "paid")
+      throw new Error("Audit Protection: Cannot delete a paid bill.");
 
-    const deletedBill = await BillRepository.deleteById(bill);
-    if (!deletedBill) throw new Error("Failed to delete bill");
-
-    return deletedBill;
+    const deleted = await BillRepository.deleteById(billId);
+    if (!deleted) throw new Error("Failed to delete bill");
+    return deleted;
   },
 };

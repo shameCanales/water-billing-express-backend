@@ -48,7 +48,11 @@ export const BillController = {
   async create(req: Request, res: Response): Promise<Response> {
     try {
       const data = matchedData(req) as CreateBillData;
-      const bill = await BillService.addBill(data);
+
+      const bill = await BillService.addBill({
+        ...data,
+        createdBy: req.user!._id,
+      });
 
       return res.status(201).json({
         success: true,
@@ -65,7 +69,11 @@ export const BillController = {
       const { billId, ...update } = matchedData(req) as {
         billId: string;
       } & Partial<IBill>;
-      const bill = await BillService.updateBill(billId, update);
+
+      const bill = await BillService.updateBill(billId, {
+        ...update,
+        lastEditBy: req.user!._id,
+      });
 
       return res.status(200).json({
         success: true,
@@ -83,7 +91,12 @@ export const BillController = {
         billId: string;
         status: BillStatus;
       };
-      const bill = await BillService.updateBillStatus(billId, status);
+
+      const bill = await BillService.updateBillStatus(
+        billId,
+        status,
+        req.user!._id,
+      );
 
       return res.status(200).json({
         success: true,

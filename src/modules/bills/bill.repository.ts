@@ -7,13 +7,27 @@ import type {
   IBillPopulatedLean,
 } from "./bill.types.ts";
 
-const populateConfig = {
-  path: "connection",
-  populate: {
-    path: "consumer",
-    select: "firstName middleName lastName email mobileNumber address",
+const populateConfig = [
+  {
+    path: "connection",
+    populate: {
+      path: "consumer",
+      select: "firstName middleName lastName email mobileNumber address",
+    },
   },
-};
+  {
+    path: "createdBy",
+    select: "firstName middleName lastName role",
+  },
+  {
+    path: "lastEditBy",
+    select: "firstName middleName lastName role",
+  },
+  {
+    path: "processedBy",
+    select: "firstName middleName lastName role",
+  },
+];
 
 export const BillRepository = {
   async findAll(
@@ -93,13 +107,6 @@ export const BillRepository = {
       .populate(populateConfig)
       .lean()) as unknown as IBillPopulatedLean | null;
   },
-
-  // async findOneByConnection(connection: string): Promise<IBillLean | null> {
-  //   const result = await Bill.findOne({ connection })
-  //     .sort({ monthOf: -1 })
-  //     .lean();
-  //   return result as unknown as IBillLean | null;
-  // },
 };
 
 // Quick Reference - When to use which type
