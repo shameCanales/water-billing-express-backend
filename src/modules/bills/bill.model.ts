@@ -55,10 +55,7 @@ const BillSchema: Schema = new Schema<IBillDocument>(
       required: [true, "Status is required"],
       default: "unpaid",
     },
-    paidAt: {
-      type: Date,
-      default: null,
-    },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Processor",
@@ -69,9 +66,17 @@ const BillSchema: Schema = new Schema<IBillDocument>(
       ref: "Processor",
       default: null,
     },
+    lastEditAt: {
+      type: Date,
+      default: null,
+    },
     processedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Processor",
+      default: null,
+    },
+    paidAt: {
+      type: Date,
       default: null,
     },
   },

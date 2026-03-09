@@ -21,6 +21,7 @@ export interface IBill {
 
   createdBy: mongoose.Types.ObjectId | string;
   lastEditBy: mongoose.Types.ObjectId | null | string;
+  lastEditAt: Date | null;
   processedBy: mongoose.Types.ObjectId | null | string;
 }
 

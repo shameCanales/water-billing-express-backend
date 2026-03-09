@@ -159,6 +159,7 @@ export const BillService = {
       createdBy,
       processedBy: finalStatus === "paid" ? createdBy : null,
       lastEditBy: null,
+      lastEditAt: null,
     } as IBill);
 
     return (await BillRepository.findById(newBill._id.toString()))!;
@@ -218,7 +219,13 @@ export const BillService = {
         isPastDue || bill.surchargeAmount > 0,
       );
 
-      Object.assign(updates, financials);
+      Object.assign(updates, {
+        ...financials,
+        lastEditBy: updates.lastEditBy,
+        lastEditAt: new Date(),
+      });
+    } else {
+      updates.lastEditAt = new Date();
     }
 
     const updated = await BillRepository.updateById(billId, updates);
@@ -240,7 +247,7 @@ export const BillService = {
     if (bill.status === status) throw new Error(`Bill is already ${status}`);
 
     const isPastDue = new Date(bill.dueDate) < new Date();
-    
+
     const updatedData: Partial<IBill> = {
       status,
       paidAt: status === "paid" ? new Date() : null,
@@ -257,6 +264,7 @@ export const BillService = {
       updatedData.surchargeAmount = surcharge;
       updatedData.totalAmount = formatCurrency(bill.billAmount + surcharge);
       updatedData.lastEditBy = adminId;
+      updatedData.lastEditAt = new Date();
     }
 
     const updated = await BillRepository.updateById(billId, updatedData);
