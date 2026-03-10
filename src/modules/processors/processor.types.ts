@@ -44,18 +44,11 @@ export interface IProcessorPopulated {
   firstName: string;
   middleName?: string;
   lastName: string;
-  role: "staff" | "manager";
+  role: ProcessorRole;
 }
 
-// // Public API version (no password, safe to return in responses)
-// export interface IProcessorPublic {
-//   _id: mongoose.Types.ObjectId;
-//   firstName: string;
-//   middleName?: string;
-//   lastName: string;
-//   email: string;
-//   role: "staff" | "manager";
-//   status: "active" | "restricted";
-//   createdAt: Date;
-//   updatedAt: Date;
-// }
+export type IProcessorSummary = Pick<
+  IProcessorPopulated,
+  "firstName" | "middleName" | "lastName" | "role"
+>;
+

@@ -1,5 +1,6 @@
 import mongoose, { Document } from "mongoose";
 import type { IConsumerPopulated } from "../consumers/consumer.types.ts";
+import type { IConsumerSummary } from "../consumers/consumer.types.ts";
 
 export const CONNECTION_STATUSES = ["connected", "disconnected"] as const;
 export type ConnectionStatus = (typeof CONNECTION_STATUSES)[number];
@@ -49,4 +50,11 @@ export interface IConnectionPopulated {
   createdAt: Date;
   updatedAt: Date;
   __v: number;
+}
+
+export interface IConnectionSummary {
+  meterNumber: number;
+  address: string;
+  type: ConnectionType;
+  consumer: IConsumerSummary;
 }

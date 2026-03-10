@@ -1,6 +1,12 @@
 import mongoose, { Document } from "mongoose";
-import type { IConnectionPopulated } from "../connections/connection.types.ts";
-import type { IProcessorPopulated } from "../processors/processor.types.ts";
+import type {
+  IConnectionPopulated,
+  IConnectionSummary,
+} from "../connections/connection.types.ts";
+import type {
+  IProcessorPopulated,
+  IProcessorSummary,
+} from "../processors/processor.types.ts";
 
 export const BILL_STATUSES = ["paid", "unpaid", "overdue"] as const;
 export type BillStatus = (typeof BILL_STATUSES)[number];
@@ -64,8 +70,26 @@ export interface IBillPopulatedLean extends Omit<
   processedBy: IProcessorPopulated | null;
 }
 
+// lightweight data. tinanggal ang unimportant data for table
+export interface IBillSummary extends Omit<
+  IBillLean,
+  | "connection"
+  | "createdBy"
+  | "lastEditBy"
+  | "processedBy"
+  | "chargePerCubicMeter"
+  | "appliedSurchargePercent"
+  | "__v"
+  | "updatedAt"
+> {
+  connection: IConnectionSummary | null;
+  createdBy: IProcessorSummary;
+  lastEditBy: IProcessorSummary | null;
+  processedBy: IProcessorSummary | null;
+}
+
 export interface PaginatedBillsResult {
-  bills: IBillPopulatedLean[];
+  bills: IBillSummary[];
   pagination: {
     total: number;
     totalPages: number;

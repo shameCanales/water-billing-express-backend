@@ -59,3 +59,7 @@ export interface PaginatedConsumersResult {
   };
 }
 
+export type IConsumerSummary = Pick<
+  IConsumerPopulated,
+  "firstName" | "middleName" | "lastName" | "mobileNumber"
+>;

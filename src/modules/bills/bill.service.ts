@@ -8,6 +8,7 @@ import type {
   BillStatus,
   IBillPopulatedLean,
   PaginatedBillsResult,
+  IBillSummary,
 } from "./bill.types.ts";
 import { Consumer } from "../consumers/consumer.model.ts";
 import { Connection } from "../connections/connection.model.ts";
@@ -94,7 +95,7 @@ export const BillService = {
 
   async getBillsByConnection(
     connection: string,
-  ): Promise<IBillPopulatedLean[]> {
+  ): Promise<IBillSummary[]> {
     const connectionExists = await ConnectionRepository.findById(connection);
 
     if (!connectionExists) throw new Error("Connection not found");

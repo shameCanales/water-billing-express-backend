@@ -5,7 +5,22 @@ import type {
   IBillDocument,
   IBillLean,
   IBillPopulatedLean,
+  IBillSummary,
 } from "./bill.types.ts";
+
+const LIST_POPULATE = [
+  {
+    path: "connection",
+    select: "meterNumber address type -_id", // -_id hide connection ID
+    populate: {
+      path: "consumer",
+      select: "firstName middleName lastName mobileNumber -_id",
+    },
+  },
+  { path: "createdBy", select: "firstName middleName lastName role -_id" },
+  { path: "lastEditBy", select: "firstName middleName lastName role -_id" },
+  { path: "processedBy", select: "firstName middleName lastName role -_id" },
+];
 
 const populateConfig = [
   {
@@ -35,15 +50,16 @@ export const BillRepository = {
     sort: Record<string, any> = { createdAt: -1 },
     skip: number = 0,
     limit: number = 0,
-  ): Promise<IBillPopulatedLean[]> {
+  ): Promise<IBillSummary[]> {
     const result = await Bill.find(filter)
-      .populate(populateConfig)
+      .populate(LIST_POPULATE)
+      .select("-appliedSurchargePercent -__v -updatedAt")
       .sort(sort)
       .skip(skip)
       .limit(limit)
       .lean();
 
-    return result as unknown as IBillPopulatedLean[];
+    return result as unknown as IBillSummary[];
   },
 
   async count(filter: Record<string, any> = {}): Promise<number> {
@@ -75,11 +91,11 @@ export const BillRepository = {
 
   async findByConnection(
     connection: string | mongoose.Types.ObjectId,
-  ): Promise<IBillPopulatedLean[]> {
+  ): Promise<IBillSummary[]> {
     return (await Bill.find({ connection })
-      .populate(populateConfig)
+      .populate(LIST_POPULATE)
       .sort({ createdAt: -1 })
-      .lean()) as unknown as IBillPopulatedLean[];
+      .lean()) as unknown as IBillSummary[];
   },
 
   async findOverdueUnprocessed(today: Date): Promise<IBillDocument[]> {
