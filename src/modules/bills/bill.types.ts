@@ -51,7 +51,7 @@ export interface IBillDocument extends IBill, Document {
   updatedAt: Date;
 }
 
-// Plain lean object (no Mongoose methods)
+// Plain lean object (no Mongoose methods, no population)
 export interface IBillLean extends IBill {
   _id: mongoose.Types.ObjectId;
   createdAt: Date;

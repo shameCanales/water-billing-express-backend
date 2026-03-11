@@ -62,10 +62,6 @@ export const BillRepository = {
     return result as unknown as IBillSummary[];
   },
 
-  async count(filter: Record<string, any> = {}): Promise<number> {
-    return Bill.countDocuments(filter);
-  },
-
   async findOneByConnectionAndMonth(
     connection: string | mongoose.Types.ObjectId,
     monthOf: Date,
@@ -77,10 +73,6 @@ export const BillRepository = {
     connection: string | mongoose.Types.ObjectId,
   ): Promise<IBillLean | null> {
     return Bill.findOne({ connection }).sort({ monthOf: -1 }).lean();
-  },
-
-  async create(data: IBill): Promise<IBillDocument> {
-    return await Bill.create(data);
   },
 
   async findById(billId: string): Promise<IBillPopulatedLean | null> {
@@ -98,6 +90,30 @@ export const BillRepository = {
       .lean()) as unknown as IBillSummary[];
   },
 
+  async create(data: IBill): Promise<IBillDocument> {
+    return await Bill.create(data);
+  },
+
+  async updateById(
+    bill: string,
+    updates: Partial<IBill>,
+  ): Promise<IBillSummary | null> {
+    return (await Bill.findByIdAndUpdate(bill, updates, {
+      new: true,
+      runValidators: true,
+    })
+      .populate(LIST_POPULATE)
+      .select("-appliedSurchargePercent -__v -updatedAt")
+      .lean()) as unknown as IBillSummary | null;
+  },
+
+  async deleteById(billId: string): Promise<IBillSummary | null> {
+    return (await Bill.findByIdAndDelete(billId)
+      .populate(LIST_POPULATE)
+      .select("-appliedSurchargePercent -__v -updatedAt")
+      .lean()) as unknown as IBillSummary | null;
+  },
+
   async findOverdueUnprocessed(today: Date): Promise<IBillDocument[]> {
     return await Bill.find({
       status: "unpaid",
@@ -106,22 +122,8 @@ export const BillRepository = {
     });
   },
 
-  async updateById(
-    bill: string,
-    updates: Partial<IBill>,
-  ): Promise<IBillPopulatedLean | null> {
-    return (await Bill.findByIdAndUpdate(bill, updates, {
-      new: true,
-      runValidators: true,
-    })
-      .populate(populateConfig)
-      .lean()) as unknown as IBillPopulatedLean | null;
-  },
-
-  async deleteById(billId: string): Promise<IBillPopulatedLean | null> {
-    return (await Bill.findByIdAndDelete(billId)
-      .populate(populateConfig)
-      .lean()) as unknown as IBillPopulatedLean | null;
+  async count(filter: Record<string, any> = {}): Promise<number> {
+    return Bill.countDocuments(filter);
   },
 };
 

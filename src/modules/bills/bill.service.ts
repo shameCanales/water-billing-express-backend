@@ -93,9 +93,7 @@ export const BillService = {
     };
   },
 
-  async getBillsByConnection(
-    connection: string,
-  ): Promise<IBillSummary[]> {
+  async getBillsByConnection(connection: string): Promise<IBillSummary[]> {
     const connectionExists = await ConnectionRepository.findById(connection);
 
     if (!connectionExists) throw new Error("Connection not found");
@@ -189,7 +187,7 @@ export const BillService = {
   async updateBill(
     billId: string,
     updates: Partial<IBill> & { lastEditBy: string },
-  ): Promise<IBillPopulatedLean> {
+  ): Promise<IBillSummary> {
     const bill = await BillRepository.findById(billId);
 
     // Rule 1: Guard against missing or paid bills
@@ -238,10 +236,8 @@ export const BillService = {
     billId: string,
     status: BillStatus,
     adminId: string,
-  ): Promise<IBillPopulatedLean> {
+  ): Promise<IBillSummary> {
     const bill = await BillRepository.findById(billId);
-
-    // Guards
     if (!bill) throw new Error("Bill not found");
     if (bill.status === "paid")
       throw new Error("Financial Protection: Cannot modify a paid bill.");
@@ -273,14 +269,16 @@ export const BillService = {
     return updated;
   },
 
-  async deleteBill(billId: string): Promise<IBillPopulatedLean> {
+  async deleteBill(billId: string): Promise<IBillSummary> {
     const bill = await BillRepository.findById(billId);
     if (!bill) throw new Error("Bill not found");
+
     if (bill.status === "paid")
       throw new Error("Audit Protection: Cannot delete a paid bill.");
 
     const deleted = await BillRepository.deleteById(billId);
     if (!deleted) throw new Error("Failed to delete bill");
+
     return deleted;
   },
 };
