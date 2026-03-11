@@ -1,6 +1,6 @@
 import mongoose, { Document } from "mongoose";
 import type {
-  IConnectionPopulated,
+  IConnectionPopulatedLean,
   IConnectionSummary,
 } from "../connections/connection.types.ts";
 import type {
@@ -64,7 +64,7 @@ export interface IBillPopulatedLean extends Omit<
   IBillLean,
   "connection" | "createdBy" | "lastEditBy" | "processedBy"
 > {
-  connection: IConnectionPopulated;
+  connection: IConnectionPopulatedLean;
   createdBy: IProcessorPopulated;
   lastEditBy: IProcessorPopulated | null;
   processedBy: IProcessorPopulated | null;

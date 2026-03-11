@@ -10,7 +10,7 @@ const ConnectionSchema = new mongoose.Schema(
     consumer: {
       type: mongoose.Schema.Types.ObjectId, // reference to Consumer model
       ref: "Consumer", // foreign key
-      required: true,
+      required: [true, "Consumer reference is required"],
     },
     meterNumber: {
       type: Number,
@@ -37,6 +37,20 @@ const ConnectionSchema = new mongoose.Schema(
       type: String,
       enum: CONNECTION_STATUSES,
       default: "connected",
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Processor",
+      required: [true, "Creator reference is required"],
+    },
+    lastEditBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Processor",
+      default: null,
+    },
+    lastEditAt: {
+      type: Date,
+      default: null,
     },
   },
   {

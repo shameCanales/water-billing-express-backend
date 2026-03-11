@@ -22,7 +22,7 @@ const LIST_POPULATE = [
   { path: "processedBy", select: "firstName middleName lastName role -_id" },
 ];
 
-const populateConfig = [
+const FULL_POPULATE = [
   {
     path: "connection",
     populate: {
@@ -77,7 +77,7 @@ export const BillRepository = {
 
   async findById(billId: string): Promise<IBillPopulatedLean | null> {
     return (await Bill.findById(billId)
-      .populate(populateConfig)
+      .populate(FULL_POPULATE)
       .lean()) as unknown as IBillPopulatedLean | null;
   },
 

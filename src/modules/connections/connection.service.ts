@@ -2,9 +2,11 @@ import { ConnectionRepository } from "./connection.repository.ts";
 import { ConsumerRepository } from "../consumers/consumer.repository.ts";
 import type {
   IConnection,
-  IConnectionPopulated,
+  IConnectionPopulatedLean,
   ConnectionStatus,
   IConnectionDocument,
+  IConnectionSummary,
+  PaginatedConnectionsResult,
 } from "./connection.types.ts";
 import type mongoose from "mongoose";
 
@@ -19,7 +21,7 @@ interface GetAllConnectionsParams {
 }
 
 export const ConnectionService = {
-  async create(data: IConnection): Promise<IConnectionPopulated> {
+  async create(data: IConnection): Promise<IConnectionPopulatedLean> {
     const { consumer, meterNumber } = data;
 
     const foundConsumer = await ConsumerRepository.findById(consumer);
@@ -33,7 +35,9 @@ export const ConnectionService = {
     return connection;
   },
 
-  async getAll(params: GetAllConnectionsParams) {
+  async getAll(
+    params: GetAllConnectionsParams,
+  ): Promise<PaginatedConnectionsResult> {
     const {
       page = 1,
       limit = 10,
@@ -93,7 +97,7 @@ export const ConnectionService = {
     };
   },
 
-  async getById(_id: string): Promise<IConnectionPopulated> {
+  async getById(_id: string): Promise<IConnectionPopulatedLean> {
     const connection = await ConnectionRepository.findById(_id);
     if (!connection) throw new Error("Connection not found");
     return connection;
@@ -101,8 +105,10 @@ export const ConnectionService = {
 
   async updateById(
     _id: string | mongoose.Types.ObjectId,
-    updates: Partial<IConnection>,
-  ): Promise<IConnectionPopulated> {
+    updates: Partial<IConnection> & { lastEditBy: string },
+  ): Promise<IConnectionSummary> {
+    updates.lastEditAt = new Date();
+
     const updated = await ConnectionRepository.updateById(_id, updates);
     if (!updated) throw new Error("Connection not found");
     return updated;
@@ -110,7 +116,7 @@ export const ConnectionService = {
 
   async deleteById(
     _id: string | mongoose.Types.ObjectId,
-  ): Promise<IConnectionPopulated> {
+  ): Promise<IConnectionSummary> {
     const deleted = await ConnectionRepository.deleteById(_id);
     if (!deleted) throw new Error("Connection not found");
     return deleted;
@@ -123,19 +129,20 @@ export const ConnectionService = {
   async updateStatusById(
     _id: string,
     status: ConnectionStatus,
-  ): Promise<IConnectionDocument | null> {
+    adminId: string,
+  ): Promise<IConnectionSummary | null> {
     const existingConnection = await ConnectionRepository.findStatusById(_id);
-
     if (!existingConnection) throw new Error("Connection not found");
 
     if (existingConnection?.status === status) {
       throw new Error(`Connection is already ${status}`);
     }
 
-    const updatedConnection = await ConnectionRepository.updateStatusById(
-      _id,
+    const updatedConnection = await ConnectionRepository.updateById(_id, {
       status,
-    );
+      lastEditBy: adminId,
+      lastEditAt: new Date(), // why remove this?
+    });
 
     return updatedConnection;
   },

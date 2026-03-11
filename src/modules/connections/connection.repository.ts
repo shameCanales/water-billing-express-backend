@@ -1,13 +1,32 @@
 import { Connection } from "./connection.model.ts";
 import type {
   IConnectionLean,
-  IConnectionPopulated,
+  IConnectionPopulatedLean,
   IConnection,
   IConnectionDocument,
   ConnectionStatus,
+  IConnectionSummary,
 } from "./connection.types.ts";
 
 import mongoose from "mongoose";
+
+const LIST_POPULATE = [
+  {
+    path: "consumer",
+    select: "firstName middleName lastName mobileNumber -_id",
+  },
+  { path: "createdBy", select: "firstName lastName role -_id" },
+  { path: "lastEditBy", select: "firstName lastName role -_id" },
+];
+
+const FULL_POPULATE = [
+  {
+    path: "consumer",
+    select: "firstName middleName lastName email mobileNumber address",
+  },
+  { path: "createdBy", select: "firstName lastName role" },
+  { path: "lastEditBy", select: "firstName lastName role" },
+];
 
 export const ConnectionRepository = {
   async findAll(
@@ -15,13 +34,14 @@ export const ConnectionRepository = {
     sort: Record<string, any> = { createdAt: -1 },
     skip: number = 0,
     limit: number = 0,
-  ): Promise<IConnectionPopulated[]> {
+  ): Promise<IConnectionSummary[]> {
     return (await Connection.find(filter)
-      .populate("consumer", "firstName middleName lastName email mobileNumber")
+      .populate(LIST_POPULATE)
+      .select("-updatedAt -__v")
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .lean()) as unknown as IConnectionPopulated[];
+      .lean()) as unknown as IConnectionSummary[];
   },
 
   async count(filter: Record<string, any> = {}): Promise<number> {
@@ -30,10 +50,10 @@ export const ConnectionRepository = {
 
   async findById(
     id: string | mongoose.Types.ObjectId,
-  ): Promise<IConnectionPopulated | null> {
+  ): Promise<IConnectionPopulatedLean | null> {
     return (await Connection.findById(id)
-      .populate("consumer", "firstName middleName lastName email mobileNumber")
-      .lean()) as unknown as IConnectionPopulated | null;
+      .populate(FULL_POPULATE)
+      .lean()) as unknown as IConnectionPopulatedLean | null;
   },
 
   async findStatusById(_id: string): Promise<{ status: string } | null> {
@@ -48,55 +68,39 @@ export const ConnectionRepository = {
     }).lean()) as unknown as IConnectionLean | null;
   },
 
-  async findByConsumerId(consumer: string | mongoose.Types.ObjectId) {
+  async findByConsumerId(
+    consumer: string | mongoose.Types.ObjectId,
+  ): Promise<IConnectionSummary[]> {
     return Connection.find({ consumer })
-      .populate("consumer", "firstName middleName lastName email mobileNumber")
+      .populate(LIST_POPULATE)
       .sort({ createdAt: -1 })
-      .lean() as unknown as IConnectionPopulated[];
+      .lean() as unknown as IConnectionSummary[];
   },
 
-  async create(data: IConnection): Promise<IConnectionPopulated> {
+  async create(data: IConnection): Promise<IConnectionPopulatedLean> {
     const newConnection = await Connection.create(data);
-
-    await newConnection.populate(
-      "consumer",
-      "firstName middleName lastName email mobileNumber",
-    );
-
-    return newConnection.toObject() as unknown as IConnectionPopulated;
+    return (await ConnectionRepository.findById(newConnection._id.toString()))!;
   },
 
   async updateById(
     _id: string | mongoose.Types.ObjectId,
     updates: Partial<IConnection>,
-  ): Promise<IConnectionPopulated | null> {
+  ): Promise<IConnectionSummary | null> {
     return (await Connection.findByIdAndUpdate(_id, updates, {
       new: true,
       runValidators: true,
     })
-      .populate("consumer", "firstName middleName lastName email mobileNumber")
-      .lean()) as unknown as IConnectionPopulated | null;
+      .populate(LIST_POPULATE)
+      .select("-updatedAt -__v")
+      .lean()) as unknown as IConnectionSummary | null;
   },
 
   async deleteById(
     _id: string | mongoose.Types.ObjectId,
-  ): Promise<IConnectionPopulated | null> {
+  ): Promise<IConnectionSummary | null> {
     return (await Connection.findByIdAndDelete(_id)
-      .populate("consumer", "firstName middleName lastName email mobileNumber")
-      .lean()) as unknown as IConnectionPopulated | null;
-  },
-
-  async updateStatusById(
-    _id: string,
-    status: ConnectionStatus,
-  ): Promise<IConnectionDocument | null> {
-    return Connection.findByIdAndUpdate(
-      _id,
-      { status: status },
-      {
-        new: true,
-        runValidators: true,
-      },
-    );
+      .populate(LIST_POPULATE)
+      .select("-updatedAt -__v")
+      .lean()) as unknown as IConnectionSummary | null;
   },
 };

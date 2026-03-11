@@ -13,6 +13,9 @@ export interface IConsumer {
   password: string;
   address: string;
   status: ConsumerStatus;
+  createdBy: mongoose.Types.ObjectId | string;
+  lastEditBy: mongoose.Types.ObjectId | null | string;
+  lastEditAt: Date | null;
 }
 
 // Interface for the consumer document (with MongoDB fields)
@@ -23,34 +26,32 @@ export interface IConsumerDocument extends IConsumer, Document {
 }
 
 // Lean version - plain object with password INCLUDED (for auth checks)
-export interface IConsumerLean {
+export interface IConsumerLean extends IConsumer {
   _id: mongoose.Types.ObjectId;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  email: string;
-  birthDate: Date;
-  mobileNumber: string;
-  address: string;
-  status: ConsumerStatus;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 }
 
 // For population in other models (minimal fields)
-export interface IConsumerPopulated {
+export interface IConsumerPopulated extends Omit< 
+  IConsumerLean,
+  "password" | "__v" | "createdBy" | "lastEditBy"
+> {
+  // If you later decide to populate who created the consumer,
+  // you'd add: createdBy: IProcessorPopulated;
+}
+
+export interface IConsumerSummary {
   _id: mongoose.Types.ObjectId;
   firstName: string;
   middleName?: string;
   lastName: string;
-  email: string;
   mobileNumber: string;
-  address: string;
 }
 
 export interface PaginatedConsumersResult {
-  consumers: IConsumerLean[];
+  consumers: IConsumerLean[]; // Usually, we use Lean here so we have the password for potential admin resets
   pagination: {
     total: number;
     totalPages: number;
@@ -58,8 +59,3 @@ export interface PaginatedConsumersResult {
     limit: number;
   };
 }
-
-export type IConsumerSummary = Pick<
-  IConsumerPopulated,
-  "firstName" | "middleName" | "lastName" | "mobileNumber"
->;

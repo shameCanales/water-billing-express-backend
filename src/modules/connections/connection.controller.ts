@@ -1,14 +1,20 @@
 import { matchedData } from "express-validator";
 import { ConnectionService } from "./connection.service.ts";
 import type { Request, Response } from "express";
-import type { IConnection } from "./connection.types.ts";
+import type {
+  IConnection,
+  PaginatedConnectionsResult,
+} from "./connection.types.ts";
 import { handleControllerError } from "../../core/utils/errorHandler.ts";
 
 export const ConnectionController = {
   async create(req: Request, res: Response): Promise<Response> {
     try {
       const data = matchedData(req) as IConnection;
-      const newConnection = await ConnectionService.create(data);
+      const newConnection = await ConnectionService.create({
+        ...data,
+        createdBy: req.user!._id,
+      });
 
       return res.status(201).json({
         success: true,
@@ -25,15 +31,16 @@ export const ConnectionController = {
       const { page, limit, search, status, type, sortBy, sortOrder } =
         matchedData(req);
 
-      const connections = await ConnectionService.getAll({
-        page,
-        limit,
-        search,
-        status,
-        type,
-        sortBy,
-        sortOrder,
-      });
+      const connections: PaginatedConnectionsResult =
+        await ConnectionService.getAll({
+          page,
+          limit,
+          search,
+          status,
+          type,
+          sortBy,
+          sortOrder,
+        });
 
       return res.status(200).json({
         success: true,
@@ -60,7 +67,10 @@ export const ConnectionController = {
     try {
       const { connectionId, ...updates } = matchedData(req);
 
-      const updated = await ConnectionService.updateById(connectionId, updates);
+      const updated = await ConnectionService.updateById(connectionId, {
+        ...updates,
+        lastEditBy: req.user!._id,
+      });
 
       return res.status(200).json({
         success: true,
@@ -79,6 +89,7 @@ export const ConnectionController = {
       const updatedConnection = await ConnectionService.updateStatusById(
         connectionId,
         status,
+        req.user!._id,
       );
 
       return res.status(200).json({
