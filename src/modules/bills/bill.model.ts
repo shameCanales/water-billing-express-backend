@@ -22,7 +22,7 @@ const BillSchema: Schema = new Schema<IBillDocument>(
       min: [0, "Meter reading cannot be negative"],
     },
     chargePerCubicMeter: {
-      type: Number, // this should be auto populated from settings
+      type: Number, 
       required: [true, "Charge per cubic meter is required"],
       min: [0, "Charge per cubic meter cannot be negative"],
     },
@@ -31,12 +31,12 @@ const BillSchema: Schema = new Schema<IBillDocument>(
       required: [true, "Applied surcharge percent is required."],
     },
     consumedUnits: {
-      type: Number, // calculated as current meter reading - last month's meter reading
+      type: Number, 
       required: [true, "Consumed units is required"],
       min: [0, "Consumed units cannot be negative"],
     },
     billAmount: {
-      type: Number, // calculated as consumedUnits * chargePerCubicMeter
+      type: Number, 
       required: [true, "Amount is required"],
       min: [0, "Amount cannot be negative"],
     },

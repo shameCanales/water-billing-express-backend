@@ -127,13 +127,3 @@ export const BillRepository = {
   },
 };
 
-// Quick Reference - When to use which type
-// ----------------------------------------
-// Query has .lean()? | Has .populate()? | Return Type
-// -------------------+------------------+-------------------------
-// Yes                | No               | IBillLean
-// Yes                | Yes              | IBillPopulatedLean
-// No                 | Either           | IBillDocument
-
-// Key principle:
-// .lean() returns plain objects, NOT Mongoose documents, so you need different types!

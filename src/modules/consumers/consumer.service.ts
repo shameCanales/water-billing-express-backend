@@ -4,9 +4,10 @@ import { hashPassword } from "../../core/utils/helpers.ts";
 import type {
   IConsumer,
   ConsumerStatus,
-  IConsumerDocument,
   PaginatedConsumersResult,
   IConsumerLean,
+  IConsumerPopulatedLean,
+  IConsumerSummary,
 } from "./consumer.types.ts";
 import type mongoose from "mongoose";
 
@@ -32,7 +33,6 @@ export const ConsumerService = {
       sortOrder = "desc",
       status,
     } = params;
-
     const skip = (page - 1) * limit;
 
     // 1. Build Filter
@@ -75,7 +75,7 @@ export const ConsumerService = {
     };
   },
 
-  async createConsumer(data: IConsumer): Promise<IConsumerLean> {
+  async createConsumer(data: IConsumer): Promise<IConsumerPopulatedLean> {
     const {
       firstName,
       middleName,
@@ -86,15 +86,17 @@ export const ConsumerService = {
       password,
       address,
       status,
+      createdBy,
     } = data;
 
     const existingConsumer = await ConsumerRepository.findByEmail(email);
     if (existingConsumer) {
       throw new Error("Consumer with this email already exists");
     }
+
     const hashedPassword = await hashPassword(password);
 
-    const newConsumer = await ConsumerRepository.create({
+    return await ConsumerRepository.create({
       firstName,
       middleName,
       lastName,
@@ -104,16 +106,15 @@ export const ConsumerService = {
       password: hashedPassword,
       address,
       status: status || "active",
-    });
-
-    const { password: _, ...consumerData } = newConsumer.toObject();
-    console.log("Created Consumer: ", consumerData);
-    return consumerData as unknown as IConsumerLean; // do we need to cast it to IConsumerLean?
+      createdBy,
+      lastEditBy: null,
+      lastEditAt: null,
+    } as IConsumer);
   },
 
   async getConsumerById(
     _id: mongoose.Types.ObjectId | string,
-  ): Promise<IConsumerLean> {
+  ): Promise<IConsumerPopulatedLean> {
     const consumer = await ConsumerRepository.findById(_id);
     if (!consumer) throw new Error("Consumer not found");
     return consumer;
@@ -127,19 +128,20 @@ export const ConsumerService = {
 
   async updateConsumer(
     _id: string,
-    updates: Partial<IConsumerDocument>,
-  ): Promise<IConsumerLean> {
+    updates: Partial<IConsumer> & { lastEditBy: string },
+  ): Promise<IConsumerSummary> {
     if (updates.password) {
       updates.password = await hashPassword(updates.password);
     }
 
+    updates.lastEditAt = new Date();
+
     const updatedConsumer = await ConsumerRepository.editById(_id, updates);
     if (!updatedConsumer) throw new Error("Consumer not found");
-
     return updatedConsumer;
   },
 
-  async deleteConsumer(_id: string): Promise<IConsumerLean> {
+  async deleteConsumer(_id: string): Promise<IConsumerSummary> {
     const deletedConsumer = await ConsumerRepository.deleteById(_id);
     if (!deletedConsumer) throw new Error("Consumer not found");
     return deletedConsumer;
@@ -148,16 +150,17 @@ export const ConsumerService = {
   async updateStatus(
     _id: string,
     status: ConsumerStatus,
-  ): Promise<IConsumerLean | null> {
+    adminId: string,
+  ): Promise<IConsumerSummary | null> {
     const existingConsumer = await ConsumerRepository.findById(_id);
     if (!existingConsumer) throw new Error("Consumer not found");
-    
     if (existingConsumer?.status === status) {
       throw new Error(`Consumer is already ${status}`);
     }
 
-    const updatedConsumer = await ConsumerRepository.updateStatus(_id, status);
-
-    return updatedConsumer;
+    return await ConsumerService.updateConsumer(_id, {
+      status,
+      lastEditBy: adminId,
+    });
   },
 };

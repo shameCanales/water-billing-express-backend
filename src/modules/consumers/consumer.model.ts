@@ -55,6 +55,20 @@ const consumerSchema = new Schema<IConsumerDocument>(
       enum: CONSUMER_STATUSES,
       default: "active",
     },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Processor",
+      required: [true, "Creator reference is required"],
+    },
+    lastEditBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Processor",
+      default: null,
+    },
+    lastEditAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true, // auto-creates createdAt and updatedAt fields

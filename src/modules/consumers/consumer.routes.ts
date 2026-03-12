@@ -18,7 +18,7 @@ router.post(
   ConsumerController.create,
 );
 
-// get all consumers :  [{name, email, birthDate, mobileNumber, password, address, status}, ...]
+// get all consumers 
 router.get(
   "/",
   AuthMiddleware.requireStaffOrManager,

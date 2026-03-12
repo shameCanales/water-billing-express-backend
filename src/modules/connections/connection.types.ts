@@ -1,5 +1,5 @@
 import mongoose, { Document } from "mongoose";
-import type { IConsumerPopulated } from "../consumers/consumer.types.ts";
+import type { IConsumerPopulatedLean } from "../consumers/consumer.types.ts";
 import type { IConsumerSummary } from "../consumers/consumer.types.ts";
 import type {
   IProcessorSummary,
@@ -28,7 +28,6 @@ export interface IConnectionDocument extends IConnection, Document {
   _id: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
-  __v: number;
 }
 
 export interface IConnectionLean extends IConnection {
@@ -42,7 +41,7 @@ export interface IConnectionPopulatedLean extends Omit<
   IConnectionLean,
   "consumer" | "createdBy" | "lastEditBy"
 > {
-  consumer: IConsumerPopulated;
+  consumer: IConsumerPopulatedLean;
   createdBy: IProcessorPopulated;
   lastEditBy: IProcessorPopulated | null;
 }

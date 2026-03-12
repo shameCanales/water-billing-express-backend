@@ -3,8 +3,6 @@ import type {
   IConnectionLean,
   IConnectionPopulatedLean,
   IConnection,
-  IConnectionDocument,
-  ConnectionStatus,
   IConnectionSummary,
 } from "./connection.types.ts";
 

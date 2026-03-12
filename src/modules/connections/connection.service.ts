@@ -4,7 +4,6 @@ import type {
   IConnection,
   IConnectionPopulatedLean,
   ConnectionStatus,
-  IConnectionDocument,
   IConnectionSummary,
   PaginatedConnectionsResult,
 } from "./connection.types.ts";

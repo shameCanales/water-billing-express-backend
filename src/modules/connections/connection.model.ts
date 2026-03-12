@@ -5,7 +5,7 @@ import {
   type IConnectionDocument,
 } from "./connection.types.ts";
 
-const ConnectionSchema = new mongoose.Schema(
+const ConnectionSchema = new mongoose.Schema<IConnectionDocument>(
   {
     consumer: {
       type: mongoose.Schema.Types.ObjectId, // reference to Consumer model

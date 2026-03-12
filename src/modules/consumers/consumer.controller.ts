@@ -1,7 +1,7 @@
 import { matchedData } from "express-validator";
 import { ConsumerService } from "./consumer.service.ts";
 import type { Request, Response } from "express";
-import type { ConsumerStatus, IConsumer } from "./consumer.types.ts";
+import type { IConsumer } from "./consumer.types.ts";
 import { handleControllerError } from "../../core/utils/errorHandler.ts";
 
 export const ConsumerController = {
@@ -24,10 +24,9 @@ export const ConsumerController = {
       return res.status(200).json({
         success: true,
         message: "Consumers fetched successfully",
-        data: result, // result contain {consumers, pagination}
+        data: result,
       });
     } catch (err) {
-      // should we really send error message to client? i think not
       return handleControllerError(err, res);
     }
   },
@@ -35,7 +34,10 @@ export const ConsumerController = {
   async create(req: Request, res: Response): Promise<Response> {
     try {
       const data = matchedData(req) as IConsumer;
-      const newConsumer = await ConsumerService.createConsumer(data);
+      const newConsumer = await ConsumerService.createConsumer({
+        ...data,
+        createdBy: req.user!._id,
+      } as IConsumer);
 
       return res.status(201).json({
         success: true,
@@ -67,14 +69,12 @@ export const ConsumerController = {
 
   async editById(req: Request, res: Response): Promise<Response> {
     try {
-      const { consumerId, ...updates } = matchedData(req) as {
-        consumerId: string;
-      } & Partial<IConsumer>;
+      const { consumerId, ...updates } = matchedData(req);
 
-      const updatedConsumer = await ConsumerService.updateConsumer(
-        consumerId,
-        updates,
-      );
+      const updatedConsumer = await ConsumerService.updateConsumer(consumerId, {
+        ...updates,
+        lastEditBy: req.user!._id,
+      });
 
       return res.status(200).json({
         success: true,
@@ -102,14 +102,13 @@ export const ConsumerController = {
 
   async updateStatusById(req: Request, res: Response) {
     try {
-      const { consumerId, status } = matchedData(req) as {
-        consumerId: string;
-        status: ConsumerStatus;
-      };
+      const { consumerId, status } = matchedData(req);
 
       const updatedConsumer = await ConsumerService.updateStatus(
+        // what if we just use the general ConsuemrService.updateConsumer instead of having separate updateStatus? is it best practice?
         consumerId,
         status,
+        req.user!._id,
       );
 
       return res.status(200).json({
