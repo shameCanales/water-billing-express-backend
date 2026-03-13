@@ -1,6 +1,7 @@
 import { BillRepository } from "./bill.repository.ts";
 import { ConnectionRepository } from "../connections/connection.repository.ts";
 import { SettingsRepository } from "../settings/settings.repository.ts";
+import mongoose from "mongoose";
 
 import type {
   IBill,
@@ -91,6 +92,12 @@ export const BillService = {
         limit,
       },
     };
+  },
+
+  async getBillById(billId: string): Promise<IBillPopulatedLean> {
+    const bill = await BillRepository.findById(billId);
+    if (!bill) throw new Error("bill not found");
+    return bill;
   },
 
   async getBillsByConnection(connection: string): Promise<IBillSummary[]> {

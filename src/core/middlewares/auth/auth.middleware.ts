@@ -4,6 +4,7 @@ import {
   extractTokenFromHeader,
   type JWTPayload,
 } from "../../utils/jwt.utils.ts";
+import { Consumer } from "../../../modules/consumers/consumer.model.ts";
 
 declare global {
   namespace Express {
@@ -21,7 +22,7 @@ declare global {
 // check the token: this is a helper to follow DRY concept. because we are checking the token on multiple parts. so we make it reusable
 const authenticateRequest = (
   req: Request,
-  res: Response
+  res: Response,
 ): JWTPayload | null => {
   const token = extractTokenFromHeader(req.headers.authorization);
 
@@ -160,5 +161,7 @@ export const AuthMiddleware = {
     next();
   },
 };
+
+// maybe i should have a middleware that requiresConsumeroradmin user. but if user is a Consumer, the data he's requesting should belong to him. for example the getBill by id.
 
 // RBAC - ROLE BASED ACCESS CONTROL for consumers and admins(staff and manager)

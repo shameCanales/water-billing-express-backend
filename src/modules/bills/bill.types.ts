@@ -77,7 +77,6 @@ export interface IBillSummary extends Omit<
   | "createdBy"
   | "lastEditBy"
   | "processedBy"
-  | "chargePerCubicMeter"
   | "appliedSurchargePercent"
   | "__v"
   | "updatedAt"

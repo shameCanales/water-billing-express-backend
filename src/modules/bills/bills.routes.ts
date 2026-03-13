@@ -16,6 +16,14 @@ router.get(
   BillController.getAll,
 );
 
+router.get(
+  "/:billId",
+  AuthMiddleware.requireStaffOrManager,
+  checkSchema(BillValidationSchema.idOnly),
+  handleValidationErrors,
+  BillController.getById,
+);
+
 // add bill to a connection
 router.post(
   "/",

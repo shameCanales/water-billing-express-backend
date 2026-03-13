@@ -25,6 +25,7 @@ router.get(
   ProcessorController.getById,
 );
 
+
 /**
  * @route   POST /api/processors
  * @desc    Register a new processor (Manager only)

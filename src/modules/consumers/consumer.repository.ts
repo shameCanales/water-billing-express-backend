@@ -23,13 +23,14 @@ export const ConsumerRepository = {
     sort: Record<string, any> = { createdAt: -1 },
     skip: number = 0,
     limit: number = 10,
-  ): Promise<IConsumerSummary[]> {
+  ): Promise<IConsumerPopulatedLean[]> {
     return Consumer.find(filter)
+      .populate(FULL_POPULATE)
       .select("-password")
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .lean() as unknown as IConsumerSummary[];
+      .lean() as unknown as IConsumerPopulatedLean[];
   },
 
   async findById(

@@ -20,10 +20,11 @@ const LIST_POPULATE = [
 const FULL_POPULATE = [
   {
     path: "consumer",
-    select: "firstName middleName lastName email mobileNumber address",
+    select:
+      "firstName middleName lastName email birthDate mobileNumber address status lastEditAt",
   },
-  { path: "createdBy", select: "firstName lastName role" },
-  { path: "lastEditBy", select: "firstName lastName role" },
+  { path: "createdBy", select: "firstName middleName lastName role" },
+  { path: "lastEditBy", select: "firstName middleName lastName role" },
 ];
 
 export const ConnectionRepository = {
