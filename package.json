@@ -9,8 +9,8 @@
     "test:watch": "NODE_ENV=test jest --watch",
     "startLocal": "nodemon src/app/server.ts",
     "start": "node dist/app/server.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/app/server.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "ts-node-dev --respawn --esm --transpile-only src/app/server.ts",
     "lint": "eslint . --ext .ts,.js"
   },
   "keywords": [],

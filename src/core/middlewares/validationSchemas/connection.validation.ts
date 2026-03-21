@@ -2,8 +2,8 @@ import type { Schema } from "express-validator";
 import {
   CONNECTION_STATUSES,
   CONNECTION_TYPES,
-} from "../../../modules/connections/connection.types.ts";
-import { capitalizeFirstLetter } from "../../utils/validationHelpers.ts";
+} from "../../../modules/connections/connection.types.js";
+import { capitalizeFirstLetter } from "../../utils/validationHelpers.js";
 
 const connectionIdParam: Schema[string] = {
   in: ["params"],

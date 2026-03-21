@@ -1,12 +1,12 @@
-import { ConnectionRepository } from "./connection.repository.ts";
-import { ConsumerRepository } from "../consumers/consumer.repository.ts";
+import { ConnectionRepository } from "./connection.repository.js";
+import { ConsumerRepository } from "../consumers/consumer.repository.js";
 import type {
   IConnection,
   IConnectionPopulatedLean,
   ConnectionStatus,
   IConnectionSummary,
   PaginatedConnectionsResult,
-} from "./connection.types.ts";
+} from "./connection.types.js";
 import type mongoose from "mongoose";
 
 interface GetAllConnectionsParams {

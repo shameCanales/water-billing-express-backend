@@ -1,11 +1,11 @@
 import type mongoose from "mongoose";
-import { Consumer } from "./consumer.model.ts";
+import { Consumer } from "./consumer.model.js";
 import type {
   IConsumer,
   IConsumerLean,
   IConsumerSummary,
   IConsumerPopulatedLean,
-} from "./consumer.types.ts";
+} from "./consumer.types.js";
 
 const LIST_POPULATE = [
   { path: "createdBy", select: "firstName middleName lastName role -_id" },

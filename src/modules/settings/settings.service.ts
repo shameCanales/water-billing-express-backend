@@ -1,6 +1,6 @@
-import { SettingsRepository } from "./settings.repository.ts";
-import type { Settingkey, ISettingsLean } from "./settings.model.ts";
-import type { ISettingsHistoryLean } from "./settingsHistory.model.ts";
+import { SettingsRepository } from "./settings.repository.js";
+import type { Settingkey, ISettingsLean } from "./settings.model.js";
+import type { ISettingsHistoryLean } from "./settingsHistory.model.js";
 
 export interface SettingHistoryPoint {
   month: string;

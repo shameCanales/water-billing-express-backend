@@ -1,7 +1,6 @@
-import { BillRepository } from "./bill.repository.ts";
-import { ConnectionRepository } from "../connections/connection.repository.ts";
-import { SettingsRepository } from "../settings/settings.repository.ts";
-import mongoose from "mongoose";
+import { BillRepository } from "./bill.repository.js";
+import { ConnectionRepository } from "../connections/connection.repository.js";
+import { SettingsRepository } from "../settings/settings.repository.js";
 
 import type {
   IBill,
@@ -11,12 +10,12 @@ import type {
   PaginatedBillsResult,
   IBillSummary,
 } from "./bill.types.ts";
-import { Consumer } from "../consumers/consumer.model.ts";
-import { Connection } from "../connections/connection.model.ts";
+import { Consumer } from "../consumers/consumer.model.js";
+import { Connection } from "../connections/connection.model.js";
 import {
   formatCurrency,
   calculateBillFinancials,
-} from "../../core/utils/finance.utils.ts";
+} from "../../core/utils/finance.utils.js";
 
 interface GetAllBillsParams {
   page: number;

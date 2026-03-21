@@ -3,14 +3,14 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import type { Application, Request, Response, NextFunction } from "express";
 
-import authAdminRouter from "../modules/authAdmin/authAdmin.routes.ts";
-import authConsumerRouter from "../modules/authConsumer/authConsumer.routes.ts";
-import consumerRouter from "../modules/consumers/consumer.routes.ts";
-import connectionRouter from "../modules/connections/connections.routes.ts";
-import billRouter from "../modules/bills/bills.routes.ts";
-import processorRouter from "../modules/processors/processor.routes.ts";
-import sharedRouter from "../modules/shared/shared.routes.ts";
-import settingsRouter from "../modules/settings/settings.routes.ts";
+import authAdminRouter from "../modules/authAdmin/authAdmin.routes.js";
+// import authConsumerRouter from "../modules/authConsumer/authConsumer.routes.js";
+import consumerRouter from "../modules/consumers/consumer.routes.js";
+import connectionRouter from "../modules/connections/connections.routes.js";
+import billRouter from "../modules/bills/bills.routes.js";
+import processorRouter from "../modules/processors/processor.routes.js";
+import sharedRouter from "../modules/shared/shared.routes.js";
+import settingsRouter from "../modules/settings/settings.routes.js";
 
 export function createApp(): Application {
   const app: Application = express();
@@ -47,7 +47,7 @@ export function createApp(): Application {
 
   // AUth
   app.use("/api/auth/admin", authAdminRouter);
-  app.use("/api/auth/consumer", authConsumerRouter);
+  // app.use("/api/auth/consumer", authConsumerRouter);
 
   // Resources
   app.use("/api/consumers", consumerRouter);

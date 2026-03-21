@@ -706,3 +706,63 @@ ERROR HANDLING::::
 
 // Key principle:
 // .lean() returns plain objects, NOT Mongoose documents, so you need different types!
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::
+//  PREPARING FOR DEPLOYMENT IN RENDER FREE: 
+// changed ts imports into js imports. 
+// added dev and build scripts. 
+
+npm run dev
+
+Command: ts-node-dev --respawn --esm --transpile-only src/app/server.ts
+
+Description: Use this for daily coding. It watches your files and restarts the server instantly when you save. The --esm flag is required because we are using .js extensions in our TypeScript imports.
+
+Best for: Active feature development and bug fixing.
+
+npm run build
+
+Command: tsc -p tsconfig.build.json
+
+Description: The Production Compiler. It converts all your .ts files in src/ into clean .js files in the dist/ folder.
+
+Best for: Running right before you push to GitHub or deploy to Render.
+
+npm start
+
+Command: node dist/app/server.js
+
+Description: The Production Runner. This is exactly what Render uses to host your app. It runs the pre-compiled code from the dist folder.
+
+Note: You must run npm run build at least once before using this.
+
+npm test
+
+Command: jest
+
+Description: Runs all your Unit Tests once. Use this to ensure that your water bill calculations or database logic hasn't broken after a change.
+
+npm run test:e2e
+
+Command: jest --testPathPatterns src/tests/e2e
+
+Description: Runs End-to-End tests. These simulate a full user journey (e.g., an Admin logging in and creating a new consumer connection).
+
+npm run test:watch
+
+Command: NODE_ENV=test jest --watch
+
+Description: Keeps the test runner open. Every time you save a file, it re-runs the relevant tests. Excellent for "Test-Driven Development" (TDD).
+
+npm run lint
+
+Command: eslint . --ext .ts,.js
+
+Description: Scans your code for style and syntax errors. It helps keep your code clean and consistent, which is great for Capstone documentation.
+
+npm run startLocal (Optional/Legacy)
+
+Command: nodemon src/app/server.ts
+
+Description: A standard Node restarter. Since we are using ESM and TypeScript, it is generally slower and more prone to errors than the dev script.

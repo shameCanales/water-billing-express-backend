@@ -3,7 +3,7 @@ import {
   CONNECTION_STATUSES,
   CONNECTION_TYPES,
   type IConnectionDocument,
-} from "./connection.types.ts";
+} from "./connection.types.js";
 
 const ConnectionSchema = new mongoose.Schema<IConnectionDocument>(
   {

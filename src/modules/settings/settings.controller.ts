@@ -1,8 +1,8 @@
-import { SettingsService } from "./settings.service.ts";
+import { SettingsService } from "./settings.service.js";
 import type { Request, Response } from "express";
-import type { Settingkey } from "./settings.model.ts";
+import type { Settingkey } from "./settings.model.js";
 import { matchedData } from "express-validator";
-import { handleControllerError } from "../../core/utils/errorHandler.ts";
+import { handleControllerError } from "../../core/utils/errorHandler.js";
 
 export const SettingsController = {
   async getSettings(_req: Request, res: Response): Promise<Response> {

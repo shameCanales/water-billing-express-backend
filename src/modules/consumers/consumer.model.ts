@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { CONSUMER_STATUSES, type IConsumerDocument } from "./consumer.types.ts";
+import { CONSUMER_STATUSES, type IConsumerDocument } from "./consumer.types.js";
 
 const consumerSchema = new Schema<IConsumerDocument>(
   {

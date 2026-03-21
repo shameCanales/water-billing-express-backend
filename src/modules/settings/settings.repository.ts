@@ -3,11 +3,11 @@ import {
   Settings,
   type ISettingsLean,
   type Settingkey,
-} from "./settings.model.ts";
+} from "./settings.model.js";
 import {
   SettingsHistory,
   type ISettingsHistoryLean,
-} from "./settingsHistory.model.ts";
+} from "./settingsHistory.model.js";
 
 export const SettingsRepository = {
   async getSettings(): Promise<ISettingsLean> {

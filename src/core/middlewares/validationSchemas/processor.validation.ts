@@ -2,8 +2,8 @@ import type { Schema } from "express-validator";
 import {
   PROCESSOR_ROLES,
   PROCESSOR_STATUSES,
-} from "../../../modules/processors/processor.types.ts";
-import { capitalizeFirstLetter } from "../../utils/validationHelpers.ts";
+} from "../../../modules/processors/processor.types.js";
+import { capitalizeFirstLetter } from "../../utils/validationHelpers.js";
 
 const processorIdParam: Schema[string] = {
   in: ["params"],

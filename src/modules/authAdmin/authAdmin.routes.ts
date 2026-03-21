@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { AuthAdminController } from "./authAdmin.controller.ts";
-import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
+import { AuthAdminController } from "./authAdmin.controller.js";
+import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.js";
 import { checkSchema } from "express-validator";
-import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.ts";
-import { AuthAdminValidationSchema } from "../../core/middlewares/validationSchemas/auth.validation.ts";
+import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.js";
+import { AuthAdminValidationSchema } from "../../core/middlewares/validationSchemas/auth.validation.js";
 // api/auth/admin/login
 const router = Router();
 

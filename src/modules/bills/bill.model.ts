@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { BILL_STATUSES, type IBillDocument } from "./bill.types.ts";
+import { BILL_STATUSES, type IBillDocument } from "./bill.types.js";
 
 const BillSchema: Schema = new Schema<IBillDocument>(
   {

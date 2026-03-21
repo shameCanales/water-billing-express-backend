@@ -1,13 +1,13 @@
 import type { Request, Response } from "express";
-import { ProcessorService } from "../processors/processor.service.ts";
+import { ProcessorService } from "../processors/processor.service.js";
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
-} from "../../core/utils/jwt.utils.ts";
-import { comparePassword } from "../../core/utils/helpers.ts";
+} from "../../core/utils/jwt.utils.js";
+import { comparePassword } from "../../core/utils/helpers.js";
 import { matchedData } from "express-validator";
-import { handleControllerError } from "../../core/utils/errorHandler.ts";
+import { handleControllerError } from "../../core/utils/errorHandler.js";
 
 export const AuthAdminController = {
   /**

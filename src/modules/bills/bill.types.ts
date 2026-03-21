@@ -2,11 +2,11 @@ import mongoose, { Document } from "mongoose";
 import type {
   IConnectionPopulatedLean,
   IConnectionSummary,
-} from "../connections/connection.types.ts";
+} from "../connections/connection.types.js";
 import type {
   IProcessorPopulated,
   IProcessorSummary,
-} from "../processors/processor.types.ts";
+} from "../processors/processor.types.js";
 
 export const BILL_STATUSES = ["paid", "unpaid", "overdue"] as const;
 export type BillStatus = (typeof BILL_STATUSES)[number];

@@ -1,4 +1,4 @@
-import { Processor } from "./processor.model.ts";
+import { Processor } from "./processor.model.js";
 import type {
   IProcessor,
   IProcessorDocument,

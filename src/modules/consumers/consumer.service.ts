@@ -1,5 +1,5 @@
-import { ConsumerRepository } from "./consumer.repository.ts";
-import { hashPassword } from "../../core/utils/helpers.ts";
+import { ConsumerRepository } from "./consumer.repository.js";
+import { hashPassword } from "../../core/utils/helpers.js";
 
 import type {
   IConsumer,

@@ -1,5 +1,5 @@
 import type mongoose from "mongoose";
-import { Bill } from "./bill.model.ts";
+import { Bill } from "./bill.model.js";
 import type {
   IBill,
   IBillDocument,

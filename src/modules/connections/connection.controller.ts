@@ -1,11 +1,11 @@
 import { matchedData } from "express-validator";
-import { ConnectionService } from "./connection.service.ts";
+import { ConnectionService } from "./connection.service.js";
 import type { Request, Response } from "express";
 import type {
   IConnection,
   PaginatedConnectionsResult,
-} from "./connection.types.ts";
-import { handleControllerError } from "../../core/utils/errorHandler.ts";
+} from "./connection.types.js";
+import { handleControllerError } from "../../core/utils/errorHandler.js";
 
 export const ConnectionController = {
   async create(req: Request, res: Response): Promise<Response> {

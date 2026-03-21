@@ -1,10 +1,10 @@
 import mongoose, { Document } from "mongoose";
-import type { IConsumerPopulatedLean } from "../consumers/consumer.types.ts";
-import type { IConsumerSummary } from "../consumers/consumer.types.ts";
+import type { IConsumerPopulatedLean } from "../consumers/consumer.types.js";
+import type { IConsumerSummary } from "../consumers/consumer.types.js";
 import type {
   IProcessorSummary,
   IProcessorPopulated,
-} from "../processors/processor.types.ts";
+} from "../processors/processor.types.js";
 
 export const CONNECTION_STATUSES = ["connected", "disconnected"] as const;
 export type ConnectionStatus = (typeof CONNECTION_STATUSES)[number];

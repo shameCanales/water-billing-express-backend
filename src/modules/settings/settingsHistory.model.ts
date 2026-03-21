@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import type { Settingkey } from "./settings.model.ts";
+import type { Settingkey } from "./settings.model.js";
 
 export interface ISettingsHistory {
   key: Settingkey;

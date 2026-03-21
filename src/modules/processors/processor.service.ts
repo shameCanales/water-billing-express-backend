@@ -1,12 +1,12 @@
-import { ProcessorRepository } from "./processor.repository.ts";
-import { hashPassword } from "../../core/utils/helpers.ts";
+import { ProcessorRepository } from "./processor.repository.js";
+import { hashPassword } from "../../core/utils/helpers.js";
 import type {
   IProcessor,
   IProcessorDocument,
   IProcessorLean,
   ProcessorStatus,
   PaginatedProcessorsResult,
-} from "./processor.types.ts";
+} from "./processor.types.js";
 import type mongoose from "mongoose";
 
 interface GetAllProcessorsParams {

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import type { IProcessorDocument } from "./processor.types.ts";
-import { PROCESSOR_ROLES, PROCESSOR_STATUSES } from "./processor.types.ts";
+import { PROCESSOR_ROLES, PROCESSOR_STATUSES } from "./processor.types.js";
 
 const processorSchema = new mongoose.Schema(
   {

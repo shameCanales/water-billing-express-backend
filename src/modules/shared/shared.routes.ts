@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { SharedController } from "./shared.controller.ts";
-import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
+import { SharedController } from "./shared.controller.js";
+import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.js";
 
 const router = Router();
 

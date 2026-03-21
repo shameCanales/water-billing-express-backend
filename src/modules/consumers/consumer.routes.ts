@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { checkSchema } from "express-validator";
-import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
-import { ConsumerController } from "./consumer.controller.ts";
-import { ConnectionController } from "../connections/connection.controller.ts";
-import { ConsumerValidationSchema } from "../../core/middlewares/validationSchemas/consumers.validation.ts";
-import { ConnectionValidationSchema } from "../../core/middlewares/validationSchemas/connection.validation.ts";
-import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.ts";
+import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.js";
+import { ConsumerController } from "./consumer.controller.js";
+import { ConnectionController } from "../connections/connection.controller.js";
+import { ConsumerValidationSchema } from "../../core/middlewares/validationSchemas/consumers.validation.js";
+import { ConnectionValidationSchema } from "../../core/middlewares/validationSchemas/connection.validation.js";
+import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.js";
 
 const router = Router();
 

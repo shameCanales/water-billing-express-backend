@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { ProcessorService } from "../processors/processor.service.ts";
-import { ConsumerService } from "../consumers/consumer.service.ts";
-import { handleControllerError } from "../../core/utils/errorHandler.ts";
+import { ProcessorService } from "../processors/processor.service.js";
+import { ConsumerService } from "../consumers/consumer.service.js";
+import { handleControllerError } from "../../core/utils/errorHandler.js";
 
 export const SharedController = {
   async getMe(req: Request, res: Response): Promise<Response> {

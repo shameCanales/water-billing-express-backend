@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { checkSchema } from "express-validator";
-import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.ts";
-import { ProcessorController } from "./processor.controller.ts";
-import { ProcessorValidationSchema } from "../../core/middlewares/validationSchemas/processor.validation.ts";
-import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.ts";
+import { AuthMiddleware } from "../../core/middlewares/auth/auth.middleware.js";
+import { ProcessorController } from "./processor.controller.js";
+import { ProcessorValidationSchema } from "../../core/middlewares/validationSchemas/processor.validation.js";
+import { handleValidationErrors } from "../../core/middlewares/validation/validate.middleware.js";
 
 const router = Router();
 

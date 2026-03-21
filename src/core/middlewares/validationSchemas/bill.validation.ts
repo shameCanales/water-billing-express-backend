@@ -1,5 +1,5 @@
 import type { Schema } from "express-validator";
-import { BILL_STATUSES } from "../../../modules/bills/bill.types.ts";
+import { BILL_STATUSES } from "../../../modules/bills/bill.types.js";
 
 const billIdParam: Schema[string] = {
   in: ["params"],

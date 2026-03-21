@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { BillService } from "./bill.service.ts";
+import { BillService } from "./bill.service.js";
 
 export const initBillCrons = async () => {
   //runs when server starts

@@ -1,6 +1,6 @@
 import type { Schema } from "express-validator";
-import { CONSUMER_STATUSES } from "../../../modules/consumers/consumer.types.ts";
-import { capitalizeFirstLetter } from "../../utils/validationHelpers.ts";
+import { CONSUMER_STATUSES } from "../../../modules/consumers/consumer.types.js";
+import { capitalizeFirstLetter } from "../../utils/validationHelpers.js";
 
 const consumerIdParam: Schema[string] = {
   in: ["params"],

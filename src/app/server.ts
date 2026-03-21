@@ -1,7 +1,7 @@
-import "../core/emv.ts"; // import first to
+import "../core/emv.js"; 
 import mongoose from "mongoose";
-import { createApp } from "./createApp.ts";
-import { initBillCrons } from "../modules/bills/bill.cron.ts";
+import { createApp } from "./createApp.js";
+import { initBillCrons } from "../modules/bills/bill.cron.js";
 
 mongoose
   // .connect("mongodb://localhost/water_billing_system")

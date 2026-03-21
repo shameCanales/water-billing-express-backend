@@ -3,8 +3,7 @@ import {
   verifyAccessToken,
   extractTokenFromHeader,
   type JWTPayload,
-} from "../../utils/jwt.utils.ts";
-import { Consumer } from "../../../modules/consumers/consumer.model.ts";
+} from "../../utils/jwt.utils.js";
 
 declare global {
   namespace Express {
@@ -163,5 +162,4 @@ export const AuthMiddleware = {
 };
 
 // maybe i should have a middleware that requiresConsumeroradmin user. but if user is a Consumer, the data he's requesting should belong to him. for example the getBill by id.
-
 // RBAC - ROLE BASED ACCESS CONTROL for consumers and admins(staff and manager)

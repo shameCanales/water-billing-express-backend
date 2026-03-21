@@ -15,7 +15,8 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
 
     // Other Outputs
     "sourceMap": true,

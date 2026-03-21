@@ -2,7 +2,7 @@ import mongoose, { Document } from "mongoose";
 import type {
   IProcessorPopulated,
   IProcessorSummary,
-} from "../processors/processor.types.ts";
+} from "../processors/processor.types.js";
 
 export const CONSUMER_STATUSES = ["active", "suspended"] as const;
 export type ConsumerStatus = (typeof CONSUMER_STATUSES)[number];

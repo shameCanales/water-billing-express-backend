@@ -1,8 +1,8 @@
 import { matchedData } from "express-validator";
-import type { BillStatus, CreateBillData, IBill } from "./bill.types.ts";
+import type { BillStatus, CreateBillData, IBill } from "./bill.types.js";
 import type { Request, Response } from "express";
-import { BillService } from "./bill.service.ts";
-import { handleControllerError } from "../../core/utils/errorHandler.ts";
+import { BillService } from "./bill.service.js";
+import { handleControllerError } from "../../core/utils/errorHandler.js";
 
 export const BillController = {
   async getAll(req: Request, res: Response): Promise<Response> {
@@ -29,17 +29,17 @@ export const BillController = {
     }
   },
 
-  async getById(req: Request, res: Response): Promise<Response>{
+  async getById(req: Request, res: Response): Promise<Response> {
     try {
-      const {billId} = matchedData(req) as {billId: string};
+      const { billId } = matchedData(req) as { billId: string };
       const bill = await BillService.getBillById(billId);
 
       return res.status(200).json({
         success: true,
         data: bill,
-      })
+      });
     } catch (err) {
-      return handleControllerError(err, res)
+      return handleControllerError(err, res);
     }
   },
 
